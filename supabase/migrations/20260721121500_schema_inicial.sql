@@ -13,6 +13,12 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 
+CREATE SCHEMA IF NOT EXISTS "monitor";
+
+
+ALTER SCHEMA "monitor" OWNER TO "postgres";
+
+
 CREATE SCHEMA IF NOT EXISTS "public";
 
 
@@ -21,6 +27,109 @@ ALTER SCHEMA "public" OWNER TO "pg_database_owner";
 
 COMMENT ON SCHEMA "public" IS 'standard public schema';
 
+
+
+CREATE OR REPLACE FUNCTION "monitor"."log_table_dml"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO ''
+    AS $$
+declare
+  v_rows integer;
+  v_query text;
+begin
+  begin
+    get diagnostics v_rows = row_count;
+  exception when others then
+    v_rows := null;
+  end;
+
+  begin
+    select query into v_query
+    from pg_stat_activity
+    where pid = pg_backend_pid();
+  exception when others then
+    v_query := null;
+  end;
+
+  insert into monitor.audit_log (
+    schema_name,
+    object_name,
+    operation,
+    row_count,
+    query_text
+  )
+  values (
+    tg_table_schema,
+    tg_table_name,
+    tg_op,
+    v_rows,
+    v_query
+  );
+
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+
+  return new;
+end;
+$$;
+
+
+ALTER FUNCTION "monitor"."log_table_dml"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "monitor"."objects_without_dml_since"("p_days" integer DEFAULT 30) RETURNS TABLE("schema_name" "text", "table_name" "text", "last_used_at" timestamp with time zone, "days_since_last_dml" numeric)
+    LANGUAGE "sql" SECURITY DEFINER
+    SET "search_path" TO ''
+    AS $$
+with public_tables as (
+  select schemaname::text as schema_name, tablename::text as object_name
+  from pg_tables
+  where schemaname = 'public'
+),
+last_seen as (
+  select l.schema_name::text, l.object_name::text, max(l.occurred_at) as last_used_at
+  from monitor.audit_log l
+  group by l.schema_name, l.object_name
+)
+select
+  t.schema_name,
+  t.object_name as table_name,
+  l.last_used_at,
+  case
+    when l.last_used_at is null then null
+    else round((extract(epoch from (now() - l.last_used_at)) / 86400.0)::numeric, 2)
+  end as days_since_last_dml
+from public_tables t
+left join last_seen l
+  on l.schema_name = t.schema_name
+ and l.object_name = t.object_name
+where l.last_used_at is null
+   or l.last_used_at < now() - make_interval(days => p_days)
+order by l.last_used_at nulls first, t.object_name;
+$$;
+
+
+ALTER FUNCTION "monitor"."objects_without_dml_since"("p_days" integer) OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "monitor"."purge_audit_log"("p_keep_days" integer DEFAULT 90) RETURNS integer
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO ''
+    AS $$
+declare
+  v_deleted integer;
+begin
+  delete from monitor.audit_log
+  where occurred_at < now() - make_interval(days => p_keep_days);
+
+  get diagnostics v_deleted = row_count;
+  return v_deleted;
+end;
+$$;
+
+
+ALTER FUNCTION "monitor"."purge_audit_log"("p_keep_days" integer) OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."add_organization_member"("p_profile_id" "uuid", "p_org_id" "uuid", "p_funcao" "text") RETURNS json
@@ -3085,6 +3194,174 @@ SET default_tablespace = '';
 SET default_table_access_method = "heap";
 
 
+CREATE TABLE IF NOT EXISTS "monitor"."audit_log" (
+    "id" bigint NOT NULL,
+    "occurred_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "schema_name" "text" NOT NULL,
+    "object_name" "text" NOT NULL,
+    "operation" "text" NOT NULL,
+    "role_name" "text" DEFAULT CURRENT_USER NOT NULL,
+    "session_user_name" "text" DEFAULT SESSION_USER NOT NULL,
+    "app_name" "text" DEFAULT "current_setting"('application_name'::"text", true),
+    "client_addr" "inet" DEFAULT "inet_client_addr"(),
+    "txid" bigint DEFAULT "txid_current"() NOT NULL,
+    "row_count" integer,
+    "query_text" "text"
+);
+
+
+ALTER TABLE "monitor"."audit_log" OWNER TO "postgres";
+
+
+ALTER TABLE "monitor"."audit_log" ALTER COLUMN "id" ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME "monitor"."audit_log_id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+
+CREATE OR REPLACE VIEW "monitor"."function_usage_public" AS
+ SELECT "n"."nspname" AS "schema_name",
+    "p"."proname" AS "function_name",
+    "sf"."calls",
+    "sf"."total_time",
+    "sf"."self_time"
+   FROM (("pg_proc" "p"
+     JOIN "pg_namespace" "n" ON (("n"."oid" = "p"."pronamespace")))
+     LEFT JOIN "pg_stat_user_functions" "sf" ON (("sf"."funcid" = "p"."oid")))
+  WHERE ("n"."nspname" = 'public'::"name")
+  ORDER BY COALESCE("sf"."calls", (0)::bigint), "p"."proname";
+
+
+ALTER VIEW "monitor"."function_usage_public" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "monitor"."last_usage_by_table" AS
+ SELECT "schema_name",
+    "object_name" AS "table_name",
+    "max"("occurred_at") AS "last_used_at",
+    "count"(*) AS "events",
+    "count"(*) FILTER (WHERE ("operation" = 'INSERT'::"text")) AS "insert_events",
+    "count"(*) FILTER (WHERE ("operation" = 'UPDATE'::"text")) AS "update_events",
+    "count"(*) FILTER (WHERE ("operation" = 'DELETE'::"text")) AS "delete_events"
+   FROM "monitor"."audit_log" "l"
+  GROUP BY "schema_name", "object_name"
+  ORDER BY ("max"("occurred_at")) DESC;
+
+
+ALTER VIEW "monitor"."last_usage_by_table" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "monitor"."objects_without_dml_last_30d" AS
+ WITH "public_tables" AS (
+         SELECT "pg_tables"."schemaname" AS "schema_name",
+            "pg_tables"."tablename" AS "object_name"
+           FROM "pg_tables"
+          WHERE ("pg_tables"."schemaname" = 'public'::"name")
+        ), "last_seen" AS (
+         SELECT "audit_log"."schema_name",
+            "audit_log"."object_name",
+            "max"("audit_log"."occurred_at") AS "last_used_at"
+           FROM "monitor"."audit_log"
+          GROUP BY "audit_log"."schema_name", "audit_log"."object_name"
+        )
+ SELECT "t"."schema_name",
+    "t"."object_name" AS "table_name",
+    "l"."last_used_at",
+        CASE
+            WHEN ("l"."last_used_at" IS NULL) THEN NULL::numeric
+            ELSE "round"((EXTRACT(epoch FROM ("now"() - "l"."last_used_at")) / 86400.0), 2)
+        END AS "days_since_last_dml"
+   FROM ("public_tables" "t"
+     LEFT JOIN "last_seen" "l" ON ((("l"."schema_name" = "t"."schema_name") AND ("l"."object_name" = "t"."object_name"))))
+  WHERE (("l"."last_used_at" IS NULL) OR ("l"."last_used_at" < ("now"() - '30 days'::interval)))
+  ORDER BY "l"."last_used_at" NULLS FIRST, "t"."object_name";
+
+
+ALTER VIEW "monitor"."objects_without_dml_last_30d" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "monitor"."recent_activity" AS
+ SELECT "occurred_at",
+    "schema_name",
+    "object_name",
+    "operation",
+    "role_name",
+    "app_name",
+    "client_addr"
+   FROM "monitor"."audit_log"
+  ORDER BY "occurred_at" DESC;
+
+
+ALTER VIEW "monitor"."recent_activity" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "monitor"."table_usage_public" AS
+ SELECT "schemaname",
+    "relname" AS "table_name",
+    "seq_scan",
+    "idx_scan",
+    "n_tup_ins",
+    "n_tup_upd",
+    "n_tup_del",
+    GREATEST("last_seq_scan", "last_idx_scan") AS "last_read_at",
+    GREATEST("last_vacuum", "last_autovacuum", "last_analyze", "last_autoanalyze") AS "last_maintenance_at"
+   FROM "pg_stat_user_tables" "st"
+  WHERE ("schemaname" = 'public'::"name")
+  ORDER BY GREATEST("last_seq_scan", "last_idx_scan") NULLS FIRST, ("seq_scan" + "idx_scan");
+
+
+ALTER VIEW "monitor"."table_usage_public" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "monitor"."triggers_public" AS
+ SELECT "n"."nspname" AS "table_schema",
+    "c"."relname" AS "table_name",
+    "t"."tgname" AS "trigger_name",
+    "p"."proname" AS "function_name",
+    "pg_get_triggerdef"("t"."oid") AS "trigger_def",
+    "t"."tgenabled"
+   FROM ((("pg_trigger" "t"
+     JOIN "pg_class" "c" ON (("c"."oid" = "t"."tgrelid")))
+     JOIN "pg_namespace" "n" ON (("n"."oid" = "c"."relnamespace")))
+     JOIN "pg_proc" "p" ON (("p"."oid" = "t"."tgfoid")))
+  WHERE ((NOT "t"."tgisinternal") AND ("n"."nspname" = 'public'::"name"))
+  ORDER BY "n"."nspname", "c"."relname", "t"."tgname";
+
+
+ALTER VIEW "monitor"."triggers_public" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "monitor"."unused_tables_public" AS
+ SELECT "schemaname",
+    "relname" AS "table_name",
+    "seq_scan",
+    "idx_scan",
+    GREATEST("last_seq_scan", "last_idx_scan") AS "last_read_at"
+   FROM "pg_stat_user_tables" "st"
+  WHERE (("schemaname" = 'public'::"name") AND ((COALESCE("seq_scan", (0)::bigint) + COALESCE("idx_scan", (0)::bigint)) = 0))
+  ORDER BY "relname";
+
+
+ALTER VIEW "monitor"."unused_tables_public" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "monitor"."views_public" AS
+ SELECT "schemaname",
+    "viewname",
+    "pg_get_viewdef"((((("quote_ident"(("schemaname")::"text") || '.'::"text") || "quote_ident"(("viewname")::"text")))::"regclass")::"oid", true) AS "view_def"
+   FROM "pg_views" "v"
+  WHERE ("schemaname" = 'public'::"name")
+  ORDER BY "viewname";
+
+
+ALTER VIEW "monitor"."views_public" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."centros_custo" (
     "id" "uuid" DEFAULT "public"."uuid_generate_v7"() NOT NULL,
     "organization_id" "uuid" NOT NULL,
@@ -3610,6 +3887,11 @@ CREATE OR REPLACE VIEW "public"."vw_transacoes_competencia" WITH ("security_invo
 ALTER VIEW "public"."vw_transacoes_competencia" OWNER TO "postgres";
 
 
+ALTER TABLE ONLY "monitor"."audit_log"
+    ADD CONSTRAINT "audit_log_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."centros_custo"
     ADD CONSTRAINT "centros_custo_pkey" PRIMARY KEY ("id");
 
@@ -3687,6 +3969,14 @@ ALTER TABLE ONLY "public"."transacoes"
 
 ALTER TABLE ONLY "public"."orcamentos_centro_custo"
     ADD CONSTRAINT "uq_orcamento_cc_projeto" UNIQUE ("organization_id", "centro_custo_id", "identificador_projeto", "data_inicio", "data_fim");
+
+
+
+CREATE INDEX "audit_log_object_idx" ON "monitor"."audit_log" USING "btree" ("schema_name", "object_name", "occurred_at" DESC);
+
+
+
+CREATE INDEX "audit_log_occurred_at_idx" ON "monitor"."audit_log" USING "btree" ("occurred_at" DESC);
 
 
 
