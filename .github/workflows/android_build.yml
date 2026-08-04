@@ -1,0 +1,48 @@
+name: Build Automático do Android - Lastro App
+
+on:
+  release:
+    types: [published] # Dispara apenas no lançamento oficial
+
+jobs:
+  build-apk:
+    name: Compilar APK (Release)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar o código do repositório
+        uses: actions/checkout@v3
+
+      - name: Setup do Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup do Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x' # Ou ajuste para a versão exata do seu SDK
+          channel: 'stable'
+
+      - name: Baixar dependências
+        run: |
+          cd lastro_sigma_sistemas
+          flutter pub get
+
+      - name: Compilar o APK de Produção
+        run: |
+          cd lastro_sigma_sistemas
+          flutter build apk --release
+
+      - name: Upload do APK como Artefato (Aba Actions)
+        uses: actions/upload-artifact@v3
+        with:
+          name: lastro-app-release-apk
+          path: lastro_sigma_sistemas/build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Anexar o APK à Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: lastro_sigma_sistemas/build/app/outputs/flutter-apk/app-release.apk

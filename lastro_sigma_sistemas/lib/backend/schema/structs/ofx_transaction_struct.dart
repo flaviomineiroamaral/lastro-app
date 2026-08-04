@@ -18,13 +18,19 @@ class OfxTransactionStruct extends BaseStruct {
     /// ID unico
     String? fitid,
     bool? selecionado,
+    String? planoContasSugeridoId,
+    String? centroCustoSugeridoId,
+    String? scoreConfianca,
   })  : _amount = amount,
         _description = description,
         _date = date,
         _dueDate = dueDate,
         _type = type,
         _fitid = fitid,
-        _selecionado = selecionado;
+        _selecionado = selecionado,
+        _planoContasSugeridoId = planoContasSugeridoId,
+        _centroCustoSugeridoId = centroCustoSugeridoId,
+        _scoreConfianca = scoreConfianca;
 
   // "amount" field.
   double? _amount;
@@ -77,6 +83,27 @@ class OfxTransactionStruct extends BaseStruct {
 
   bool hasSelecionado() => _selecionado != null;
 
+  // "planoContasSugeridoId" field.
+  String? _planoContasSugeridoId;
+  String? get planoContasSugeridoId => _planoContasSugeridoId;
+  set planoContasSugeridoId(String? val) => _planoContasSugeridoId = val;
+
+  bool hasPlanoContasSugeridoId() => _planoContasSugeridoId != null;
+
+  // "centroCustoSugeridoId" field.
+  String? _centroCustoSugeridoId;
+  String? get centroCustoSugeridoId => _centroCustoSugeridoId;
+  set centroCustoSugeridoId(String? val) => _centroCustoSugeridoId = val;
+
+  bool hasCentroCustoSugeridoId() => _centroCustoSugeridoId != null;
+
+  // "scoreConfianca" field.
+  String? _scoreConfianca;
+  String? get scoreConfianca => _scoreConfianca;
+  set scoreConfianca(String? val) => _scoreConfianca = val;
+
+  bool hasScoreConfianca() => _scoreConfianca != null;
+
   static OfxTransactionStruct fromMap(Map<String, dynamic> data) =>
       OfxTransactionStruct(
         amount: castToType<double>(data['amount']),
@@ -86,6 +113,9 @@ class OfxTransactionStruct extends BaseStruct {
         type: data['type'] as String?,
         fitid: data['fitid'] as String?,
         selecionado: data['selecionado'] as bool?,
+        planoContasSugeridoId: data['planoContasSugeridoId'] as String?,
+        centroCustoSugeridoId: data['centroCustoSugeridoId'] as String?,
+        scoreConfianca: data['scoreConfianca'] as String?,
       );
 
   static OfxTransactionStruct? maybeFromMap(dynamic data) => data is Map
@@ -100,6 +130,9 @@ class OfxTransactionStruct extends BaseStruct {
         'type': _type,
         'fitid': _fitid,
         'selecionado': _selecionado,
+        'planoContasSugeridoId': _planoContasSugeridoId,
+        'centroCustoSugeridoId': _centroCustoSugeridoId,
+        'scoreConfianca': _scoreConfianca,
       }.withoutNulls;
 
   @override
@@ -131,6 +164,18 @@ class OfxTransactionStruct extends BaseStruct {
         'selecionado': serializeParam(
           _selecionado,
           ParamType.bool,
+        ),
+        'planoContasSugeridoId': serializeParam(
+          _planoContasSugeridoId,
+          ParamType.String,
+        ),
+        'centroCustoSugeridoId': serializeParam(
+          _centroCustoSugeridoId,
+          ParamType.String,
+        ),
+        'scoreConfianca': serializeParam(
+          _scoreConfianca,
+          ParamType.String,
         ),
       }.withoutNulls;
 
@@ -171,6 +216,21 @@ class OfxTransactionStruct extends BaseStruct {
           ParamType.bool,
           false,
         ),
+        planoContasSugeridoId: deserializeParam(
+          data['planoContasSugeridoId'],
+          ParamType.String,
+          false,
+        ),
+        centroCustoSugeridoId: deserializeParam(
+          data['centroCustoSugeridoId'],
+          ParamType.String,
+          false,
+        ),
+        scoreConfianca: deserializeParam(
+          data['scoreConfianca'],
+          ParamType.String,
+          false,
+        ),
       );
 
   @override
@@ -185,12 +245,25 @@ class OfxTransactionStruct extends BaseStruct {
         dueDate == other.dueDate &&
         type == other.type &&
         fitid == other.fitid &&
-        selecionado == other.selecionado;
+        selecionado == other.selecionado &&
+        planoContasSugeridoId == other.planoContasSugeridoId &&
+        centroCustoSugeridoId == other.centroCustoSugeridoId &&
+        scoreConfianca == other.scoreConfianca;
   }
 
   @override
-  int get hashCode => const ListEquality()
-      .hash([amount, description, date, dueDate, type, fitid, selecionado]);
+  int get hashCode => const ListEquality().hash([
+        amount,
+        description,
+        date,
+        dueDate,
+        type,
+        fitid,
+        selecionado,
+        planoContasSugeridoId,
+        centroCustoSugeridoId,
+        scoreConfianca,
+      ]);
 }
 
 OfxTransactionStruct createOfxTransactionStruct({
@@ -201,6 +274,9 @@ OfxTransactionStruct createOfxTransactionStruct({
   String? type,
   String? fitid,
   bool? selecionado,
+  String? planoContasSugeridoId,
+  String? centroCustoSugeridoId,
+  String? scoreConfianca,
 }) =>
     OfxTransactionStruct(
       amount: amount,
@@ -210,4 +286,7 @@ OfxTransactionStruct createOfxTransactionStruct({
       type: type,
       fitid: fitid,
       selecionado: selecionado,
+      planoContasSugeridoId: planoContasSugeridoId,
+      centroCustoSugeridoId: centroCustoSugeridoId,
+      scoreConfianca: scoreConfianca,
     );

@@ -1,0 +1,52 @@
+name: Deploy de Banco de Dados - Lastro
+
+# Quais eventos acionam a automação?
+on:
+  push:
+    branches:
+      - main # Aciona ao enviar código novo para a branch principal
+  release:
+    types: [published] # Aciona apenas quando você publica uma "Release" oficial
+
+jobs:
+  # -------------------------------------------------------------
+  # JOB 1: Deploy Contínuo em Homologação (Staging)
+  # -------------------------------------------------------------
+  deploy-staging:
+    name: Deploy no Ambiente de Homologação
+    # Só roda se o evento for um push na branch main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Baixar o código do repositório
+        uses: actions/checkout@v3
+
+      - name: Instalar a CLI do Supabase no Servidor do GitHub
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Aplicar Migrações no lastro-homologacao
+        run: supabase db push --db-url ${{ secrets.STAGING_DB_URL }}
+
+  # -------------------------------------------------------------
+  # JOB 2: Deploy Controlado em Produção
+  # -------------------------------------------------------------
+  deploy-production:
+    name: Deploy no Ambiente Financeiro Oficial
+    # Só roda se o evento for a publicação de um Release
+    if: github.event_name == 'release' && github.event.action == 'published'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Baixar o código do repositório
+        uses: actions/checkout@v3
+
+      - name: Instalar a CLI do Supabase no Servidor do GitHub
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Aplicar Migrações no lastro-financa
+        run: supabase db push --db-url ${{ secrets.PROD_DB_URL }}

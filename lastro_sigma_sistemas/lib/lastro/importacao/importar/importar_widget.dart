@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/upload_data.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
 import '/custom_code/actions/index.dart' as actions;
+import '/lastro/importacao/action/receber_arquivo_compartilhado.dart';
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +36,10 @@ class _ImportarWidgetState extends State<ImportarWidget> {
     _model = createModel(context, () => ImportarModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    // Inicializa listener de arquivos compartilhados (Share Intent do app do banco)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      inicializarShareListener(context);
+    });
   }
 
   @override

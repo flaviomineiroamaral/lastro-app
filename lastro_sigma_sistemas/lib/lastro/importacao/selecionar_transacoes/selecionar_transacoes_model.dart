@@ -19,6 +19,17 @@ class SelecionarTransacoesModel
 
   int? diaFechamento;
 
+  /// Resultado da RPC de importação em lote
+  int contadorImportados = 0;
+  int contadorConciliados = 0;
+
+  /// Mapa de categoria selecionada por índice (substitui o dropdown global)
+  Map<int, String?> categoriasPorItem = {};
+  Map<int, String?> centrosCustoPorItem = {};
+
+  /// Se true, sugestões já foram carregadas
+  bool sugestoesCarregadas = false;
+
   ///  State fields for stateful widgets in this page.
 
   // State field(s) for ddContaOrigem widget.

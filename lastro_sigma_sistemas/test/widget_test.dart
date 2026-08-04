@@ -6,12 +6,13 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:lastro_sigma_sistemas/backend/supabase/supabase.dart';
 import 'package:lastro_sigma_sistemas/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('App initialization test', (WidgetTester tester) async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    await SupaFlow.initialize();
     await tester.pumpWidget(MyApp());
   });
 }

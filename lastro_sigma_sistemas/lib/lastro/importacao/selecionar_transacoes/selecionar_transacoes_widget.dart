@@ -14,6 +14,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'selecionar_transacoes_model.dart';
 export 'selecionar_transacoes_model.dart';
+import '/lastro/importacao/action/sugerir_categoria_ofx.dart';
+import '/lastro/importacao/action/salvar_regras_aprendidas.dart';
 
 class SelecionarTransacoesWidget extends StatefulWidget {
   const SelecionarTransacoesWidget({super.key});
@@ -37,7 +39,30 @@ class _SelecionarTransacoesWidgetState
     super.initState();
     _model = createModel(context, () => SelecionarTransacoesModel());
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      safeSetState(() {});
+      // Carrega sugestões automáticas de categoria se ainda não carregadas
+      if (!_model.sugestoesCarregadas &&
+          FFAppState().tempImportacaoOFX.isNotEmpty &&
+          FFAppState().currentOrganizationId.isNotEmpty) {
+        final sugeridas = await sugerirCategoriaOfx(
+          FFAppState().tempImportacaoOFX,
+          FFAppState().currentOrganizationId,
+        );
+        FFAppState().tempImportacaoOFX = sugeridas;
+        // Pré-preenche categoriasPorItem com as sugestões
+        for (int i = 0; i < sugeridas.length; i++) {
+          if ((sugeridas[i].planoContasSugeridoId ?? '').isNotEmpty) {
+            _model.categoriasPorItem[i] = sugeridas[i].planoContasSugeridoId;
+          }
+          if ((sugeridas[i].centroCustoSugeridoId ?? '').isNotEmpty) {
+            _model.centrosCustoPorItem[i] = sugeridas[i].centroCustoSugeridoId;
+          }
+        }
+        _model.sugestoesCarregadas = true;
+        safeSetState(() {});
+      }
+    });
   }
 
   @override
@@ -675,17 +700,12 @@ class _SelecionarTransacoesWidgetState
                                                           safeSetState(() {});
                                                         }
                                                       },
-                                                      side: (FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .alternate !=
-                                                              null)
-                                                          ? BorderSide(
+                                                      side: BorderSide(
                                                               width: 2,
                                                               color: FlutterFlowTheme
                                                                       .of(context)
                                                                   .alternate,
-                                                            )
-                                                          : null,
+                                                            ),
                                                       activeColor:
                                                           FlutterFlowTheme.of(
                                                                   context)
@@ -929,6 +949,51 @@ class _SelecionarTransacoesWidgetState
                                                       ],
                                                     ),
                                                   ),
+                                                  // Badge de sugestão de categoria automática
+                                                  if ((transacaoItemOfxItem
+                                                              .scoreConfianca ==
+                                                          'ALTO' ||
+                                                      transacaoItemOfxItem
+                                                              .scoreConfianca ==
+                                                          'MEDIO') &&
+                                                      (transacaoItemOfxItem
+                                                              .planoContasSugeridoId ??
+                                                          '')
+                                                          .isNotEmpty)
+                                                    Padding(
+                                                      padding:
+                                                          EdgeInsetsDirectional
+                                                              .fromSTEB(
+                                                                  0.0,
+                                                                  0.0,
+                                                                  4.0,
+                                                                  0.0),
+                                                      child: Tooltip(
+                                                        message:
+                                                            transacaoItemOfxItem
+                                                                        .scoreConfianca ==
+                                                                    'ALTO'
+                                                                ? 'Categoria sugerida com alta confiança'
+                                                                : 'Categoria sugerida',
+                                                        child: Icon(
+                                                          transacaoItemOfxItem
+                                                                      .scoreConfianca ==
+                                                                  'ALTO'
+                                                              ? Icons
+                                                                  .auto_awesome
+                                                              : Icons
+                                                                  .lightbulb_outline,
+                                                          size: 16.0,
+                                                          color: transacaoItemOfxItem
+                                                                      .scoreConfianca ==
+                                                                  'ALTO'
+                                                              ? Color(
+                                                                  0xFF4CAF50)
+                                                              : Color(
+                                                                  0xFFFFC107),
+                                                        ),
+                                                      ),
+                                                    ),
                                                   Padding(
                                                     padding:
                                                         EdgeInsetsDirectional
@@ -1027,93 +1092,9 @@ class _SelecionarTransacoesWidgetState
                                         0.0, 12.0, 0.0, 0.0),
                                     child: FFButtonWidget(
                                       onPressed: () async {
-                                        var _shouldSetState = false;
-                                        if ((_model.ddContaOrigemValue !=
-                                                    null &&
-                                                _model.ddContaOrigemValue !=
-                                                    '') &&
-                                            (_model.ddCategoriaValue != null &&
-                                                _model.ddCategoriaValue !=
-                                                    '') &&
-                                            (_model.ddCentroDeCustoValue !=
-                                                    null &&
-                                                _model.ddCentroDeCustoValue !=
-                                                    '')) {
-                                          for (int loop1Index = 0;
-                                              loop1Index <
-                                                  FFAppState()
-                                                      .tempImportacaoOFX
-                                                      .length;
-                                              loop1Index++) {
-                                            final currentLoop1Item =
-                                                FFAppState().tempImportacaoOFX[
-                                                    loop1Index];
-                                            if (currentLoop1Item.selecionado ==
-                                                true) {
-                                              _model.checkExistencia =
-                                                  await TransacoesTable()
-                                                      .queryRows(
-                                                queryFn: (q) => q
-                                                    .eqOrNull(
-                                                      'id_unico_banco',
-                                                      currentLoop1Item.fitid,
-                                                    )
-                                                    .eqOrNull(
-                                                      'organization_id',
-                                                      FFAppState()
-                                                          .currentOrganizationId,
-                                                    ),
-                                              );
-                                              _shouldSetState = true;
-                                              if (_model
-                                                      .checkExistencia!.length >
-                                                  0) {
-                                                _model.contadorDuplicados =
-                                                    _model.contadorDuplicados +
-                                                        1;
-                                                safeSetState(() {});
-                                              } else {
-                                                await TransacoesTable().insert({
-                                                  'descricao': currentLoop1Item
-                                                      .description,
-                                                  'valor':
-                                                      currentLoop1Item.amount,
-                                                  'data_pagamento':
-                                                      supaSerialize<DateTime>(
-                                                          _model.tipoConta ==
-                                                                  'CARTAO'
-                                                              ? null
-                                                              : currentLoop1Item
-                                                                  .date),
-                                                  'tipo_operacao': _model
-                                                              .tipoConta ==
-                                                          'CARTAO'
-                                                      ? 'DEBITO'
-                                                      : currentLoop1Item.type,
-                                                  'id_unico_banco':
-                                                      currentLoop1Item.fitid,
-                                                  'conta_bancaria_id':
-                                                      _model.ddContaOrigemValue,
-                                                  'plano_contas_id':
-                                                      _model.ddCategoriaValue,
-                                                  'centro_custo_id': _model
-                                                      .ddCentroDeCustoValue,
-                                                  'organization_id': FFAppState()
-                                                      .currentOrganizationId,
-                                                  'data_vencimento':
-                                                      supaSerialize<DateTime>(
-                                                          currentLoop1Item
-                                                              .dueDate),
-                                                  'data_competencia':
-                                                      supaSerialize<DateTime>(
-                                                          currentLoop1Item
-                                                              .date),
-                                                  'status': 'CONCILIADO',
-                                                });
-                                              }
-                                            }
-                                          }
-                                        } else {
+                                        // Valida: conta de origem obrigatória
+                                        if (_model.ddContaOrigemValue == null ||
+                                            _model.ddContaOrigemValue!.isEmpty) {
                                           await showDialog(
                                             context: context,
                                             builder: (dialogContext) {
@@ -1138,60 +1119,241 @@ class _SelecionarTransacoesWidgetState
                                                       BsTopNotificacoesWidget(
                                                     pTipo: 'ERRO',
                                                     pMensagem:
-                                                        'Selecione os itens (Conta/Categoria/Centro de Custo) acima!',
+                                                        'Selecione a Conta de Origem antes de salvar!',
                                                   ),
                                                 ),
                                               );
                                             },
                                           );
-
-                                          if (_shouldSetState)
-                                            safeSetState(() {});
                                           return;
                                         }
 
-                                        FFAppState().tempImportacaoOFX =
-                                            FFAppState()
+                                        // Coleta apenas itens selecionados
+                                        final List<OfxTransactionStruct>
+                                            selecionados = FFAppState()
                                                 .tempImportacaoOFX
-                                                .where((e) =>
-                                                    e.selecionado == false)
-                                                .toList()
-                                                .cast<OfxTransactionStruct>();
-                                        safeSetState(() {});
-                                        await showDialog(
-                                          context: context,
-                                          builder: (dialogContext) {
-                                            return Dialog(
-                                              elevation: 0,
-                                              insetPadding: EdgeInsets.zero,
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              alignment: AlignmentDirectional(
-                                                      -1.0, 0.0)
-                                                  .resolve(Directionality.of(
-                                                      context)),
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  FocusScope.of(dialogContext)
-                                                      .unfocus();
-                                                  FocusManager
-                                                      .instance.primaryFocus
-                                                      ?.unfocus();
-                                                },
-                                                child: BsTopNotificacoesWidget(
-                                                  pTipo: 'SUCESSO',
-                                                  pMensagem:
-                                                      'Importação concluída! ${_model.contadorDuplicados > 0 ? '${_model.contadorDuplicados.toString()} itens já existiam e foram ignorados.' : ''}',
+                                                .where(
+                                                    (e) => e.selecionado == true)
+                                                .toList();
+
+                                        if (selecionados.isEmpty) {
+                                          await showDialog(
+                                            context: context,
+                                            builder: (dialogContext) {
+                                              return Dialog(
+                                                elevation: 0,
+                                                insetPadding: EdgeInsets.zero,
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                alignment: AlignmentDirectional(
+                                                        -1.0, 0.0)
+                                                    .resolve(Directionality.of(
+                                                        context)),
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    FocusScope.of(dialogContext)
+                                                        .unfocus();
+                                                    FocusManager
+                                                        .instance.primaryFocus
+                                                        ?.unfocus();
+                                                  },
+                                                  child:
+                                                      BsTopNotificacoesWidget(
+                                                    pTipo: 'AVISO',
+                                                    pMensagem:
+                                                        'Selecione ao menos uma transação para salvar.',
+                                                  ),
                                                 ),
-                                              ),
-                                            );
-                                          },
-                                        );
+                                              );
+                                            },
+                                          );
+                                          return;
+                                        }
+
+                                        // Monta payload JSON para a RPC em lote
+                                        final List<Map<String, dynamic>>
+                                            payload = [];
+                                        for (int i = 0;
+                                            i < selecionados.length;
+                                            i++) {
+                                          final t = selecionados[i];
+                                          // Resolução de categoria: por item > global > sugerida
+                                          final int idxOriginal = FFAppState()
+                                              .tempImportacaoOFX
+                                              .indexOf(t);
+                                          final String? planoId =
+                                              _model.categoriasPorItem[
+                                                      idxOriginal] ??
+                                                  _model.ddCategoriaValue ??
+                                                  t.planoContasSugeridoId;
+                                          final String? centroId =
+                                              _model.centrosCustoPorItem[
+                                                      idxOriginal] ??
+                                                  _model.ddCentroDeCustoValue ??
+                                                  t.centroCustoSugeridoId;
+
+                                          // Calcula datas conforme tipo de conta
+                                          final DateTime? dataPgto =
+                                              _model.tipoConta == 'CARTAO'
+                                                  ? null
+                                                  : t.date;
+                                          final DateTime dataComp =
+                                              t.date ?? DateTime.now();
+                                          final DateTime dataVenc =
+                                              t.dueDate ?? dataComp;
+
+                                          payload.add({
+                                            'fitid': t.fitid,
+                                            'descricao': t.description,
+                                            'valor': t.amount,
+                                            'tipo_operacao':
+                                                _model.tipoConta == 'CARTAO'
+                                                    ? 'DEBITO'
+                                                    : t.type,
+                                            'data_pagamento':
+                                                dataPgto?.toIso8601String(),
+                                            'data_competencia': dataComp
+                                                .toIso8601String()
+                                                .substring(0, 10),
+                                            'data_vencimento': dataVenc
+                                                .toIso8601String()
+                                                .substring(0, 10),
+                                            'plano_contas_id': planoId,
+                                            'centro_custo_id': centroId,
+                                            'organization_id': FFAppState()
+                                                .currentOrganizationId,
+                                          });
+                                        }
+
+                                        // Chama a RPC em LOTE (1 único request)
+                                        try {
+                                          final dynamic resultado =
+                                              await SupaFlow.client.rpc(
+                                            'fn_importar_ofx_lote',
+                                            params: {
+                                              'p_org_id': FFAppState()
+                                                  .currentOrganizationId,
+                                              'p_conta_id':
+                                                  _model.ddContaOrigemValue,
+                                              'p_transacoes':
+                                                  jsonEncode(payload),
+                                            },
+                                          );
+
+                                          final Map<String, dynamic> res =
+                                              Map<String, dynamic>.from(
+                                                  resultado as Map);
+                                          _model.contadorImportados =
+                                              (res['importados'] as int?) ?? 0;
+                                          _model.contadorConciliados =
+                                              (res['conciliados'] as int?) ?? 0;
+                                          _model.contadorDuplicados =
+                                              (res['duplicados'] as int?) ?? 0;
+
+                                          // Aprendizado automático de categorias
+                                          // Enriquece os itens com planoId resolvido antes de salvar
+                                          for (int i = 0;
+                                              i < selecionados.length;
+                                              i++) {
+                                            final int idx = FFAppState()
+                                                .tempImportacaoOFX
+                                                .indexOf(selecionados[i]);
+                                            selecionados[i]
+                                                .planoContasSugeridoId = _model
+                                                    .categoriasPorItem[idx] ??
+                                                _model.ddCategoriaValue;
+                                            selecionados[i]
+                                                .centroCustoSugeridoId = _model
+                                                    .centrosCustoPorItem[idx] ??
+                                                _model.ddCentroDeCustoValue;
+                                          }
+                                          await salvarRegrasAprendidas(
+                                            selecionados,
+                                            FFAppState().currentOrganizationId,
+                                          );
+
+                                          // Remove itens salvos da lista temporária
+                                          FFAppState().tempImportacaoOFX =
+                                              FFAppState()
+                                                  .tempImportacaoOFX
+                                                  .where((e) =>
+                                                      e.selecionado == false)
+                                                  .toList()
+                                                  .cast<OfxTransactionStruct>();
+                                          _model.sugestoesCarregadas = false;
+                                          safeSetState(() {});
+
+                                          // Exibe resultado detalhado
+                                          final String msgSucesso =
+                                              '${_model.contadorImportados} importadas'
+                                              '${_model.contadorConciliados > 0 ? ' · ${_model.contadorConciliados} conciliadas' : ''}'
+                                              '${_model.contadorDuplicados > 0 ? ' · ${_model.contadorDuplicados} já existiam' : ''}';
+                                          await showDialog(
+                                            context: context,
+                                            builder: (dialogContext) {
+                                              return Dialog(
+                                                elevation: 0,
+                                                insetPadding: EdgeInsets.zero,
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                alignment: AlignmentDirectional(
+                                                        -1.0, 0.0)
+                                                    .resolve(Directionality.of(
+                                                        context)),
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    FocusScope.of(dialogContext)
+                                                        .unfocus();
+                                                    FocusManager
+                                                        .instance.primaryFocus
+                                                        ?.unfocus();
+                                                  },
+                                                  child:
+                                                      BsTopNotificacoesWidget(
+                                                    pTipo: 'SUCESSO',
+                                                    pMensagem: msgSucesso,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        } catch (e) {
+                                          await showDialog(
+                                            context: context,
+                                            builder: (dialogContext) {
+                                              return Dialog(
+                                                elevation: 0,
+                                                insetPadding: EdgeInsets.zero,
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                alignment: AlignmentDirectional(
+                                                        -1.0, 0.0)
+                                                    .resolve(Directionality.of(
+                                                        context)),
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    FocusScope.of(dialogContext)
+                                                        .unfocus();
+                                                    FocusManager
+                                                        .instance.primaryFocus
+                                                        ?.unfocus();
+                                                  },
+                                                  child:
+                                                      BsTopNotificacoesWidget(
+                                                    pTipo: 'ERRO',
+                                                    pMensagem:
+                                                        'Erro ao salvar: ${e.toString()}',
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        }
 
                                         _model.contadorDuplicados = 0;
+                                        _model.contadorImportados = 0;
+                                        _model.contadorConciliados = 0;
                                         safeSetState(() {});
-                                        if (_shouldSetState)
-                                          safeSetState(() {});
                                       },
                                       text: 'Salvar Selecionados',
                                       icon: Icon(

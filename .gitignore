@@ -1,0 +1,41 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+
+# Flutter / Dart
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# Nested Flutter App build dirs
+lastro_sigma_sistemas/build/
+lastro_sigma_sistemas/.dart_tool/
+lastro_sigma_sistemas/.flutter-plugins
+lastro_sigma_sistemas/.flutter-plugins-dependencies
+lastro_sigma_sistemas/.packages
+lastro_sigma_sistemas/.pub-cache/
+lastro_sigma_sistemas/.pub/
+lastro_sigma_sistemas/ios/Flutter/ephemeral/
+lastro_sigma_sistemas/ios/Flutter/Flutter.podspec
+
+# Android / iOS build outputs
+*.apk
+*.aab
+*.app
+*.ipa
+
+# User-specific files
+.idea/
+.vscode/
+*.iml
