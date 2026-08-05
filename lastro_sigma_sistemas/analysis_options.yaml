@@ -5,3 +5,5 @@ analyzer:
   exclude:
     - lib/custom_code/**
     - lib/flutter_flow/custom_functions.dart
+    # Pasta aninhada gerada por exportação incorreta do FlutterFlow — não faz parte do projeto ativo
+    - lastro_sigma_sistemas/**

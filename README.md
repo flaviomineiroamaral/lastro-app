@@ -4,6 +4,23 @@ Este documento é a **fonte central** de toda a arquitetura operacional e DevOps
 
 ---
 
+## ⚠️ INTERVENÇÕES MANUAIS NECESSÁRIAS (Pré-requisitos)
+Para que a automação completa (GitHub Actions e FlutterFlow) funcione 100%, você **precisa** realizar as seguintes configurações uma única vez:
+
+1. **GitHub Secrets (Para CI/CD de Banco de Dados)**
+   - Vá no seu repositório no GitHub: `Settings` > `Secrets and variables` > `Actions`.
+   - Adicione o secret **`STAGING_DB_URL`** com a Connection String do banco de Homologação.
+   - Adicione o secret **`PROD_DB_URL`** com a Connection String do banco de Produção.
+   - *Se isso não for feito, os deploys automáticos de banco falharão na nuvem.*
+
+2. **FlutterFlow API Token (Para o script de Sincronização)**
+   - Gere um API Token no painel do FlutterFlow.
+   - Abra o arquivo `C:\SIGMA\lastro-app\scripts\sync_flutterflow.ps1` usando um bloco de notas.
+   - Substitua o texto `"SEU_API_TOKEN_AQUI"` pelo seu token real.
+   - Substitua `"SEU_PROJECT_ID_AQUI"` pelo ID do seu projeto no FlutterFlow.
+
+---
+
 ## 📂 Estrutura de Ferramentas e Atalhos
 
 Todos os atalhos essenciais estão localizados na pasta da sua Área de Trabalho:
