@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '/index.dart';
 import 'selecionar_transacoes_model.dart';
 export 'selecionar_transacoes_model.dart';
 
@@ -94,6 +95,14 @@ class _SelecionarTransacoesWidgetState
           },
           child: PopScope(
             canPop: false,
+            onPopInvokedWithResult: (didPop, result) {
+              if (didPop) return;
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.goNamed(DashboardWidget.routeName);
+              }
+            },
             child: Scaffold(
               key: scaffoldKey,
               backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
@@ -111,7 +120,11 @@ class _SelecionarTransacoesWidgetState
                     size: 30.0,
                   ),
                   onPressed: () async {
-                    context.pop();
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.goNamed(DashboardWidget.routeName);
+                    }
                   },
                 ),
                 title: Text(
@@ -717,8 +730,9 @@ class _SelecionarTransacoesWidgetState
                                                                         -1.0,
                                                                         0.0),
                                                                 child: Text(
-                                                                  transacaoItemOfxItem
-                                                                      .description,
+                                                                  transacaoItemOfxItem.hasCategoriaSugerida() && transacaoItemOfxItem.categoriaSugerida.isNotEmpty
+                                                                      ? '${transacaoItemOfxItem.description} [${transacaoItemOfxItem.categoriaSugerida}]'
+                                                                      : transacaoItemOfxItem.description,
                                                                   textAlign:
                                                                       TextAlign
                                                                           .start,
@@ -1150,6 +1164,16 @@ class _SelecionarTransacoesWidgetState
                                           if (_shouldSetState)
                                             safeSetState(() {});
                                           return;
+                                        }
+
+                                        // Atualiza o pulse para sincronização em tempo real do Dashboard
+                                        try {
+                                          await OrgPulseTable().upsert({
+                                            'organization_id': FFAppState().currentOrganizationId,
+                                            'ultima_atualizacao': supaSerialize<DateTime>(DateTime.now()),
+                                          });
+                                        } catch (e) {
+                                          debugPrint('Erro ao atualizar org_pulse: \$e');
                                         }
 
                                         FFAppState().tempImportacaoOFX =

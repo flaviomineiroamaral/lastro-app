@@ -21,13 +21,7 @@ class LerFaturaGeminiCall {
     {
       "parts": [
         {
-          "text": "Você é um extrator de dados financeiros sênior. Vou fornecer um arquivo PDF. Leia visualmente. Extraia APENAS as compras confirmadas e devolva EXCLUSIVAMENTE um array JSON. REGRAS RÍGIDAS: 1. 'date': Data exata da COMPRA. ATENÇÃO: Se a fatura mostrar apenas dia/mês (ex: 12/01), deduza o ano usando o vencimento da fatura. É PROIBIDO usar a data de vencimento como data da compra. Formato 'AAAA-MM-DDT00:00:00.000Z'. 2. 'dueDate': Data de VENCIMENTO DA FATURA. Se não achar, null. Formato 'AAAA-MM-DDT00:00:00.000Z'. 3. 'description': Nome do estabelecimento. 4. 'amount': Valor decimal usando ponto (Ex: 150.50). 5. IGNORE: pagamentos, simulações, juros, saldos. 6. Devolva apenas o [ { ... } ]."
-        },
-        {
-          "inlineData": {
-            "mimeType": "application/pdf",
-            "data": "<pdfBase64>"
-          }
+          "text": "Você é um extrator de dados financeiros sênior. Vou fornecer os dados da fatura em texto bruto. Extraia APENAS as compras confirmadas e devolva EXCLUSIVAMENTE um array JSON. REGRAS RÍGIDAS: 1. 'date': Data exata da COMPRA. ATENÇÃO: Se a fatura mostrar apenas dia/mês (ex: 12/01), deduza o ano usando o vencimento da fatura. É PROIBIDO usar a data de vencimento como data da compra. Formato 'AAAA-MM-DDT00:00:00.000Z'. 2. 'dueDate': Data de VENCIMENTO DA FATURA. Se não achar, null. Formato 'AAAA-MM-DDT00:00:00.000Z'. 3. 'description': Nome do estabelecimento. 4. 'amount': Valor decimal usando ponto (Ex: 150.50). 5. IGNORE: pagamentos, simulações, juros, saldos. 6. Devolva apenas o [ { ... } ]. 7. 'categoria_sugerida': Infira uma categoria genérica (Ex: Alimentação, Transporte, Saúde, Serviços) baseada na descrição.\\n\\nCONTEÚDO DA FATURA:\\n${escapeStringForJson(textoFatura)}"
         }
       ]
     }
@@ -39,7 +33,7 @@ class LerFaturaGeminiCall {
     return ApiManager.instance.makeApiCall(
       callName: 'LerFaturaGemini',
       apiUrl:
-          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAq1Jk05mwvVbOtBnlqaviKbYkNb9B0ss0',
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyAq1Jk05mwvVbOtBnlqaviKbYkNb9B0ss0',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -70,7 +64,7 @@ class LerFaturaGeminiVisualCall {
     {
       "parts": [
         {
-          "text": "Você é um extrator de dados financeiros sênior. Vou fornecer um arquivo PDF. Leia visualmente. Extraia APENAS as compras confirmadas e devolva EXCLUSIVAMENTE um array JSON. REGRAS RÍGIDAS: 1. 'date': Data exata da COMPRA. ATENÇÃO: Se a fatura mostrar apenas dia/mês (ex: 12/01), deduza o ano usando o vencimento da fatura. É PROIBIDO usar a data de vencimento como data da compra. Formato 'AAAA-MM-DDT00:00:00.000Z'. 2. 'dueDate': Data de VENCIMENTO DA FATURA. Se não achar, null. Formato 'AAAA-MM-DDT00:00:00.000Z'. 3. 'description': Nome do estabelecimento. 4. 'amount': Valor decimal usando ponto (Ex: 150.50). 5. IGNORE: pagamentos, simulações, juros, saldos. 6. Devolva apenas o [ { ... } ]."
+          "text": "Você é um extrator de dados financeiros sênior. Vou fornecer um arquivo PDF. Leia visualmente. Extraia APENAS as compras confirmadas e devolva EXCLUSIVAMENTE um array JSON. REGRAS RÍGIDAS: 1. 'date': Data exata da COMPRA. ATENÇÃO: Se a fatura mostrar apenas dia/mês (ex: 12/01), deduza o ano usando o vencimento da fatura. É PROIBIDO usar a data de vencimento como data da compra. Formato 'AAAA-MM-DDT00:00:00.000Z'. 2. 'dueDate': Data de VENCIMENTO DA FATURA. Se não achar, null. Formato 'AAAA-MM-DDT00:00:00.000Z'. 3. 'description': Nome do estabelecimento. 4. 'amount': Valor decimal usando ponto (Ex: 150.50). 5. IGNORE: pagamentos, simulações, juros, saldos. 6. Devolva apenas o [ { ... } ]. 7. 'categoria_sugerida': Infira uma categoria genérica (Ex: Alimentação, Transporte, Saúde, Serviços) baseada na descrição."
         },
         {
           "inlineData": {
@@ -88,7 +82,7 @@ class LerFaturaGeminiVisualCall {
     return ApiManager.instance.makeApiCall(
       callName: 'LerFaturaGeminiVisual',
       apiUrl:
-          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAq1Jk05mwvVbOtBnlqaviKbYkNb9B0ss0',
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyAq1Jk05mwvVbOtBnlqaviKbYkNb9B0ss0',
       callType: ApiCallType.POST,
       headers: {},
       params: {},

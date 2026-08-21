@@ -25,25 +25,28 @@ Future<List<OfxTransactionStruct>> parseOfxFile(
     content = latin1.decode(fileBytes.bytes!);
   }
 
+  // Suporta tanto XML quanto SGML (OFX 1.02), onde </STMTTRN> pode não existir
   final transactionRegex = RegExp(
-    r'<STMTTRN>(.*?)<\/STMTTRN>',
-    multiLine: true,
+    r'<STMTTRN>(.*?)(?=(<\/STMTTRN>|<STMTTRN>|<\/BANKTRANLIST>|\Z))',
     dotAll: true,
     caseSensitive: false,
   );
 
   final matches = transactionRegex.allMatches(content);
 
+  String extractTag(String block, String tag) {
+    final r = RegExp(r'<' + tag + r'>\s*([^<\r\n]+)', caseSensitive: false);
+    return r.firstMatch(block)?.group(1)?.trim() ?? '';
+  }
+
   // ============================================================================
-  // PASSO 1: O PADRÃO OURO - ANÁLISE DE FREQUÊNCIA (Detecção de Lixo do Banco)
+  // PASSO 1: ANÁLISE DE FREQUÊNCIA DE FITID (Detecção de Lixo do Banco)
   // ============================================================================
   Map<String, int> frequenciaFitid = {};
 
   for (final match in matches) {
     final block = match.group(1) ?? '';
-    final r = RegExp(r'<FITID>([^<]+)', caseSensitive: false);
-    String fitid = r.firstMatch(block)?.group(1)?.trim() ?? '';
-
+    String fitid = extractTag(block, 'FITID');
     if (fitid.isNotEmpty) {
       frequenciaFitid[fitid] = (frequenciaFitid[fitid] ?? 0) + 1;
     }
@@ -58,29 +61,27 @@ Future<List<OfxTransactionStruct>> parseOfxFile(
   for (final match in matches) {
     final block = match.group(1) ?? '';
 
-    String getTag(String tag) {
-      final r = RegExp(r'<' + tag + r'>([^<]+)', caseSensitive: false);
-      return r.firstMatch(block)?.group(1)?.trim() ?? '';
-    }
+    String type = extractTag(block, 'TRNTYPE');
+    String dtPosted = extractTag(block, 'DTPOSTED');
+    String amountStr = extractTag(block, 'TRNAMT');
+    String memo = extractTag(block, 'MEMO');
+    if (memo.isEmpty) memo = extractTag(block, 'NAME');
+    if (memo.isEmpty) memo = extractTag(block, 'PAYEE');
+    String originalFitid = extractTag(block, 'FITID');
 
-    String type = getTag('TRNTYPE');
-    String dtPosted = getTag('DTPOSTED');
-    String amountStr = getTag('TRNAMT');
-    String memo = getTag('MEMO');
-    String originalFitid = getTag('FITID');
-
-    // Data com Trava do Meio-Dia UTC (Proteção de Interface do FlutterFlow)
+    // Data com Trava do Meio-Dia UTC
     DateTime date = DateTime.now().toUtc();
-    if (dtPosted.length >= 8) {
+    String digitsDate = RegExp(r'\d+').firstMatch(dtPosted)?.group(0) ?? '';
+    if (digitsDate.length >= 8) {
       try {
-        int year = int.parse(dtPosted.substring(0, 4));
-        int month = int.parse(dtPosted.substring(4, 6));
-        int day = int.parse(dtPosted.substring(6, 8));
+        int year = int.parse(digitsDate.substring(0, 4));
+        int month = int.parse(digitsDate.substring(4, 6));
+        int day = int.parse(digitsDate.substring(6, 8));
         date = DateTime.utc(year, month, day, 12, 0, 0);
       } catch (_) {}
     }
 
-    // Sanitização Modular Blindada
+    // Sanitização de Valor e Tipo
     double amount = sanitizarValor(amountStr) ?? 0.0;
 
     String finalType = 'DEBITO';
@@ -94,32 +95,22 @@ Future<List<OfxTransactionStruct>> parseOfxFile(
     String safeFitid = originalFitid.trim();
     String fitidFinal;
 
-    // A MÁGICA: Um ID só é confiável se tiver tamanho decente E aparecer apenas UMA vez no arquivo.
     bool isFitidConfiavel =
         safeFitid.length > 5 && (frequenciaFitid[safeFitid] == 1);
 
     if (isFitidConfiavel) {
-      // O banco enviou um ID válido e único (Ex: 011815).
-      // Mantemos um teto de 30 caracteres para segurança do Supabase.
       fitidFinal =
           safeFitid.length > 30 ? safeFitid.substring(0, 30) : safeFitid;
     } else {
-      // O banco enviou lixo repetido (Ex: 000000 quatro vezes) ou vazio.
-      // Assumimos o controle e criamos a CHAVE SEMÂNTICA.
-
       String dataStr =
           "${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}";
       String tipoChar = finalType == 'CREDITO' ? 'C' : 'D';
-
-      // Convertendo o valor para centavos (inteiro) para remover pontos e vírgulas da chave
       String valorCentavos = (absAmount * 100).toInt().toString();
 
       String assinaturaBase = "${dataStr}_${tipoChar}_${valorCentavos}";
       int ocorrenciaAtual = (ocorrenciasIntrinsecas[assinaturaBase] ?? 0) + 1;
       ocorrenciasIntrinsecas[assinaturaBase] = ocorrenciaAtual;
 
-      // Resultado exato: LS_20260701_D_60745_1
-      // Tamanho: 22 caracteres (Cabe no banco com folga, altamente legível e matematicamente único).
       fitidFinal = "LS_${assinaturaBase}_${ocorrenciaAtual}";
     }
 

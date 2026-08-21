@@ -49,6 +49,8 @@ List<OfxTransactionStruct> jsonToOfx(String jsonString) {
       String descricao = item['description']?.toString().trim() ?? '';
       if (descricao.isEmpty) descricao = 'Sem descrição';
 
+      String? categoriaSugerida = item['categoria_sugerida']?.toString().trim();
+
       // 4. Geração de ID Estável (FITID)
       // O hash usa o toIso8601String (que agora será sempre T12:00:00.000Z), mantendo estabilidade
       String hashBase =
@@ -70,6 +72,7 @@ List<OfxTransactionStruct> jsonToOfx(String jsonString) {
         dueDate: dueDate,
         type: tipoOperacao,
         fitid: fitidFinal,
+        categoriaSugerida: categoriaSugerida,
       ));
     }
 

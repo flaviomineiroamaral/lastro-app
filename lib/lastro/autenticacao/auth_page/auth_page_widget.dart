@@ -1556,7 +1556,7 @@ class _AuthPageWidgetState extends State<AuthPageWidget>
                                                       .showSnackBar(
                                                     SnackBar(
                                                       content: Text(
-                                                        'Passwords don\'t match!',
+                                                        'As senhas não coincidem!',
                                                       ),
                                                     ),
                                                   );

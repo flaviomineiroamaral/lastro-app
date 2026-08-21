@@ -18,13 +18,15 @@ class OfxTransactionStruct extends BaseStruct {
     /// ID unico
     String? fitid,
     bool? selecionado,
+    String? categoriaSugerida,
   })  : _amount = amount,
         _description = description,
         _date = date,
         _dueDate = dueDate,
         _type = type,
         _fitid = fitid,
-        _selecionado = selecionado;
+        _selecionado = selecionado,
+        _categoriaSugerida = categoriaSugerida;
 
   // "amount" field.
   double? _amount;
@@ -77,6 +79,13 @@ class OfxTransactionStruct extends BaseStruct {
 
   bool hasSelecionado() => _selecionado != null;
 
+  // "categoriaSugerida" field.
+  String? _categoriaSugerida;
+  String get categoriaSugerida => _categoriaSugerida ?? '';
+  set categoriaSugerida(String? val) => _categoriaSugerida = val;
+
+  bool hasCategoriaSugerida() => _categoriaSugerida != null;
+
   static OfxTransactionStruct fromMap(Map<String, dynamic> data) =>
       OfxTransactionStruct(
         amount: castToType<double>(data['amount']),
@@ -86,6 +95,7 @@ class OfxTransactionStruct extends BaseStruct {
         type: data['type'] as String?,
         fitid: data['fitid'] as String?,
         selecionado: data['selecionado'] as bool?,
+        categoriaSugerida: data['categoriaSugerida'] as String?,
       );
 
   static OfxTransactionStruct? maybeFromMap(dynamic data) => data is Map
@@ -100,6 +110,7 @@ class OfxTransactionStruct extends BaseStruct {
         'type': _type,
         'fitid': _fitid,
         'selecionado': _selecionado,
+        'categoriaSugerida': _categoriaSugerida,
       }.withoutNulls;
 
   @override
@@ -131,6 +142,10 @@ class OfxTransactionStruct extends BaseStruct {
         'selecionado': serializeParam(
           _selecionado,
           ParamType.bool,
+        ),
+        'categoriaSugerida': serializeParam(
+          _categoriaSugerida,
+          ParamType.String,
         ),
       }.withoutNulls;
 
@@ -171,6 +186,11 @@ class OfxTransactionStruct extends BaseStruct {
           ParamType.bool,
           false,
         ),
+        categoriaSugerida: deserializeParam(
+          data['categoriaSugerida'],
+          ParamType.String,
+          false,
+        ),
       );
 
   @override
@@ -185,12 +205,13 @@ class OfxTransactionStruct extends BaseStruct {
         dueDate == other.dueDate &&
         type == other.type &&
         fitid == other.fitid &&
-        selecionado == other.selecionado;
+        selecionado == other.selecionado &&
+        categoriaSugerida == other.categoriaSugerida;
   }
 
   @override
   int get hashCode => const ListEquality()
-      .hash([amount, description, date, dueDate, type, fitid, selecionado]);
+      .hash([amount, description, date, dueDate, type, fitid, selecionado, categoriaSugerida]);
 }
 
 OfxTransactionStruct createOfxTransactionStruct({
@@ -201,6 +222,7 @@ OfxTransactionStruct createOfxTransactionStruct({
   String? type,
   String? fitid,
   bool? selecionado,
+  String? categoriaSugerida,
 }) =>
     OfxTransactionStruct(
       amount: amount,
@@ -210,4 +232,5 @@ OfxTransactionStruct createOfxTransactionStruct({
       type: type,
       fitid: fitid,
       selecionado: selecionado,
+      categoriaSugerida: categoriaSugerida,
     );

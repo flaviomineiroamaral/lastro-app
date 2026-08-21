@@ -20,7 +20,7 @@ jobs:
     
     steps:
       - name: Baixar o código do repositório
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Instalar a CLI do Supabase no Servidor do GitHub
         uses: supabase/setup-cli@v1
@@ -41,7 +41,7 @@ jobs:
     
     steps:
       - name: Baixar o código do repositório
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Instalar a CLI do Supabase no Servidor do GitHub
         uses: supabase/setup-cli@v1

@@ -19,15 +19,7 @@ build/
 .pub/
 
 # Nested Flutter App build dirs
-lastro_sigma_sistemas/build/
-lastro_sigma_sistemas/.dart_tool/
-lastro_sigma_sistemas/.flutter-plugins
-lastro_sigma_sistemas/.flutter-plugins-dependencies
-lastro_sigma_sistemas/.packages
-lastro_sigma_sistemas/.pub-cache/
-lastro_sigma_sistemas/.pub/
-lastro_sigma_sistemas/ios/Flutter/ephemeral/
-lastro_sigma_sistemas/ios/Flutter/Flutter.podspec
+lastro_sigma_sistemas/
 
 # Android / iOS build outputs
 *.apk
@@ -39,3 +31,7 @@ lastro_sigma_sistemas/ios/Flutter/Flutter.podspec
 .idea/
 .vscode/
 *.iml
+ios/Flutter/ephemeral/
+temp_app/
+scratch_*.dart
+

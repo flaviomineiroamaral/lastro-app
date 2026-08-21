@@ -121,6 +121,30 @@ class SupabaseAuthManager extends AuthManager with EmailSignInManager {
         () => emailCreateAccountFunc(email, password),
       );
 
+  String _traduzirMensagemErroAuth(AuthException e) {
+    final msg = (e.message ?? '').toLowerCase();
+    if (msg.contains('security purposes') || msg.contains('rate limit')) {
+      final matchSec = RegExp(r'(\d+)\s*second').firstMatch(e.message ?? '');
+      if (matchSec != null) {
+        return 'Por motivos de segurança, aguarde ${matchSec.group(1)} segundos antes de tentar novamente.';
+      }
+      return 'Limite de tentativas excedido. Por favor, aguarde um instante antes de tentar novamente.';
+    }
+    if (msg.contains('user already registered') || msg.contains('already exists')) {
+      return 'Este e-mail já está cadastrado em outra conta.';
+    }
+    if (msg.contains('invalid login credentials') || msg.contains('invalid credentials')) {
+      return 'E-mail ou senha incorretos.';
+    }
+    if (msg.contains('password should be at least')) {
+      return 'A senha deve ter no mínimo 6 caracteres.';
+    }
+    if (msg.contains('email not confirmed')) {
+      return 'E-mail não confirmado. Verifique sua caixa de entrada.';
+    }
+    return 'Erro de autenticação: ${e.message}';
+  }
+
   /// Tries to sign in or create an account using Supabase Auth.
   /// Returns the User object if sign in was successful.
   Future<BaseAuthUser?> _signInOrCreateAccount(
@@ -132,19 +156,13 @@ class SupabaseAuthManager extends AuthManager with EmailSignInManager {
       final authUser =
           user == null ? null : LastroSigmaSistemasSupabaseUser(user);
 
-      // Update currentUser here in case user info needs to be used immediately
-      // after a user is signed in. This should be handled by the user stream,
-      // but adding here too in case of a race condition where the user stream
-      // doesn't assign the currentUser in time.
       if (authUser != null) {
         currentUser = authUser;
         AppStateNotifier.instance.update(authUser);
       }
       return authUser;
     } on AuthException catch (e) {
-      final errorMsg = e.message.contains('User already registered')
-          ? 'Error: The email is already in use by a different account'
-          : 'Error: ${e.message!}';
+      final errorMsg = _traduzirMensagemErroAuth(e);
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMsg)),

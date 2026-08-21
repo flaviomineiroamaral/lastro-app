@@ -14,6 +14,7 @@ import 'flutter_flow/flutter_flow_util.dart';
 import 'flutter_flow/internationalization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'flutter_flow/nav/nav.dart';
+import 'lastro/importacao/action/share_intent_service.dart';
 import 'index.dart';
 
 void main() async {
@@ -83,6 +84,7 @@ class _MyAppState extends State<MyApp> {
 
     _appStateNotifier = AppStateNotifier.instance;
     _router = createRouter(_appStateNotifier);
+    ShareIntentService.init(_router, _appStateNotifier);
     userStream = lastroSigmaSistemasSupabaseUserStream()
       ..listen((user) {
         _appStateNotifier.update(user);

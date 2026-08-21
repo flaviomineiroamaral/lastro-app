@@ -19,21 +19,40 @@ double? sanitizarValor(dynamic amount) {
   String valStr = amount.toString().trim();
   if (valStr.isEmpty) return 0.0;
 
-  // Remove caracteres estranhos, mantendo dígitos, vírgula, ponto e menos
-  String apenasNumeros = valStr.replaceAll(RegExp(r'[^0-9,-.]'), '');
-
-  // Localiza o último separador para garantir que o decimal seja o ponto
-  int lastComma = apenasNumeros.lastIndexOf(',');
-  int lastDot = apenasNumeros.lastIndexOf('.');
-  int lastSep = math.max(lastComma, lastDot);
-
-  if (lastSep != -1) {
-    // Remove separadores de milhar (qualquer ponto ou vírgula antes do último)
-    String parteInteira =
-        apenasNumeros.substring(0, lastSep).replaceAll(RegExp(r'[.,]'), '');
-    String parteDecimal = apenasNumeros.substring(lastSep + 1);
-    return double.tryParse("$parteInteira.$parteDecimal") ?? 0.0;
+  // Verifica se o valor é negativo (prefixo -, sufixo -, ou sufixo D / DEBITO)
+  bool isNegative = false;
+  String upperStr = valStr.toUpperCase();
+  if (valStr.startsWith('-') ||
+      valStr.endsWith('-') ||
+      upperStr.endsWith(' D') ||
+      upperStr.endsWith('D') ||
+      upperStr.endsWith('DEBITO') ||
+      upperStr.endsWith('DÉBITO')) {
+    isNegative = true;
   }
 
-  return double.tryParse(apenasNumeros) ?? 0.0;
+  // Remove caracteres que não sejam dígitos, vírgula ou ponto
+  String clean = valStr.replaceAll(RegExp(r'[^0-9,.]'), '');
+  if (clean.isEmpty) return 0.0;
+
+  int lastComma = clean.lastIndexOf(',');
+  int lastDot = clean.lastIndexOf('.');
+
+  double parsed = 0.0;
+  if (lastComma > lastDot) {
+    // Formato brasileiro: vírgula é o separador decimal (ex: 1.234,56 ou 1234,56)
+    String parteInteira = clean.substring(0, lastComma).replaceAll('.', '');
+    String parteDecimal = clean.substring(lastComma + 1);
+    parsed = double.tryParse("$parteInteira.$parteDecimal") ?? 0.0;
+  } else if (lastDot > lastComma) {
+    // Formato americano/OFX: ponto é o separador decimal (ex: 1,234.56 ou 1234.56)
+    String parteInteira = clean.substring(0, lastDot).replaceAll(',', '');
+    String parteDecimal = clean.substring(lastDot + 1);
+    parsed = double.tryParse("$parteInteira.$parteDecimal") ?? 0.0;
+  } else {
+    // Sem separador decimal (ex: 1500)
+    parsed = double.tryParse(clean) ?? 0.0;
+  }
+
+  return isNegative ? -parsed.abs() : parsed.abs();
 }
