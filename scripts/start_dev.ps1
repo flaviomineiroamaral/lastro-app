@@ -1,15 +1,13 @@
-# Script de Inicialização do Ambiente Matinal
+# Script de Inicialização do Ambiente (Cloud-First)
 Set-Location "C:\SIGMA\lastro-app"
 
-Write-Host "=== INICIANDO AMBIENTE LASTRO ===" -ForegroundColor Cyan
+Write-Host "=== INICIANDO AMBIENTE LASTRO (CLOUD) ===" -ForegroundColor Cyan
 
 # 1. Baixar atualizações do Git
 Write-Host "Sincronizando com o GitHub..." -ForegroundColor Yellow
 git pull origin main
 
-# 2. Iniciar Supabase Local
-Write-Host "Iniciando microsserviços do Supabase local..." -ForegroundColor Yellow
-npx supabase start
+Write-Host "`n=== AMBIENTE PRONTO PARA USO! ===" -ForegroundColor Green
+Write-Host "Backend: Supabase Cloud (Nuvem Oficial)" -ForegroundColor Cyan
+Write-Host "CI/CD: GitHub Actions ativo" -ForegroundColor Cyan
 
-Write-Host "=== AMBIENTE PRONTO PARA USO! ===" -ForegroundColor Green
-Write-Host "Studio Local: http://127.0.0.1:54323" -ForegroundColor Cyan

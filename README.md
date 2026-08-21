@@ -10,45 +10,62 @@ Este documento é a **fonte central** de arquitetura, operações diárias e gui
 * **Tipo:** Sistema de Gestão Financeira Corporativa Multi-Organização
 * **Tecnologias Principais:**
   * **Framework:** Flutter / Dart (Web, Mobile & Desktop)
-  * **Backend / BaaS:** Supabase (PostgreSQL 17, Auth & Storage)
+  * **Backend / BaaS:** Supabase Cloud (PostgreSQL 17, Auth & Storage)
+  * **CI/CD & Cloud Build:** GitHub Actions (Compilação e Deploy em Nuvem)
   * **Gerenciador de Estado:** Provider (`FFAppState`)
   * **Roteamento:** GoRouter
   * **Relatórios & Exportações:** `pdf`, `printing`, `csvlib`
-  * **Integração Android:** Intent Filter para recebimento de extratos de banco (`application/pdf`, `application/x-ofx`, `text/csv`)
+  * **Integração Android:** Intent Filter para recebimento de extratos bancários (`application/pdf`, `application/x-ofx`, `text/csv`)
 
 ---
 
-## 💻 2. Ferramentas e Atalhos da Área de Trabalho
+## ☁️ 2. Arquitetura Cloud-First (Sem Sobrecarga Local)
 
-Todos os scripts utilitários estão organizados na pasta da sua Área de Trabalho:
-`Área de Trabalho > Lastro App - Ferramentas`
+Para garantir máxima performance no hardware de desenvolvimento, o projeto adota uma arquitetura **100% Cloud-First**:
 
-| Atalho / Script | Comando / Arquivo Alvo | Descrição & Quando Usar |
+1. **Supabase Cloud (Oficial):** Banco de dados, autenticação e storage operam na nuvem gerenciada. Não é necessário rodar Docker localmente.
+2. **Builds no GitHub Actions:** A compilação pesada do Flutter (Android APK) e o deploy de migrations rodam gratuitamente em servidores da nuvem.
+3. **Blindagem Local (`.wslconfig`):** A máquina possui teto de recursos configurado para manter o sistema operacional ágil e fluido.
+
+---
+
+## 💻 3. Ferramentas e Scripts de Automação
+
+Os scripts utilitários estão disponíveis em `C:\SIGMA\lastro-app\scripts` e `C:\SIGMA\Automacao`:
+
+| Script | Caminho | Descrição & Quando Usar |
 | :--- | :--- | :--- |
-| **`1 - Iniciar Ambiente`** | `scripts/start_dev.ps1` | Sincroniza o código com o GitHub (`git pull`) e inicia o Supabase local. Use no início do dia. |
-| **`2 - Aplicar Patch Android`** | `scripts/patch_android.ps1` | Re-aplica as correções do Gradle 9.1.0, Kotlin 2.3.20 e o **Share Intent Filter** no `AndroidManifest.xml` após exportar do FlutterFlow. |
-| **`3 - Encerrar Expediente`** | `scripts/finish_day.ps1` | Executa o commit e push para o GitHub (ativando a esteira CI/CD) e encerra os serviços do Supabase. |
-| **`4 - Abrir Supabase Studio`** | `http://127.0.0.1:54323` | Abre a interface de gerenciamento do banco de dados local no seu navegador. |
-| **`5 - Abrir Pasta do Projeto`** | `C:\SIGMA\lastro-app` | Abre a raiz do projeto no Windows Explorer. |
-| **`7 - Assistente de Migração`** | `scripts/create_migration.ps1` | Pergunta o nome da migração, executa o `db diff` no Supabase e abre o SQL para revisão no VS Code. |
-| **`8 - Lançar no Celular Físico`** | `scripts/run_mobile.ps1` | Limpa o cache, baixa pacotes e compila o app no seu smartphone Android (ADB/USB). |
+| **`1 - Iniciar Ambiente`** | `scripts/start_dev.ps1` | Sincroniza o código com o GitHub (`git pull`). Use no início do dia. |
+| **`2 - Aplicar Patch Android`** | `scripts/patch_android.ps1` | Re-aplica as correções do Gradle, Kotlin e o **Share Intent Filter** no `AndroidManifest.xml` após exportar do FlutterFlow. |
+| **`3 - Encerrar Expediente`** | `scripts/finish_day.ps1` | Executa o commit e push para o GitHub, disparando a esteira CI/CD na nuvem. |
+| **`4 - Build APK na Nuvem`** | `C:\SIGMA\Automacao\build-apk-cloud.ps1` | Envia alterações e abre o GitHub Actions para download do APK. |
+| **`5 - Diagnóstico de Saúde`** | `C:\SIGMA\Automacao\status-sistema.ps1` | Exibe o status de espaço no SSD e consumo de memória RAM. |
+| **`6 - Lançar no Celular Físico`** | `scripts/run_mobile.ps1` | Compila diretamente no seu smartphone Android via cabo USB/Wi-Fi (ADB). |
 
 ---
 
-## ⚡ 3. Fluxo de Integração FlutterFlow + GitHub
+## ⚡ 4. Fluxo de Integração FlutterFlow + GitHub + CI/CD
 
-Como o FlutterFlow exporta o código diretamente para a raiz do repositório no GitHub:
+```mermaid
+graph LR
+    FF[FlutterFlow] -->|Push| GH[GitHub: branch main]
+    GH -->|Gatilho Automático| GHA[GitHub Actions CI/CD]
+    GHA -->|Compilação em Nuvem| APK[Download APK Pronto]
+    GHA -->|Deploy Migrations| SC[Supabase Cloud]
+```
 
-1. **Alterações no FlutterFlow:** Desenvolva telas e componentes no editor do FlutterFlow e clique em **Push to GitHub**.
-2. **Aplicação de Patch Nativo:** Após o push do FlutterFlow, execute no seu computador ou terminal:
+1. **Alterações no FlutterFlow:** Desenvolva telas e componentes no FlutterFlow e clique em **Push to GitHub**.
+2. **Aplicação de Patch Nativo (Local):** Após o push, se for testar no Android nativo:
    ```powershell
    powershell -ExecutionPolicy Bypass -File scripts/patch_android.ps1
    ```
-3. **Validação:** Isso garante que o `AndroidManifest.xml` continue reconhecendo os arquivos do app de banco compartilhados pelo celular.
+3. **Build e Teste do APK:**
+   * Acesse a aba **Actions** no GitHub: [GitHub Actions - Lastro App](https://github.com/flaviomineiroamaral/lastro-app/actions).
+   * Baixe o artefato `lastro-apk-debug` e instale no seu celular.
 
 ---
 
-## 🏛️ 4. Arquitetura do Banco de Dados Supabase (`supabase/`)
+## 🏛️ 5. Arquitetura do Banco de Dados Supabase (`supabase/`)
 
 O backend é fundamentado em PostgreSQL 17 com suporte a views analíticas para alto desempenho financeiro.
 
@@ -77,7 +94,7 @@ O backend é fundamentado em PostgreSQL 17 com suporte a views analíticas para 
 
 ---
 
-## 📱 5. Estrutura dos Módulos da Aplicação (`lib/`)
+## 📱 6. Estrutura dos Módulos da Aplicação (`lib/`)
 
 ```
 lib/
@@ -95,8 +112,10 @@ lib/
 
 ---
 
-## 🧠 6. Regras de Negócio Importantes
+## 🧠 7. Regras de Negócio e Diretrizes Operacionais
 
 1. **Integridade de Lançamentos Contábeis:** Triggers no banco (`public.check_permite_lancamento`) rejeitam lançamentos em contas sintéticas. Somente contas analíticas (`permite_lancamento = true`) aceitam lançamentos.
 2. **Deleção Lógica vs Física:** O banco impede exclusão física (`DELETE`) de contas ou centros de custo com movimentação (`public.check_finance_usage`). Utilize desativação/inativação na interface.
 3. **Compartilhamento de Banco (Share Intent):** O `AndroidManifest.xml` registra o Intent Filter para `android.intent.action.SEND` capturar arquivos enviados de apps de bancos diretamente para o módulo de importação.
+4. **Sem Emuladores Locais Pesados:** Utilize o modo Web leve (`flutter run -d chrome`), o Test Mode do FlutterFlow ou a esteira do GitHub Actions para testar no dispositivo físico.
+
