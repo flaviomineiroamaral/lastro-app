@@ -95,7 +95,7 @@ Future<List<OfxTransactionStruct>> parsePdfFaturaRegex(
           }
 
           transacoes.add(OfxTransactionStruct(
-              date: isoDate,
+              date: DateTime.tryParse(isoDate),
               description: allDesc[i],
               amount: amount,
           ));
@@ -136,7 +136,7 @@ Future<List<OfxTransactionStruct>> parsePdfFaturaRegex(
             }
             
             transacoes.add(OfxTransactionStruct(
-                date: isoDate,
+                date: DateTime.tryParse(isoDate),
                 description: desc,
                 amount: amount,
             ));
@@ -189,7 +189,7 @@ Future<List<OfxTransactionStruct>> parsePdfFaturaRegex(
         }
         
         transacoes.add(OfxTransactionStruct(
-            date: isoDate,
+            date: DateTime.tryParse(isoDate),
             description: descriptions[i],
             amount: amount,
         ));
@@ -245,7 +245,7 @@ Future<List<OfxTransactionStruct>> parsePdfFaturaRegex(
         amount = -amount.abs();
         
         transacoes.add(OfxTransactionStruct(
-            date: isoDate,
+            date: DateTime.tryParse(isoDate),
             description: descriptions[i],
             amount: amount,
         ));
