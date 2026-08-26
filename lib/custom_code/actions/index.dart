@@ -84,3 +84,4 @@ export '/lastro/dashboard/action/get_projecao_titulos_retroativa.dart'
 export '/lastro/cr/actions/get_cr_sintetico_por_id.dart'
     show getCrSinteticoPorId;
 export '/lastro/dfc/action/gerar_csv_dfc.dart' show gerarCsvDfc;
+export '/lastro/importacao/action/parse_pdf_fatura_regex.dart' show parsePdfFaturaRegex;

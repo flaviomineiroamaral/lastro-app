@@ -114,7 +114,13 @@ class ShareIntentService {
           _isPdfBytes(bytes)) {
         debugPrint("ShareIntentService: Identificado como PDF");
         final textoBruto = await actions.extrairTextoPDF(uploadedFile);
-        if (textoBruto == "ERRO_IMAGEM") {
+        if (textoBruto == "ERRO_SENHA") {
+          debugPrint("ShareIntentService: PDF com senha detectado.");
+          ReceiveSharingIntent.instance.reset();
+          _exibirAvisoIncompativel(
+              "Este PDF possui senha. Por favor, importe-o diretamente pelo botão Importar no aplicativo para digitar a senha.");
+          return;
+        } else if (textoBruto == "ERRO_IMAGEM") {
           debugPrint("ShareIntentService: PDF escaneado/imagem detectado, chamando Gemini Visual...");
           final base64Pdf = await actions.pdfParaBase64(uploadedFile);
           final respostaVisual = await LerFaturaGeminiVisualCall.call(pdfBase64: base64Pdf);
@@ -127,18 +133,24 @@ class ShareIntentService {
           }
         } else if (textoBruto != "ERRO_VAZIO" &&
             textoBruto != "ERRO_PROCESSAMENTO") {
-          debugPrint("ShareIntentService: Texto PDF extraído (${textoBruto.length} caracteres), chamando Gemini Text...");
-          final resposta = await LerFaturaGeminiCall.call(textoFatura: textoBruto);
-          debugPrint("ShareIntentService: Status Code: ${resposta.statusCode}");
-          debugPrint("ShareIntentService: Body: ${resposta.jsonBody}");
-          if ((resposta.statusCode ?? 200) == 200 && (resposta.succeeded ?? true)) {
-            final jsonText = getJsonField(
-              (resposta.jsonBody ?? ''),
-              r'''$.candidates[0].content.parts[0].text''',
-            ).toString();
-            transacoes = jsonToOfx(jsonText);
+          debugPrint("ShareIntentService: Texto PDF extraído (${textoBruto.length} caracteres), chamando Regex Motor...");
+          transacoes = await actions.parsePdfFaturaRegex(textoBruto);
+          
+          if (transacoes.isEmpty) {
+            debugPrint("ShareIntentService: Regex retornou vazio. Chamando Fallback Gemini Text...");
+            final resposta = await LerFaturaGeminiCall.call(textoFatura: textoBruto);
+            debugPrint("ShareIntentService: Status Code: ${resposta.statusCode}");
+            if ((resposta.statusCode ?? 200) == 200 && (resposta.succeeded ?? true)) {
+              final jsonText = getJsonField(
+                (resposta.jsonBody ?? ''),
+                r'''$.candidates[0].content.parts[0].text''',
+              ).toString();
+              transacoes = jsonToOfx(jsonText);
+            } else {
+               debugPrint("ShareIntentService: Erro na API do Gemini.");
+            }
           } else {
-             debugPrint("ShareIntentService: Erro na API do Gemini.");
+            debugPrint("ShareIntentService: Regex identificou ${transacoes.length} transações localmente!");
           }
         }
       } else if (lowerName.endsWith('.csv') ||

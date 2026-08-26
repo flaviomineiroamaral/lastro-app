@@ -12,13 +12,13 @@ import 'package:flutter/material.dart';
 // Mantenha os imports padrões do FlutterFlow que já estão no topo e adicione este:
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
-Future<String> extrairTextoPDF(FFUploadedFile arquivoPdf) async {
+Future<String> extrairTextoPDF(FFUploadedFile arquivoPdf, [String? senha]) async {
   if (arquivoPdf.bytes == null || arquivoPdf.bytes!.isEmpty) {
     return "ERRO_VAZIO";
   }
 
   try {
-    final PdfDocument document = PdfDocument(inputBytes: arquivoPdf.bytes);
+    final PdfDocument document = PdfDocument(inputBytes: arquivoPdf.bytes, password: senha);
     String textoExtraido = PdfTextExtractor(document).extractText();
     document.dispose();
 
@@ -36,6 +36,11 @@ Future<String> extrairTextoPDF(FFUploadedFile arquivoPdf) async {
 
     return textoSeguro;
   } catch (e) {
+    if (e.toString().toLowerCase().contains('password') || 
+        e.toString().toLowerCase().contains('senha') ||
+        e.toString().toLowerCase().contains('encrypted')) {
+      return "ERRO_SENHA";
+    }
     return "ERRO_PROCESSAMENTO";
   }
 }
