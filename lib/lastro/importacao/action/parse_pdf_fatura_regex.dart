@@ -13,246 +13,266 @@ Future<List<OfxTransactionStruct>> parsePdfFaturaRegex(
     String textoFatura) async {
   List<OfxTransactionStruct> transacoes = [];
 
-  // Detecção de Banco e extração (exemplo inicial para ser refinado)
   final textoMaiusculo = textoFatura.toUpperCase();
 
-  if (textoMaiusculo.contains('NU PAGAMENTOS') || textoMaiusculo.contains('NUBANK')) {
-    debugPrint("Regex: Banco Nubank detectado");
-    // TODO: Implementar a regex específica para o Nubank
-    // RegExp regex = RegExp(r"(\d{2} [a-zA-Z]{3})\s+(.*?)\s+R\$ (\d+,\d{2})");
-    // ...
-  } else if (textoMaiusculo.contains('ITAÚ') || textoMaiusculo.contains('ITAU')) {
-    debugPrint("Regex: Banco Itaú detectado");
-    // TODO: Implementar a regex específica para o Itaú
+  if (textoMaiusculo.contains('NU PAGAMENTOS') ||
+      textoMaiusculo.contains('NUBANK')) {
+    debugPrint("Regex: Banco Nubank detectado - fallback para IA.");
+    // TODO: Implementar regex do Nubank
+  } else if (textoMaiusculo.contains('ITAÚ') ||
+      textoMaiusculo.contains('ITAU')) {
+    debugPrint("Regex: Banco Itaú detectado - fallback para IA.");
+    // TODO: Implementar regex do Itaú
   } else if (textoMaiusculo.contains('INTER')) {
+    // ----------------------------------------------------------------
+    // BANCO INTER
+    // Formato esperado de linha:
+    // "02 de abr. 2026 NOME DO ESTABELECIMENTO - R$ 58,30"
+    // ----------------------------------------------------------------
     debugPrint("Regex: Banco Inter detectado");
     try {
-      final RegExp dateRegex = RegExp(r'(\d{2}) de ([a-zA-Z]{3})\. (\d{4})');
-      final RegExp valueRegex = RegExp(r'(?:\+\s*)?R\$\s*([\d.,]+)');
-      
-      List<int> txCountPerCard = [];
-      var parts = textoFatura.split('Total CARTÃO');
-      for (int i = 0; i < parts.length - 1; i++) {
-        int count = dateRegex.allMatches(parts[i]).length;
-        int previousCount = txCountPerCard.fold(0, (a, b) => a + b);
-        txCountPerCard.add(count - previousCount);
-      }
+      // Nova Regex de linha inteira para o Banco Inter
+      // Removidos ^ e $ para permitir capturar mesmo que o PDF extrator
+      // coloque todas as transações na mesma linha (sem \n).
+      final RegExp lineRegex = RegExp(r'(\d{2} de [a-zA-Z]{3}\. \d{4})\s+(.*?)[-\s]+(\+?\s*R\$\s*[\d.,]+)');
 
-      List<Match> allDateMatches = dateRegex.allMatches(textoFatura).toList();
-      List<String> allValuesRaw = valueRegex.allMatches(textoFatura).map((m) => m.group(0)!.trim()).toList();
-      
-      List<String> allDesc = [];
-      final lines = textoFatura.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
-      for (var line in lines) {
-        if (!dateRegex.hasMatch(line) && !valueRegex.hasMatch(line) && 
-            !line.contains('Data') && !line.contains('Movimentação') && 
-            !line.contains('Beneficiário') && !line.contains('Valor') && 
-            !line.contains('Total') && !line.contains('Despesas') && 
-            !line.contains('CARTÃO') && !line.toLowerCase().contains('banco inter')) {
-          allDesc.add(line);
-        }
-      }
-
-      List<String> filteredValues = [];
-      int valueIndex = 0;
-      for (int count in txCountPerCard) {
-        for (int j = 0; j < count; j++) {
-          if (valueIndex < allValuesRaw.length) {
-             filteredValues.add(allValuesRaw[valueIndex]);
-          }
-          valueIndex++;
-        }
-        valueIndex++; // Pula o total
-      }
-
-      Map<String, String> months = {
-        'jan': '01', 'fev': '02', 'mar': '03', 'abr': '04', 
-        'mai': '05', 'jun': '06', 'jul': '07', 'ago': '08', 
+      final Map<String, String> months = {
+        'jan': '01', 'fev': '02', 'mar': '03', 'abr': '04',
+        'mai': '05', 'jun': '06', 'jul': '07', 'ago': '08',
         'set': '09', 'out': '10', 'nov': '11', 'dez': '12'
       };
 
-      int loopCount = allDateMatches.length;
-      if (allDesc.length < loopCount) loopCount = allDesc.length;
-      if (filteredValues.length < loopCount) loopCount = filteredValues.length;
+      // Usa allMatches no texto inteiro em vez de quebrar por linha
+      for (final match in lineRegex.allMatches(textoFatura)) {
+        String dateStr = match.group(1)!;
+        String desc = match.group(2)!.trim();
+        String valStr = match.group(3)!;
 
-      for(int i = 0; i < loopCount; i++) {
-          final m = allDateMatches[i];
-          String day = m.group(1)!;
-          String monthStr = m.group(2)!.toLowerCase();
-          String year = m.group(3)!;
-          String month = months[monthStr] ?? '01';
-          
-          String isoDate = '\$year-\$month-\${day}T00:00:00.000Z';
-          
-          String valStr = filteredValues[i];
-          bool isPositive = valStr.contains('+');
-          valStr = valStr.replaceAll(RegExp(r'[^\d,]'), '').replaceAll(',', '.');
-          double amount = double.tryParse(valStr) ?? 0.0;
-          if (!isPositive) {
-              amount = -amount; // Faturas normalmente mostram despesas (saída), vamos padronizar negativo para gasto
-          } else {
-              amount = amount.abs(); // Pagamentos ou estornos = positivo
+        // Remove hífen no final da descrição (Inter coloca " - " antes do valor)
+        if (desc.endsWith('-')) {
+            desc = desc.substring(0, desc.length - 1).trim();
           }
 
+          // Montar a data
+          final dateParts = dateStr.split(' ');
+          final String day = dateParts[0];
+          final String monthStr = dateParts[2].replaceAll('.', '').toLowerCase();
+          final String year = dateParts[3];
+          final String month = months[monthStr] ?? '01';
+          final String isoDate = '$year-$month-${day}T00:00:00.000Z';
+
+          // Montar o valor
+          final bool isPositive = valStr.contains('+');
+          valStr = valStr.replaceAll(RegExp(r'[^\d,]'), '').replaceAll(',', '.');
+          double amount = double.tryParse(valStr) ?? 0.0;
+          amount = isPositive ? amount.abs() : -amount.abs();
+
           transacoes.add(OfxTransactionStruct(
-              date: DateTime.tryParse(isoDate),
-              description: allDesc[i],
-              amount: amount,
+            date: DateTime.tryParse(isoDate),
+            description: desc,
+            amount: amount,
           ));
+        }
       }
-      debugPrint("Regex: \${transacoes.length} transações extraídas do Banco Inter.");
+      debugPrint("Regex: ${transacoes.length} transações extraídas do Banco Inter.");
     } catch (e) {
-      debugPrint("Regex: Erro ao parsear fatura do Banco Inter: \$e");
+      debugPrint("Regex: Erro ao parsear fatura do Banco Inter: $e");
     }
-  } else if (textoMaiusculo.contains('CAIXA') || textoMaiusculo.contains('Demonstrativo')) {
+  } else if (textoMaiusculo.contains('CAIXA') ||
+      textoMaiusculo.contains('DEMONSTRATIVO')) {
+    // ----------------------------------------------------------------
+    // CAIXA ECONÔMICA FEDERAL
+    // Formato esperado de linha:
+    // "10/07 BALCONY DELIVERY INHUMAS 149,49D"
+    // ----------------------------------------------------------------
     debugPrint("Regex: Banco Caixa detectado");
     try {
-      final RegExp lineRegex = RegExp(r'^(\d{2}/\d{2})\s+(.*?)\s+([\d.,]+)([DC])$');
-      final lines = textoFatura.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
-      
+      final RegExp lineRegex =
+          RegExp(r'^(\d{2}/\d{2})\s+(.*?)\s+([\d.,]+)([DC])$');
+      final lines = textoFatura
+          .split('\n')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+
       for (var line in lines) {
         final match = lineRegex.firstMatch(line);
         if (match != null) {
-          String date = match.group(1)!;
-          String desc = match.group(2)!;
+          final String date = match.group(1)!;
+          final String desc = match.group(2)!;
           String val = match.group(3)!;
-          String tipo = match.group(4)!;
-          
-          if (!desc.contains('TOTAL DA FATURA') && 
-              !desc.contains('PAGAMENTO') && 
+          final String tipo = match.group(4)!;
+
+          if (!desc.contains('TOTAL DA FATURA') &&
+              !desc.contains('PAGAMENTO') &&
               !desc.contains('AJUSTE CRED PARC')) {
-            
-            String day = date.split('/')[0];
-            String month = date.split('/')[1];
-            String year = DateTime.now().year.toString(); // Deduzir o ano atual (simplificação)
-            String isoDate = '\$year-\$month-\${day}T00:00:00.000Z';
-            
+            final String day = date.split('/')[0];
+            final String month = date.split('/')[1];
+            final String year = DateTime.now().year.toString();
+            final String isoDate = '$year-$month-${day}T00:00:00.000Z';
+
             val = val.replaceAll('.', '').replaceAll(',', '.');
             double amount = double.tryParse(val) ?? 0.0;
-            if (tipo == 'D') {
-              amount = -amount; // Débito = saída
-            } else {
-              amount = amount.abs(); // Crédito = entrada/estorno
-            }
-            
+            amount = (tipo == 'D') ? -amount.abs() : amount.abs();
+
             transacoes.add(OfxTransactionStruct(
-                date: DateTime.tryParse(isoDate),
-                description: desc,
-                amount: amount,
+              date: DateTime.tryParse(isoDate),
+              description: desc,
+              amount: amount,
             ));
           }
         }
       }
-      debugPrint("Regex: \${transacoes.length} transações extraídas da Caixa.");
+      debugPrint("Regex: ${transacoes.length} transações extraídas da Caixa.");
     } catch (e) {
-      debugPrint("Regex: Erro ao parsear fatura da Caixa: \$e");
+      debugPrint("Regex: Erro ao parsear fatura da Caixa: $e");
     }
   } else if (textoMaiusculo.contains('MERCADO PAGO')) {
+    // ----------------------------------------------------------------
+    // MERCADO PAGO
+    // ----------------------------------------------------------------
     debugPrint("Regex: Banco Mercado Pago detectado");
     try {
       final RegExp dateRegex = RegExp(r'^(\d{2}/\d{2})$', multiLine: true);
       final RegExp valueRegex = RegExp(r'(?:\+\s*)?R\$\s*([\d.,]+)');
-      
-      List<String> allDates = dateRegex.allMatches(textoFatura).map((m) => m.group(1)!.trim()).toList();
-      List<String> allValuesRaw = valueRegex.allMatches(textoFatura).map((m) => m.group(0)!.trim()).toList();
-      
-      int N = allDates.length;
-      List<String> filteredValues = allValuesRaw.sublist(0, N);
-      
-      List<String> allDesc = [];
-      final lines = textoFatura.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
-      for (var line in lines) {
-        if (!dateRegex.hasMatch(line) && !valueRegex.hasMatch(line) && 
-            !line.contains('Data') && !line.contains('Movimentações') && 
-            !line.contains('Valor') && !line.contains('Total') && 
-            !line.contains('Cartão') && !line.toLowerCase().contains('banco mercado pago')) {
-          allDesc.add(line);
+
+      final List<String> allDates = dateRegex
+          .allMatches(textoFatura)
+          .map((m) => m.group(1)!.trim())
+          .toList();
+      final List<String> allValuesRaw = valueRegex
+          .allMatches(textoFatura)
+          .map((m) => m.group(0)!.trim())
+          .toList();
+
+      final int N = allDates.length;
+      if (N == 0 || allValuesRaw.length < N) {
+        debugPrint("Regex: Mercado Pago - dados insuficientes, fallback IA.");
+      } else {
+        final List<String> filteredValues = allValuesRaw.sublist(0, N);
+
+        final List<String> allDesc = [];
+        final lines = textoFatura
+            .split('\n')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+        for (var line in lines) {
+          if (!dateRegex.hasMatch(line) &&
+              !valueRegex.hasMatch(line) &&
+              !line.contains('Data') &&
+              !line.contains('Movimentações') &&
+              !line.contains('Valor') &&
+              !line.contains('Total') &&
+              !line.contains('Cartão') &&
+              !line.toLowerCase().contains('mercado pago')) {
+            allDesc.add(line);
+          }
         }
-      }
-      
-      List<String> descriptions = allDesc.sublist(0, N);
-      
-      for (int i = 0; i < N; i++) {
-        String day = allDates[i].split('/')[0];
-        String month = allDates[i].split('/')[1];
-        String year = DateTime.now().year.toString();
-        String isoDate = '\$year-\$month-\${day}T00:00:00.000Z';
-        
-        String valStr = filteredValues[i];
-        bool isPositive = valStr.contains('+');
-        valStr = valStr.replaceAll(RegExp(r'[^\d,]'), '').replaceAll(',', '.');
-        double amount = double.tryParse(valStr) ?? 0.0;
-        if (!isPositive) {
-            amount = -amount; 
+
+        if (allDesc.length < N) {
+          debugPrint("Regex: Mercado Pago - descrições insuficientes, fallback IA.");
         } else {
-            amount = amount.abs(); 
+          final List<String> descriptions = allDesc.sublist(0, N);
+
+          for (int i = 0; i < N; i++) {
+            final String day = allDates[i].split('/')[0];
+            final String month = allDates[i].split('/')[1];
+            final String year = DateTime.now().year.toString();
+            final String isoDate = '$year-$month-${day}T00:00:00.000Z';
+
+            String valStr = filteredValues[i];
+            final bool isPositive = valStr.contains('+');
+            valStr = valStr.replaceAll(RegExp(r'[^\d,]'), '').replaceAll(',', '.');
+            double amount = double.tryParse(valStr) ?? 0.0;
+            amount = isPositive ? amount.abs() : -amount.abs();
+
+            transacoes.add(OfxTransactionStruct(
+              date: DateTime.tryParse(isoDate),
+              description: descriptions[i],
+              amount: amount,
+            ));
+          }
         }
-        
-        transacoes.add(OfxTransactionStruct(
-            date: DateTime.tryParse(isoDate),
-            description: descriptions[i],
-            amount: amount,
-        ));
       }
-      debugPrint("Regex: \${transacoes.length} transações extraídas do Mercado Pago.");
+      debugPrint("Regex: ${transacoes.length} transações extraídas do Mercado Pago.");
     } catch (e) {
-      debugPrint("Regex: Erro ao parsear fatura do Mercado Pago: \$e");
+      debugPrint("Regex: Erro ao parsear fatura do Mercado Pago: $e");
     }
   } else if (textoMaiusculo.contains('CORA')) {
+    // ----------------------------------------------------------------
+    // BANCO CORA
+    // ----------------------------------------------------------------
     debugPrint("Regex: Banco Cora detectado");
     try {
-      final RegExp dateRegex = RegExp(r'^(\d{2}/\d{2}/\d{4})$', multiLine: true);
+      final RegExp dateRegex =
+          RegExp(r'^(\d{2}/\d{2}/\d{4})$', multiLine: true);
       final RegExp valueRegex = RegExp(r'^-?([\d.,]+)$', multiLine: true);
-      
-      List<String> allDates = dateRegex.allMatches(textoFatura).map((m) => m.group(1)!.trim()).toList();
-      
-      List<String> allValuesRaw = [];
-      final lines = textoFatura.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+
+      final List<String> allDates = dateRegex
+          .allMatches(textoFatura)
+          .map((m) => m.group(1)!.trim())
+          .toList();
+
+      final List<String> allValuesRaw = [];
+      final lines = textoFatura
+          .split('\n')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
       for (var line in lines) {
-         if (valueRegex.hasMatch(line) && !dateRegex.hasMatch(line)) {
-            allValuesRaw.add(line);
-         }
-      }
-      
-      int N = allDates.length;
-      List<String> filteredValues = allValuesRaw.sublist(0, N);
-      
-      List<String> allDesc = [];
-      for (var line in lines) {
-        if (!dateRegex.hasMatch(line) && !valueRegex.hasMatch(line) && 
-            !line.contains('Data') && !line.contains('Descrição') && 
-            !line.contains('Valores') && !line.contains('Total') && 
-            !line.toLowerCase().contains('banco cora')) {
-          allDesc.add(line);
+        if (valueRegex.hasMatch(line) && !dateRegex.hasMatch(line)) {
+          allValuesRaw.add(line);
         }
       }
-      
-      List<String> descriptions = allDesc.sublist(0, N);
-      
-      for (int i = 0; i < N; i++) {
-        String day = allDates[i].split('/')[0];
-        String month = allDates[i].split('/')[1];
-        String year = allDates[i].split('/')[2];
-        String isoDate = '\$year-\$month-\${day}T00:00:00.000Z';
-        
-        String valStr = filteredValues[i];
-        bool isPositive = !valStr.contains('-'); // Se não tiver -, é despesa? Cora geralmente mostra tudo positivo. Assumiremos despesa como negativo.
-        // Faturas Cora geralmente mostram valor positivo para compras.
-        valStr = valStr.replaceAll(RegExp(r'[^\d,]'), '').replaceAll(',', '.');
-        double amount = double.tryParse(valStr) ?? 0.0;
-        
-        // Em faturas, gastos normalmente são lançados para pagar, então transformamos em negativo
-        amount = -amount.abs();
-        
-        transacoes.add(OfxTransactionStruct(
-            date: DateTime.tryParse(isoDate),
-            description: descriptions[i],
-            amount: amount,
-        ));
+
+      final int N = allDates.length;
+      if (N == 0 || allValuesRaw.length < N) {
+        debugPrint("Regex: Cora - dados insuficientes, fallback IA.");
+      } else {
+        final List<String> filteredValues = allValuesRaw.sublist(0, N);
+
+        final List<String> allDesc = [];
+        for (var line in lines) {
+          if (!dateRegex.hasMatch(line) &&
+              !valueRegex.hasMatch(line) &&
+              !line.contains('Data') &&
+              !line.contains('Descrição') &&
+              !line.contains('Valores') &&
+              !line.contains('Total') &&
+              !line.toLowerCase().contains('cora')) {
+            allDesc.add(line);
+          }
+        }
+
+        if (allDesc.length < N) {
+          debugPrint("Regex: Cora - descrições insuficientes, fallback IA.");
+        } else {
+          final List<String> descriptions = allDesc.sublist(0, N);
+
+          for (int i = 0; i < N; i++) {
+            final String day = allDates[i].split('/')[0];
+            final String month = allDates[i].split('/')[1];
+            final String year = allDates[i].split('/')[2];
+            final String isoDate = '$year-$month-${day}T00:00:00.000Z';
+
+            String valStr = filteredValues[i];
+            valStr = valStr.replaceAll(RegExp(r'[^\d,]'), '').replaceAll(',', '.');
+            double amount = double.tryParse(valStr) ?? 0.0;
+            // Faturas Cora mostram valores positivos - gastos devem ser negativos
+            amount = -amount.abs();
+
+            transacoes.add(OfxTransactionStruct(
+              date: DateTime.tryParse(isoDate),
+              description: descriptions[i],
+              amount: amount,
+            ));
+          }
+        }
       }
-      debugPrint("Regex: \${transacoes.length} transações extraídas do Banco Cora.");
+      debugPrint("Regex: ${transacoes.length} transações extraídas do Banco Cora.");
     } catch (e) {
-      debugPrint("Regex: Erro ao parsear fatura do Banco Cora: \$e");
+      debugPrint("Regex: Erro ao parsear fatura do Banco Cora: $e");
     }
   } else {
     debugPrint("Regex: Banco não reconhecido. Fazendo fallback para IA.");
