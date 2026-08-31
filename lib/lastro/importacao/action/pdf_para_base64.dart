@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
-Future<String> pdfParaBase64(FFUploadedFile arquivoPdf, String? senha) async {
+Future<String> pdfParaBase64(FFUploadedFile arquivoPdf, [String? senha]) async {
   if (arquivoPdf.bytes == null || arquivoPdf.bytes!.isEmpty) {
     return "";
   }

@@ -73,7 +73,6 @@ Future<List<OfxTransactionStruct>> parsePdfFaturaRegex(
             amount: amount,
           ));
         }
-      }
       debugPrint("Regex: ${transacoes.length} transações extraídas do Banco Inter.");
     } catch (e) {
       debugPrint("Regex: Erro ao parsear fatura do Banco Inter: $e");
