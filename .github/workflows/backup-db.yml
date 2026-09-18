@@ -19,6 +19,10 @@ on:
         options:
           - Toda a Estrutura (Tabelas, Functions, Triggers, etc)
           - Apenas os Dados (Registros)
+      table:
+        description: 'Tabela específica (Opcional - deixe em branco para baixar todas)'
+        required: false
+        default: ''
 
 jobs:
   gerar_dump:
@@ -44,8 +48,14 @@ jobs:
       - name: Gerar Dump (Apenas Dados)
         if: ${{ github.event.inputs.type == 'Apenas os Dados (Registros)' }}
         run: |
-          echo "Baixando todos os registros do banco..."
-          supabase db dump --data-only --db-url "${{ env.DB_URL }}" -f ${{ env.NOME_ARQUIVO }}_Dados.sql
+          echo "Baixando registros do banco..."
+          if [ -z "${{ github.event.inputs.table }}" ]; then
+            supabase db dump --data-only --db-url "${{ env.DB_URL }}" -f ${{ env.NOME_ARQUIVO }}_Dados.sql
+          else
+            echo "Filtrando apenas a tabela: ${{ github.event.inputs.table }}"
+            # O ubuntu-latest do GitHub já possui o pg_dump instalado por padrão
+            pg_dump --data-only --column-inserts -t "public.${{ github.event.inputs.table }}" "${{ env.DB_URL }}" > ${{ env.NOME_ARQUIVO }}_${{ github.event.inputs.table }}.sql
+          fi
 
       - name: Gerar Dump (Apenas Estrutura)
         if: ${{ github.event.inputs.type == 'Toda a Estrutura (Tabelas, Functions, Triggers, etc)' }}
