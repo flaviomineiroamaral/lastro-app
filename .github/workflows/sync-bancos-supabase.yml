@@ -1,0 +1,38 @@
+name: Sync Banco Supabase (Homologacao -> Financas)
+
+on:
+  workflow_dispatch: # Adiciona um botão no GitHub para rodar manualmente
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Instalar Supabase CLI no servidor do GitHub
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Extrair Arquivo de Migração (Sem pesar sua máquina)
+        run: |
+          supabase db pull --db-url "${{ secrets.DB_URL_HOMOLOGACAO }}"
+          
+      - name: Salvar e Enviar Código
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add supabase/migrations/
+          
+          # Verifica se o Supabase CLI gerou algum arquivo novo
+          if git diff-index --quiet HEAD; then
+            echo "O banco já está sincronizado. Nenhuma alteração detectada."
+          else
+            git commit -m "chore(db): Sincronizando tabelas do homologacao via Action"
+            git push
+          fi
