@@ -1,0 +1,61 @@
+name: 💾 Gerar Backup do Banco (Dump)
+
+on:
+  workflow_dispatch:
+    inputs:
+      database:
+        description: 'Qual banco de dados?'
+        required: true
+        default: 'Produção (lastro-financas)'
+        type: choice
+        options:
+          - Produção (lastro-financas)
+          - Homologação (lastro-homologacao)
+      type:
+        description: 'O que você quer no backup?'
+        required: true
+        default: 'Apenas Dados (Registros)'
+        type: choice
+        options:
+          - Apenas Dados (Registros)
+          - Apenas Estrutura (Tabelas e Colunas)
+
+jobs:
+  gerar_dump:
+    name: Extraindo Backup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configurar URL do Banco
+        run: |
+          if [ "${{ github.event.inputs.database }}" == "Produção (lastro-financas)" ]; then
+            echo "DB_URL=${{ secrets.PROD_DB_URL }}" >> $GITHUB_ENV
+            echo "NOME_ARQUIVO=Backup_Producao" >> $GITHUB_ENV
+          else
+            echo "DB_URL=${{ secrets.STAGING_DB_URL }}" >> $GITHUB_ENV
+            echo "NOME_ARQUIVO=Backup_Homologacao" >> $GITHUB_ENV
+          fi
+
+      - name: Instalar Supabase CLI no servidor
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Gerar Dump (Apenas Dados)
+        if: ${{ github.event.inputs.type == 'Apenas Dados (Registros)' }}
+        run: |
+          echo "Baixando todos os registros do banco..."
+          supabase db dump --data-only --db-url "${{ env.DB_URL }}" -f ${{ env.NOME_ARQUIVO }}_Dados.sql
+
+      - name: Gerar Dump (Apenas Estrutura)
+        if: ${{ github.event.inputs.type == 'Apenas Estrutura (Tabelas e Colunas)' }}
+        run: |
+          echo "Baixando a estrutura das tabelas..."
+          supabase db dump --db-url "${{ env.DB_URL }}" -f ${{ env.NOME_ARQUIVO }}_Estrutura.sql
+
+      - name: Disponibilizar para Download
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NOME_ARQUIVO }}
+          path: "*.sql"
+          retention-days: 7
