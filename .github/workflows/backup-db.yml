@@ -14,11 +14,11 @@ on:
       type:
         description: 'O que você quer no backup?'
         required: true
-        default: 'Apenas Dados (Registros)'
+        default: 'Toda a Estrutura (Tabelas, Functions, Triggers, etc)'
         type: choice
         options:
-          - Apenas Dados (Registros)
-          - Apenas Estrutura (Tabelas e Colunas)
+          - Toda a Estrutura (Tabelas, Functions, Triggers, etc)
+          - Apenas os Dados (Registros)
 
 jobs:
   gerar_dump:
@@ -42,13 +42,13 @@ jobs:
           version: latest
 
       - name: Gerar Dump (Apenas Dados)
-        if: ${{ github.event.inputs.type == 'Apenas Dados (Registros)' }}
+        if: ${{ github.event.inputs.type == 'Apenas os Dados (Registros)' }}
         run: |
           echo "Baixando todos os registros do banco..."
           supabase db dump --data-only --db-url "${{ env.DB_URL }}" -f ${{ env.NOME_ARQUIVO }}_Dados.sql
 
       - name: Gerar Dump (Apenas Estrutura)
-        if: ${{ github.event.inputs.type == 'Apenas Estrutura (Tabelas e Colunas)' }}
+        if: ${{ github.event.inputs.type == 'Toda a Estrutura (Tabelas, Functions, Triggers, etc)' }}
         run: |
           echo "Baixando a estrutura das tabelas..."
           supabase db dump --db-url "${{ env.DB_URL }}" -f ${{ env.NOME_ARQUIVO }}_Estrutura.sql
