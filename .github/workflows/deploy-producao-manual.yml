@@ -1,4 +1,4 @@
-name: 🚀 ATUALIZAR PRODUCAO (lastro-financas)
+name: "Passo 2: 🚀 Aplicar GitHub na Produção (Finanças)"
 
 on:
   workflow_dispatch: # Botão manual no GitHub Actions

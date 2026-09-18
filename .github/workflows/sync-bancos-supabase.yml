@@ -1,4 +1,4 @@
-name: Sync Banco Supabase (Homologacao -> Financas)
+name: "Passo 1: 📦 Extrair Homologação para GitHub"
 
 on:
   workflow_dispatch: # Adiciona um botão no GitHub para rodar manualmente

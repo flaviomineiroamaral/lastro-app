@@ -51,3 +51,4 @@ jobs:
           name: lastro-apk-${{ inputs.build_mode || 'debug' }}
           path: build/app/outputs/flutter-apk/*.apk
           if-no-files-found: error
+          retention-days: 1
