@@ -20,7 +20,7 @@ jobs:
 
       - name: Extrair Arquivo de Migração (Sem pesar sua máquina)
         run: |
-          supabase db pull --db-url "${{ secrets.DB_URL_HOMOLOGACAO }}"
+          supabase db pull --db-url "${{ secrets.STAGING_DB_URL }}"
           
       - name: Salvar e Enviar Código
         run: |
