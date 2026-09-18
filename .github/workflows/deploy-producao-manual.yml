@@ -1,0 +1,23 @@
+name: 🚀 ATUALIZAR PRODUCAO (lastro-financas)
+
+on:
+  workflow_dispatch: # Botão manual no GitHub Actions
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Baixar código do repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar Supabase CLI no servidor
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Injetar Atualizações no Banco Oficial
+        run: |
+          echo "Conectando no lastro-financas..."
+          supabase db push --db-url "${{ secrets.PROD_DB_URL }}"
+          echo "✅ Banco Oficial atualizado com sucesso!"
