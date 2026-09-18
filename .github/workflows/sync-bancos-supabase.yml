@@ -26,6 +26,7 @@ jobs:
           supabase migration repair --status reverted 20260803000001 --db-url "${{ secrets.STAGING_DB_URL }}" || true
           supabase migration repair --status reverted 20260804113843 --db-url "${{ secrets.STAGING_DB_URL }}" || true
           supabase migration repair --status reverted 20260805004920 --db-url "${{ secrets.STAGING_DB_URL }}" || true
+          supabase migration repair --status reverted 20260918180702 --db-url "${{ secrets.STAGING_DB_URL }}" || true
 
       - name: Extrair Arquivo de Migração (Sem pesar sua máquina)
         run: |
