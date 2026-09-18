@@ -18,6 +18,10 @@ jobs:
 
       - name: Injetar Atualizações no Banco Oficial
         run: |
-          echo "Conectando no lastro-financas..."
+          echo "Sincronizando histórico inicial (Baseline)..."
+          supabase migration repair --status applied 20260918181341 --db-url "${{ secrets.PROD_DB_URL }}" || true
+          supabase migration repair --status applied 20260918184209 --db-url "${{ secrets.PROD_DB_URL }}" || true
+          
+          echo "Conectando no lastro-financas e enviando mudanças novas..."
           supabase db push --db-url "${{ secrets.PROD_DB_URL }}"
           echo "✅ Banco Oficial atualizado com sucesso!"
