@@ -1,4 +1,4 @@
-name: Flutter Cloud Build (Android)
+name: 📱 Gerar Aplicativo Android (APK)
 
 on:
   push:
@@ -39,16 +39,19 @@ jobs:
       - name: Instalar Dependencias
         run: flutter pub get
 
-      - name: Compilar APK Android
+      - name: Compilar APK Android e Renomear
         run: |
           BUILD_MODE="${{ inputs.build_mode || 'debug' }}"
           echo "Compilando em modo: $BUILD_MODE"
           flutter build apk --$BUILD_MODE
+          
+          echo "Renomeando o arquivo gerado para Lastro.apk..."
+          mv build/app/outputs/flutter-apk/app-$BUILD_MODE.apk build/app/outputs/flutter-apk/Lastro.apk
 
       - name: Disponibilizar APK para Download
         uses: actions/upload-artifact@v4
         with:
-          name: lastro-apk-${{ inputs.build_mode || 'debug' }}
-          path: build/app/outputs/flutter-apk/*.apk
+          name: Lastro-App-${{ inputs.build_mode || 'debug' }}
+          path: build/app/outputs/flutter-apk/Lastro.apk
           if-no-files-found: error
           retention-days: 1
