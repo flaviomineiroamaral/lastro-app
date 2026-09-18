@@ -18,6 +18,15 @@ jobs:
         with:
           version: latest
 
+      - name: Corrigir Historico Fantasma do Banco
+        run: |
+          echo "Limpando historico de arquivos deletados..."
+          supabase migration repair --status reverted 20260721121500 --db-url "${{ secrets.STAGING_DB_URL }}" || true
+          supabase migration repair --status reverted 20260803000000 --db-url "${{ secrets.STAGING_DB_URL }}" || true
+          supabase migration repair --status reverted 20260803000001 --db-url "${{ secrets.STAGING_DB_URL }}" || true
+          supabase migration repair --status reverted 20260804113843 --db-url "${{ secrets.STAGING_DB_URL }}" || true
+          supabase migration repair --status reverted 20260805004920 --db-url "${{ secrets.STAGING_DB_URL }}" || true
+
       - name: Extrair Arquivo de Migração (Sem pesar sua máquina)
         run: |
           supabase db pull --db-url "${{ secrets.STAGING_DB_URL }}"
