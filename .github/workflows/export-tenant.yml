@@ -1,0 +1,69 @@
+name: 🏢 Extrair Dados de uma Empresa (CSV)
+
+on:
+  workflow_dispatch:
+    inputs:
+      database:
+        description: 'Qual banco de dados?'
+        required: true
+        default: 'Produção (lastro-financas)'
+        type: choice
+        options:
+          - Produção (lastro-financas)
+          - Homologação (lastro-homologacao)
+      organization_id:
+        description: 'ID da Organização (Deixe em branco para baixar TODAS as empresas)'
+        required: false
+        default: ''
+
+jobs:
+  export_csv:
+    name: Gerando Planilhas
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configurar Banco e Instalar Ferramentas
+        run: |
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          if [ "${{ github.event.inputs.database }}" == "Produção (lastro-financas)" ]; then
+            echo "DB_URL=${{ secrets.PROD_DB_URL }}" >> $GITHUB_ENV
+            echo "NOME_ARQUIVO=Dados_Empresa_Producao" >> $GITHUB_ENV
+          else
+            echo "DB_URL=${{ secrets.STAGING_DB_URL }}" >> $GITHUB_ENV
+            echo "NOME_ARQUIVO=Dados_Empresa_Homologacao" >> $GITHUB_ENV
+          fi
+
+      - name: Extrair Dados para CSV
+        run: |
+          ORG_ID="${{ github.event.inputs.organization_id }}"
+          mkdir export_csvs
+          
+          # Pega todas as tabelas do schema public
+          TABLES=$(psql "$DB_URL" -t -A -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public';")
+          
+          for TABLE in $TABLES; do
+            echo "====================================="
+            echo "Processando tabela: $TABLE"
+            
+            # Verifica se a tabela possui a coluna organization_id
+            HAS_COL=$(psql "$DB_URL" -t -A -c "SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='$TABLE' AND column_name='organization_id';")
+            
+            if [ "$HAS_COL" -eq "1" ] && [ -n "$ORG_ID" ]; then
+              echo "✅ Coluna encontrada. Filtrando pela empresa: $ORG_ID"
+              psql "$DB_URL" -c "\copy (SELECT * FROM \"public\".\"$TABLE\" WHERE organization_id = '$ORG_ID') TO 'export_csvs/$TABLE.csv' CSV HEADER;"
+            else
+              if [ -n "$ORG_ID" ]; then
+                echo "⚠️ Coluna 'organization_id' não existe nesta tabela. Baixando a tabela completa..."
+              else
+                echo "📥 Baixando tabela completa (Nenhum filtro de empresa foi informado)..."
+              fi
+              psql "$DB_URL" -c "\copy \"public\".\"$TABLE\" TO 'export_csvs/$TABLE.csv' CSV HEADER;"
+            fi
+          done
+
+      - name: Disponibilizar Planilhas para Download
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NOME_ARQUIVO }}
+          path: export_csvs/*.csv
+          retention-days: 7
