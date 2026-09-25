@@ -267,16 +267,9 @@ Future gerarPdfDashboardGeral(
                   child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.end,
                       children: [
-                        pw.Text('Bens/Ativos: ${currencyFormatter.format(st.toMap().containsKey('totalAtivos') ? st.toMap()['totalAtivos'] : 0.0)}',
-                            style: const pw.TextStyle(
-                                fontSize: 8, color: PdfColors.grey700)),
-                        pw.Text('(-) Dívidas: ${currencyFormatter.format(st.toMap().containsKey('totalPassivos') ? st.toMap()['totalPassivos'] : 0.0)}',
-                            style: const pw.TextStyle(
-                                fontSize: 8, color: PdfColors.grey700)),
-                        pw.SizedBox(height: 10),
                         pw.Text('Capital Líquido',
                             style: const pw.TextStyle(
-                                fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.black)),
+                                fontSize: 8, color: PdfColors.grey700)),
                         pw.Text(currencyFormatter.format(st.resumoAtivoPassivo),
                             style: pw.TextStyle(
                                 fontSize: 14,
@@ -347,24 +340,9 @@ Future gerarPdfDashboardGeral(
                         currencyFormatter.format(dtDre.totalReceitas),
                         PdfColors.black),
                     _buildLinhaResumo(
-                        'Custo Operacional',
-                        currencyFormatter.format(dtDre.toMap().containsKey('somaDespesasOperacionais') ? dtDre.toMap()['somaDespesasOperacionais'] : dtDre.totalDespesas),
+                        'Despesas',
+                        currencyFormatter.format(dtDre.totalDespesas),
                         PdfColors.black),
-                    if (dtDre.toMap().containsKey('resultadoOperacional')) ...[
-                      pw.Divider(color: PdfColors.grey300, thickness: 0.5),
-                      _buildLinhaResumo(
-                          'Res. Operacional',
-                          currencyFormatter.format(dtDre.toMap()['resultadoOperacional']),
-                          PdfColors.black,
-                          isBold: true),
-                    ],
-                    if (dtDre.toMap().containsKey('somaDespesasFinanceiras') && (dtDre.toMap()['somaDespesasFinanceiras'] as num) > 0) ...[
-                      pw.SizedBox(height: 4),
-                      _buildLinhaResumo(
-                          '(-) Custo Fin. (Juros)',
-                          currencyFormatter.format(dtDre.toMap()['somaDespesasFinanceiras']),
-                          corDebito),
-                    ],
                     pw.Divider(color: PdfColors.grey300, thickness: 0.5),
                     _buildLinhaResumo(
                         'Resultado Líquido',
@@ -642,14 +620,12 @@ Future gerarPdfDashboardGeral(
             },
             data: contasCartao.map((conta) {
               double limiteIndividual = 0.0;
-              double limiteTotal = 0.0;
               if (alt.listaCartoes.isNotEmpty) {
                 try {
                   final cartaoDetalhe = alt.listaCartoes.firstWhere((c) =>
                       c.nome.toLowerCase().trim() ==
                       (conta.nomeConta ?? '').toLowerCase().trim());
                   limiteIndividual = cartaoDetalhe.limiteRestante;
-                  limiteTotal = cartaoDetalhe.toMap().containsKey('limiteTotal') ? (cartaoDetalhe.toMap()['limiteTotal'] as num).toDouble() : 0.0;
                 } catch (e) {
                   debugPrint('Cartão não encontrado: ${conta.nomeConta}');
                 }
@@ -657,7 +633,7 @@ Future gerarPdfDashboardGeral(
 
               return [
                 conta.nomeConta,
-                '${currencyFormatter.format(limiteTotal)}\n${currencyFormatter.format(limiteIndividual)}',
+                currencyFormatter.format(limiteIndividual),
                 currencyFormatter.format(conta.totalSaidas),
                 currencyFormatter.format(conta.totalEntradas),
                 currencyFormatter.format(conta.saldoAtual),
