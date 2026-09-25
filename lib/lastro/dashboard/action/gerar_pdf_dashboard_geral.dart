@@ -6,6 +6,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/custom_code/actions/index.dart'; // Imports other custom actions
 import '/flutter_flow/custom_functions.dart'; // Imports custom functions
 import 'package:flutter/material.dart';
+import '/app_state.dart';
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -44,6 +45,10 @@ Future gerarPdfDashboardGeral(
   final corAlerta = PdfColors.orange700;
   final corCinzaFundo = PdfColors.grey100;
 
+  final agora = DateTime.now();
+  final dInicio = dataInicio ?? DateTime(agora.year, agora.month, 1);
+  final dFim = dataFim ?? DateTime(agora.year, agora.month + 1, 0);
+
   final String instituicao =
       (nomeInstituicao == null || nomeInstituicao.trim().isEmpty)
           ? 'DASHBOARD CONSOLIDADO'
@@ -70,7 +75,40 @@ Future gerarPdfDashboardGeral(
   final pr = pagarReceber ?? DTResumoContasAPagarReceberStruct();
   final scr = saudeCR ?? DTResumoSaudeCRStruct();
   final alt = alertas ?? DTAlertasResumoStruct();
-  final listaContas = saldosContas ?? [];
+  
+  List<DTSaldoContaStruct> listaContas = saldosContas ?? [];
+
+  // ==========================================
+  // INJEÇÃO: BUSCAR SALDOS EXATOS DO PERÍODO
+  // ==========================================
+  try {
+    String orgId = FFAppState().currentOrganizationId;
+    if (orgId.isNotEmpty) {
+      final res = await SupaFlow.client.rpc(
+        'obter_saldos_contas_por_periodo',
+        params: {
+          'p_org_id': orgId,
+          'p_data_inicio': dInicio.toIso8601String(),
+          'p_data_fim': dFim.toIso8601String()
+        }
+      );
+      if (res != null && res is List) {
+        listaContas = res.map((e) => DTSaldoContaStruct(
+          contaId: e['conta_id']?.toString(),
+          nomeConta: e['nome_conta']?.toString(),
+          tipoConta: e['tipo_conta']?.toString(),
+          saldoInicial: e['saldo_inicial'] != null ? double.tryParse(e['saldo_inicial'].toString()) : 0.0,
+          totalEntradas: e['total_entradas'] != null ? double.tryParse(e['total_entradas'].toString()) : 0.0,
+          totalSaidas: e['total_saidas'] != null ? double.tryParse(e['total_saidas'].toString()) : 0.0,
+          saldoAtual: e['saldo_atual'] != null ? double.tryParse(e['saldo_atual'].toString()) : 0.0,
+          diaFechamento: e['dia_fechamento'] != null ? int.tryParse(e['dia_fechamento'].toString()) : null,
+          diaVencimento: e['dia_vencimento'] != null ? int.tryParse(e['dia_vencimento'].toString()) : null,
+        )).toList();
+      }
+    }
+  } catch (e) {
+    debugPrint('Erro ao buscar saldos_contas_por_periodo no PDF: $e');
+  }
 
   final contasBancarias = listaContas
       .where((c) =>
@@ -85,9 +123,6 @@ Future gerarPdfDashboardGeral(
           (c.tipoConta ?? '').toUpperCase() == 'CARTÃO')
       .toList();
 
-  final dInicio = dataInicio ?? DateTime.now();
-  final dFim = dataFim ?? DateTime.now();
-  final agora = DateTime.now();
   final dataHojeStr = dataCurtaFormatter.format(agora);
   final periodoStr =
       'Período: ${dataCurtaFormatter.format(dInicio)} a ${dataCurtaFormatter.format(dFim)}';
