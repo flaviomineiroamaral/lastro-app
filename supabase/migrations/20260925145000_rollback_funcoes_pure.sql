@@ -1,4 +1,4 @@
-﻿DROP FUNCTION IF EXISTS public.fn_resumo_saude_cr;
+DROP FUNCTION IF EXISTS public.fn_resumo_saude_cr;
 CREATE OR REPLACE FUNCTION public.fn_resumo_saude_cr (
   p_org_id      uuid,
   p_data_inicio date,
@@ -14,8 +14,6 @@ CREATE OR REPLACE FUNCTION public.fn_resumo_saude_cr (
 DECLARE
     v_inicio_ano_contabil date;
 BEGIN
-    -- Determina o início do ano contábil com base na data de início solicitada
-    -- Ex: Se p_data_inicio for '2026-05-01', v_inicio_ano_contabil será '2026-01-01'
     v_inicio_ano_contabil := DATE_TRUNC('year', p_data_inicio)::date;
 
     RETURN QUERY
@@ -29,11 +27,7 @@ BEGIN
         WHERE cc.organization_id = p_org_id 
           AND cc.ativo = true
           AND t.status = 'CONCILIADO'
-          
-          -- O limite final é sempre o mesmo para todos (o último dia do período)
           AND t.data_pagamento < ((p_data_fim + INTERVAL '1 day') AT TIME ZONE 'America/Sao_Paulo')
-          
-          -- A MÁGICA TEMPORAL: Bifurcação do limite inicial
           AND (
               (cc.permite_acumulo = false AND t.data_pagamento >= (p_data_inicio AT TIME ZONE 'America/Sao_Paulo'))
               OR 
@@ -48,6 +42,7 @@ BEGIN
     FROM SaldosCR;
 END;
 $function$;
+
 
 DROP FUNCTION IF EXISTS public.fn_resumo_contas_pagar_receber;
 CREATE OR REPLACE FUNCTION public.fn_resumo_contas_pagar_receber (
@@ -67,53 +62,23 @@ CREATE OR REPLACE FUNCTION public.fn_resumo_contas_pagar_receber (
   SECURITY DEFINER
   AS $function$
 BEGIN
-    -- 1. Validação de Segurança Blindada
     IF NOT public.check_user_in_org(p_org_id) THEN
         RAISE EXCEPTION 'Acesso negado: Usuário não autorizado para esta organização.';
     END IF;
 
-    -- 2. Agregação Direta com Index Seek e Null Safety
     RETURN QUERY
-    SELECT
+    SELECT 
         -- CONTAS A PAGAR
-        COALESCE(SUM(valor) FILTER (
-            WHERE tipo_operacao IN ('DEBITO', 'DÉBITO')
-        ), 0)::numeric AS total_pagar,
+        COALESCE(SUM(valor) FILTER (WHERE tipo_operacao IN ('DEBITO', 'DÉBITO')), 0)::numeric AS total_pagar,
+        COALESCE(SUM(valor) FILTER (WHERE tipo_operacao IN ('DEBITO', 'DÉBITO') AND data_vencimento::date < CURRENT_DATE), 0)::numeric AS total_pagar_atrasado,
+        COALESCE(SUM(valor) FILTER (WHERE tipo_operacao IN ('DEBITO', 'DÉBITO') AND data_vencimento::date = CURRENT_DATE), 0)::numeric AS total_pagar_hoje,
+        COALESCE(SUM(valor) FILTER (WHERE tipo_operacao IN ('DEBITO', 'DÉBITO') AND data_vencimento::date > CURRENT_DATE), 0)::numeric AS total_pagar_vencer,
         
-        COALESCE(SUM(valor) FILTER (
-            WHERE tipo_operacao IN ('DEBITO', 'DÉBITO') 
-              AND data_vencimento::date < CURRENT_DATE
-        ), 0)::numeric AS total_pagar_atrasado,
-        
-        COALESCE(SUM(valor) FILTER (
-            WHERE tipo_operacao IN ('DEBITO', 'DÉBITO') 
-              AND data_vencimento::date = CURRENT_DATE
-        ), 0)::numeric AS total_pagar_hoje,
-        
-        COALESCE(SUM(valor) FILTER (
-            WHERE tipo_operacao IN ('DEBITO', 'DÉBITO') 
-              AND data_vencimento::date > CURRENT_DATE
-        ), 0)::numeric AS total_pagar_vencer,
-
         -- CONTAS A RECEBER
-        COALESCE(SUM(valor) FILTER (
-            WHERE tipo_operacao IN ('CREDITO', 'CRÉDITO')
-        ), 0)::numeric AS total_receber,
-        
-        COALESCE(SUM(valor) FILTER (
-            WHERE tipo_operacao IN ('CREDITO', 'CRÉDITO') 
-              AND data_vencimento::date < CURRENT_DATE
-        ), 0)::numeric AS total_receber_atrasado,
-        
-        COALESCE(SUM(valor) FILTER (
-            WHERE tipo_operacao IN ('CREDITO', 'CRÉDITO') 
-              AND data_vencimento::date = CURRENT_DATE
-        ), 0)::numeric AS total_receber_hoje,
-        
-        COALESCE(SUM(valor) FILTER (
-            WHERE tipo_operacao IN ('CREDITO', 'CRÉDITO') 
-              AND data_vencimento::date > CURRENT_DATE
-        ), 0)::numeric AS total_receber_vencer
+        COALESCE(SUM(valor) FILTER (WHERE tipo_operacao IN ('CREDITO', 'CRÉDITO')), 0)::numeric AS total_receber,
+        COALESCE(SUM(valor) FILTER (WHERE tipo_operacao IN ('CREDITO', 'CRÉDITO') AND data_vencimento::date < CURRENT_DATE), 0)::numeric AS total_receber_atrasado,
+        COALESCE(SUM(valor) FILTER (WHERE tipo_operacao IN ('CREDITO', 'CRÉDITO') AND data_vencimento::date = CURRENT_DATE), 0)::numeric AS total_receber_hoje,
+        COALESCE(SUM(valor) FILTER (WHERE tipo_operacao IN ('CREDITO', 'CRÉDITO') AND data_vencimento::date > CURRENT_DATE), 0)::numeric AS total_receber_vencer
 
     FROM public.transacoes
     WHERE organization_id = p_org_id
@@ -121,6 +86,7 @@ BEGIN
       AND data_vencimento IS NOT NULL;
 END;
 $function$;
+
 
 DROP FUNCTION IF EXISTS public.obter_saldo_total_org;
 CREATE OR REPLACE FUNCTION public.obter_saldo_total_org (
@@ -139,37 +105,31 @@ CREATE OR REPLACE FUNCTION public.obter_saldo_total_org (
   )
   LANGUAGE plpgsql
   SECURITY DEFINER
-  AS $function$BEGIN
-    -- 1. Validação de Segurança Básica
+  AS $function$
+BEGIN
     IF NOT public.check_user_in_org(p_org_id) THEN
         RAISE EXCEPTION 'Acesso negado: Usuário não autorizado para esta organização.';
     END IF;
 
     RETURN QUERY
-    WITH 
-    -- A) CAIXA REALIZADO (O PRESENTE): Separação estrita de Liquidez
-    caixa_realizado AS (
-        SELECT
+    WITH caixa_realizado AS (
+        SELECT 
             COALESCE(SUM(v.saldo_inicial), 0)::numeric AS c_saldo_inicial,
             COALESCE(SUM(v.total_entradas), 0)::numeric AS c_entradas_geral,
             COALESCE(SUM(v.total_saidas), 0)::numeric AS c_saidas_geral,
             COALESCE(SUM(v.saldo_atual), 0)::numeric AS c_liquido_geral,
             
-            -- [CORREÇÃO]: Saldo Disponível Real (Liquidez Imediata - Whitelist)
+            -- Saldo Disponível Real (Liquidez Imediata - Whitelist)
             COALESCE(SUM(CASE WHEN v.tipo_conta IN ('CORRENTE', 'CAIXA_FISICO', 'CAIXA FÍSICO') THEN v.saldo_atual ELSE 0 END), 0)::numeric AS c_disponivel_real,
             
-            -- [NOVA MÉTRICA]: Reservas de Médio/Longo Prazo
+            -- Reservas de Médio/Longo Prazo
             COALESCE(SUM(CASE WHEN v.tipo_conta IN ('APLICACAO', 'APLICAÇÃO', 'POUPANCA', 'POUPANÇA', 'INVESTIMENTO') THEN v.saldo_atual ELSE 0 END), 0)::numeric AS c_reservas,
 
-            -- Faturas de Cartão (Dívida transformando o sinal em positivo para o cálculo de passivo)
+            -- Faturas de Cartão 
             COALESCE(SUM(CASE WHEN v.tipo_conta IN ('CARTAO', 'CARTÃO') THEN (v.saldo_atual * -1) ELSE 0 END), 0)::numeric AS c_faturas_cartao
             
-        FROM public.view_saldos_contas v
-        WHERE v.organization_id = p_org_id
-          AND v.tipo_conta IS DISTINCT FROM 'VIRTUAL'
+        FROM public.obter_saldos_contas(p_org_id) v
     ),
-    
-    -- B) PREVISÃO FUTURA (O FUTURO): Busca o Contas a Pagar e a Receber pendente
     previsao_futura AS (
         SELECT
             COALESCE(SUM(t.valor) FILTER (WHERE t.tipo_operacao IN ('CREDITO', 'CRÉDITO')), 0)::numeric AS a_receber,
@@ -179,15 +139,10 @@ CREATE OR REPLACE FUNCTION public.obter_saldo_total_org (
         LEFT JOIN public.contas_bancarias cb ON t.conta_bancaria_id = cb.id
         WHERE t.organization_id = p_org_id
           AND t.status = 'PENDENTE'
-          
-          -- Filtros de segurança arquitetural do sistema LASTRO
           AND pc.codigo_contabil IS DISTINCT FROM '9.9.99'
-          AND COALESCE(cb.tipo, '') IS DISTINCT FROM 'VIRTUAL'
+          AND (cb.tipo IS DISTINCT FROM 'CARTAO' AND cb.tipo IS DISTINCT FROM 'CARTÃO')
     )
-    
-    -- C) ENTREGA ANALÍTICA: Cruzamento de dados estruturados
     SELECT 
-        -- As 6 colunas originais
         c.c_saldo_inicial AS total_saldo_inicial,
         c.c_entradas_geral AS total_entradas_geral,
         c.c_saidas_geral AS total_saidas_geral,
@@ -195,19 +150,15 @@ CREATE OR REPLACE FUNCTION public.obter_saldo_total_org (
         c.c_disponivel_real AS saldo_disponivel_real,
         c.c_faturas_cartao AS total_faturas_cartao,
         
-        -- As 3 colunas de Previsão
         p.a_receber AS total_a_receber,
         p.a_pagar AS total_a_pagar,
         
-        -- A Métrica de Ouro (Ativo Circulante Global - Passivo Exigível)
-        -- Agora blindada: Liquidez Imediata + Reservas + A Receber - (Faturas + A Pagar)
         ((c.c_disponivel_real + c.c_reservas + p.a_receber) - (c.c_faturas_cartao + p.a_pagar))::numeric AS resumo_ativo_passivo
         
-        -- Opcional: Se desejar exportar a variável de reservas para o FlutterFlow no futuro, adicione a linha abaixo:
-        -- , c.c_reservas AS total_reservas
-        
     FROM caixa_realizado c CROSS JOIN previsao_futura p;
-END;$function$;
+END;
+$function$;
+
 
 DROP FUNCTION IF EXISTS public.fn_relatorio_dre_sintetico;
 CREATE OR REPLACE FUNCTION public.fn_relatorio_dre_sintetico (
@@ -225,7 +176,6 @@ CREATE OR REPLACE FUNCTION public.fn_relatorio_dre_sintetico (
   SECURITY DEFINER
   AS $function$
 BEGIN
-    -- Validação de Segurança
     IF NOT public.check_user_in_org(p_org_id) THEN
         RAISE EXCEPTION 'Acesso negado: Usuário não autorizado para esta organização.';
     END IF;
@@ -233,7 +183,6 @@ BEGIN
     RETURN QUERY
     WITH calculo_dre AS (
         SELECT 
-            -- O uso do FILTER é a forma mais performática no Postgres para pivoteamento condicional
             COALESCE(SUM(v.valor_absoluto) FILTER (WHERE v.tipo_conta = 'RECEITA'), 0) AS receitas,
             COALESCE(SUM(v.valor_absoluto) FILTER (WHERE v.tipo_conta = 'DESPESA'), 0) AS despesas,
             COALESCE(SUM(v.valor_liquido), 0) AS liquido
@@ -246,7 +195,6 @@ BEGIN
         c.receitas::numeric,
         c.despesas::numeric,
         c.liquido::numeric,
-        -- Trava matemática para divisão por zero em meses sem receita
         CASE 
             WHEN c.receitas > 0 THEN ROUND((c.liquido / c.receitas) * 100, 2)::numeric
             ELSE 0::numeric
@@ -254,5 +202,3 @@ BEGIN
     FROM calculo_dre c;
 END;
 $function$;
-
-
