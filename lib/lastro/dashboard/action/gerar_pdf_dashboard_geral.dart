@@ -16,6 +16,7 @@ import 'package:intl/intl.dart';
 
 Future gerarPdfDashboardGeral(
   String? nomeInstituicao,
+  String? tipoPerfilOrg,
   DTSaldoTotalOrgStruct? saldoTotal,
   List<DTSaldoContaStruct>? saldosContas,
   DTDfcSinteticoStruct? dfc,
@@ -47,6 +48,14 @@ Future gerarPdfDashboardGeral(
       (nomeInstituicao == null || nomeInstituicao.trim().isEmpty)
           ? 'DASHBOARD CONSOLIDADO'
           : nomeInstituicao.toUpperCase();
+
+  // DICIONÁRIO DINÂMICO
+  bool isIgreja = (tipoPerfilOrg ?? '').toUpperCase() == 'IGREJA';
+  String labelCaixaMetrica = isIgreja ? 'Arrecadação vs Queima' : 'Giro Bancário (Caixa)';
+  String labelEntradas = isIgreja ? 'Dízimos/Ofertas (Líquido)' : 'Entradas (Líquidas)';
+  String labelSaidas = isIgreja ? 'Despesas (Queima' : 'Saídas (Queima';
+  String lblDRE = isIgreja ? 'Raio-X de Congregação' : 'Raio-X do Mês';
+  String lblResultado = isIgreja ? 'Superávit / Déficit' : 'Resultado Líquido';
 
   final st = saldoTotal ?? DTSaldoTotalOrgStruct();
   final dtDfc = dfc ?? DTDfcSinteticoStruct();
@@ -338,16 +347,16 @@ Future gerarPdfDashboardGeral(
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text('DRE Sintético',
+                    pw.Text(lblDRE,
                         style: pw.TextStyle(
                             fontSize: 10, fontWeight: pw.FontWeight.bold)),
                     pw.SizedBox(height: 8),
                     _buildLinhaResumo(
-                        'Receitas',
+                        labelEntradas,
                         currencyFormatter.format(dtDre.totalReceitas),
                         PdfColors.black),
                     _buildLinhaResumo(
-                        'Custo Operacional',
+                        labelSaidas,
                         currencyFormatter.format(dtDre.toMap().containsKey('somaDespesasOperacionais') ? dtDre.toMap()['somaDespesasOperacionais'] : dtDre.totalDespesas),
                         PdfColors.black),
                     if (dtDre.toMap().containsKey('resultadoOperacional')) ...[
@@ -367,7 +376,7 @@ Future gerarPdfDashboardGeral(
                     ],
                     pw.Divider(color: PdfColors.grey300, thickness: 0.5),
                     _buildLinhaResumo(
-                        'Resultado Líquido',
+                        lblResultado,
                         currencyFormatter.format(dtDre.resultadoLiquido),
                         dtDre.resultadoLiquido >= 0 ? corCredito : corDebito,
                         isBold: true),
@@ -390,7 +399,7 @@ Future gerarPdfDashboardGeral(
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text('Fluxo de Caixa (DFC)',
+                    pw.Text(labelCaixaMetrica,
                         style: pw.TextStyle(
                             fontSize: 10, fontWeight: pw.FontWeight.bold)),
                     pw.SizedBox(height: 8),
@@ -399,10 +408,10 @@ Future gerarPdfDashboardGeral(
                         currencyFormatter.format(dtDfc.saldoInicial),
                         PdfColors.grey800),
                     _buildLinhaResumo(
-                        'Entradas (Líquidas)',
+                        labelEntradas,
                         currencyFormatter.format(dtDfc.totalEntradas),
                         corCredito),
-                    _buildLinhaResumo('Saídas',
+                    _buildLinhaResumo(labelSaidas,
                         currencyFormatter.format(dtDfc.totalSaidas), corDebito),
                     pw.Divider(color: PdfColors.grey300, thickness: 0.5),
                     _buildLinhaResumo(
