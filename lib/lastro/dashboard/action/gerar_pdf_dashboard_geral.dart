@@ -49,13 +49,18 @@ Future gerarPdfDashboardGeral(
           ? 'DASHBOARD CONSOLIDADO'
           : nomeInstituicao.toUpperCase();
 
-  // DICIONÁRIO DINÂMICO
-  bool isIgreja = (tipoPerfilOrg ?? '').toUpperCase() == 'IGREJA';
-  String labelCaixaMetrica = isIgreja ? 'Arrecadação vs Queima' : 'Giro Bancário (Caixa)';
-  String labelEntradas = isIgreja ? 'Dízimos/Ofertas (Líquido)' : 'Entradas (Líquidas)';
-  String labelSaidas = isIgreja ? 'Despesas (Queima' : 'Saídas (Queima';
-  String lblDRE = isIgreja ? 'Raio-X de Congregação' : 'Raio-X do Mês';
-  String lblResultado = isIgreja ? 'Superávit / Déficit' : 'Resultado Líquido';
+  // DICIONÁRIO DINÂMICO MULTI-PERFIL
+  String tPerfil = (tipoPerfilOrg ?? '').toUpperCase();
+  bool isIgreja = tPerfil == 'IGREJA';
+  bool isOng = tPerfil == 'OSC/ONG' || tPerfil == 'ONG' || tPerfil == 'OSC';
+  bool isFamilia = tPerfil == 'FAMILIA' || tPerfil == 'FAMÍLIA';
+  bool isNegocio = tPerfil == 'NEGOCIO' || tPerfil == 'NEGÓCIO' || tPerfil == 'INDUSTRIA' || tPerfil == 'INDÚSTRIA';
+
+  String lblTituloDfc = (isIgreja || isOng) ? 'Arrecadação vs Queima' : (isFamilia ? 'Entradas vs Saídas' : 'Fluxo de Caixa (Giro)');
+  String labelEntradas = isIgreja ? 'Dízimos/Ofertas (Líquido)' : (isOng ? 'Doações/Receitas' : (isFamilia ? 'Rendas/Salários' : 'Entradas (Líquidas)'));
+  String labelSaidas = isFamilia ? 'Despesas da Casa' : (isIgreja || isOng ? 'Despesas (Queima)' : 'Saídas (Queima)');
+  String lblDRE = (isIgreja || isOng) ? 'Raio-X da Organização' : (isFamilia ? 'Raio-X da Casa' : 'DRE Sintético');
+  String lblResultado = (isIgreja || isOng) ? 'Superávit / Déficit' : (isFamilia ? 'Sobra / Falta' : 'Resultado Líquido');
 
   final st = saldoTotal ?? DTSaldoTotalOrgStruct();
   final dtDfc = dfc ?? DTDfcSinteticoStruct();
@@ -215,7 +220,7 @@ Future gerarPdfDashboardGeral(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
                 pw.Text('Relatório de Posição Financeira e Operacional',
-                    style: const pw.TextStyle(
+                    style: pw.TextStyle(
                         fontSize: 10, color: PdfColors.grey700)),
                 pw.Container(
                   padding:
@@ -243,7 +248,7 @@ Future gerarPdfDashboardGeral(
             border: pw.Border(top: pw.BorderSide(color: PdfColors.grey300))),
         child: pw.Text(
             'Gerado em: ${dataHoraFormatter.format(DateTime.now())} | Página ${context.pageNumber} de ${context.pagesCount}',
-            style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600)),
+            style: pw.TextStyle(fontSize: 8, color: PdfColors.grey600)),
       ),
       build: (context) => [
         // 0. DIAGNÓSTICO EXECUTIVO
@@ -277,14 +282,14 @@ Future gerarPdfDashboardGeral(
                       crossAxisAlignment: pw.CrossAxisAlignment.end,
                       children: [
                         pw.Text('Bens/Ativos: ${currencyFormatter.format(st.toMap().containsKey('totalAtivos') ? st.toMap()['totalAtivos'] : 0.0)}',
-                            style: const pw.TextStyle(
+                            style: pw.TextStyle(
                                 fontSize: 8, color: PdfColors.grey700)),
                         pw.Text('(-) Dívidas: ${currencyFormatter.format(st.toMap().containsKey('totalPassivos') ? st.toMap()['totalPassivos'] : 0.0)}',
-                            style: const pw.TextStyle(
+                            style: pw.TextStyle(
                                 fontSize: 8, color: PdfColors.grey700)),
                         pw.SizedBox(height: 10),
                         pw.Text('Capital Líquido',
-                            style: const pw.TextStyle(
+                            style: pw.TextStyle(
                                 fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.black)),
                         pw.Text(currencyFormatter.format(st.resumoAtivoPassivo),
                             style: pw.TextStyle(
@@ -383,7 +388,7 @@ Future gerarPdfDashboardGeral(
                     pw.SizedBox(height: 4),
                     pw.Text(
                         'Margem: ${percentFormatter.format(dtDre.margemLucro)}%',
-                        style: const pw.TextStyle(
+                        style: pw.TextStyle(
                             fontSize: 9, color: PdfColors.grey700)),
                   ],
                 ),
@@ -399,7 +404,7 @@ Future gerarPdfDashboardGeral(
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text(labelCaixaMetrica,
+                    pw.Text(lblTituloDfc,
                         style: pw.TextStyle(
                             fontSize: 10, fontWeight: pw.FontWeight.bold)),
                     pw.SizedBox(height: 8),
@@ -567,7 +572,7 @@ Future gerarPdfDashboardGeral(
             4: pw.Alignment.centerRight,
             5: pw.Alignment.centerRight,
           },
-          cellStyle: const pw.TextStyle(fontSize: 8),
+          cellStyle: pw.TextStyle(fontSize: 8),
           cellAlignments: {
             0: pw.Alignment.centerLeft,
             1: pw.Alignment.centerLeft,
@@ -641,7 +646,7 @@ Future gerarPdfDashboardGeral(
               3: pw.Alignment.centerRight,
               4: pw.Alignment.centerRight,
             },
-            cellStyle: const pw.TextStyle(fontSize: 9),
+            cellStyle: pw.TextStyle(fontSize: 9),
             cellAlignments: {
               0: pw.Alignment.centerLeft,
               1: pw.Alignment.centerRight,
@@ -707,7 +712,7 @@ pw.Widget _buildCaixaMetrica(
         mainAxisAlignment: pw.MainAxisAlignment.center,
         children: [
           pw.Text(titulo,
-              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+              style: pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
               textAlign: pw.TextAlign.center),
           pw.SizedBox(height: 6),
           pw.Text(valor,
@@ -736,7 +741,7 @@ pw.Widget _buildLinhaResumo(String label, String valor, PdfColor corValor,
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
         pw.Text(label,
-            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey800)),
+            style: pw.TextStyle(fontSize: 9, color: PdfColors.grey800)),
         pw.Text(valor,
             style: pw.TextStyle(
                 fontSize: 9,
@@ -850,7 +855,7 @@ pw.Widget _buildLinhaProjecaoDetalhe(
       pw.Expanded(
         flex: 3,
         child: pw.Text(label,
-            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey800)),
+            style: pw.TextStyle(fontSize: 9, color: PdfColors.grey800)),
       ),
       pw.Expanded(
         flex: 3,
@@ -864,7 +869,7 @@ pw.Widget _buildLinhaProjecaoDetalhe(
           child: pw.Container(
               alignment: pw.Alignment.centerRight,
               child: pw.Text(pct,
-                  style: const pw.TextStyle(
+                  style: pw.TextStyle(
                       fontSize: 7, color: PdfColors.grey500)))),
     ],
   );
@@ -881,6 +886,6 @@ pw.Widget _buildPontoSaude(String label, int quantidade, PdfColor cor) {
     pw.Text('$quantidade CRs',
         style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
     pw.Text(label,
-        style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700)),
+        style: pw.TextStyle(fontSize: 8, color: PdfColors.grey700)),
   ]);
 }
