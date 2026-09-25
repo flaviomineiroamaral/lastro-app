@@ -57,9 +57,11 @@ Future gerarPdfDashboardGeral(
   bool isNegocio = tPerfil == 'NEGOCIO' || tPerfil == 'NEGÓCIO' || tPerfil == 'INDUSTRIA' || tPerfil == 'INDÚSTRIA';
 
   String lblTituloDfc = (isIgreja || isOng) ? 'Arrecadação vs Queima' : (isFamilia ? 'Entradas vs Saídas' : 'Fluxo de Caixa (Giro)');
-  String labelEntradas = isIgreja ? 'Dízimos/Ofertas (Líquido)' : (isOng ? 'Doações/Receitas' : (isFamilia ? 'Rendas/Salários' : 'Entradas (Líquidas)'));
-  String labelSaidas = isFamilia ? 'Despesas da Casa' : (isIgreja || isOng ? 'Despesas (Queima)' : 'Saídas (Queima)');
-  String lblDRE = (isIgreja || isOng) ? 'Raio-X da Organização' : (isFamilia ? 'Raio-X da Casa' : 'DRE Sintético');
+  String labelEntradas = isIgreja ? 'Dízimos/Ofertas (Líquido)' : (isOng ? 'Doações/Receitas' : 'Entradas (Líquidas)');
+  String labelSaidas = (isIgreja || isOng) ? 'Despesas (Queima)' : 'Saídas (Queima:';
+  String lblDRE = (isIgreja || isOng) ? 'Raio-X da Organização' : 'Raio-X do Mês';
+  String lblDreReceita = isFamilia ? 'Receitas' : labelEntradas;
+  String lblDreCusto = isFamilia ? 'Custo Operacional' : labelSaidas;
   String lblResultado = (isIgreja || isOng) ? 'Superávit / Déficit' : (isFamilia ? 'Sobra / Falta' : 'Resultado Líquido');
 
   final st = saldoTotal ?? DTSaldoTotalOrgStruct();
@@ -137,6 +139,11 @@ Future gerarPdfDashboardGeral(
     msgSolvenciaText =
         'SUPERÁVIT REAL: Solvência forte (${currencyFormatter.format(st.resumoAtivoPassivo)}) e máquina eficiente. Momento ideal para expansões físicas, infraestrutura ou aumento de repasses.';
   }
+
+  double pagarCurto = pr.toMap().containsKey('totalPagarVencerCurtoPrazo') ? (pr.toMap()['totalPagarVencerCurtoPrazo'] as num).toDouble() : pr.totalPagarVencer;
+  double pagarLongo = pr.toMap().containsKey('totalPagarVencerLongoPrazo') ? (pr.toMap()['totalPagarVencerLongoPrazo'] as num).toDouble() : 0.0;
+  double receberCurto = pr.toMap().containsKey('totalReceberVencerCurtoPrazo') ? (pr.toMap()['totalReceberVencerCurtoPrazo'] as num).toDouble() : pr.totalReceberVencer;
+  double receberLongo = pr.toMap().containsKey('totalReceberVencerLongoPrazo') ? (pr.toMap()['totalReceberVencerLongoPrazo'] as num).toDouble() : 0.0;
 
   // ==========================================
   // PENTE FINO: ALGORITMO CONSOLIDADO DE BREAK-EVEN
@@ -258,7 +265,7 @@ Future gerarPdfDashboardGeral(
             decoration: pw.BoxDecoration(
               color: corFundoSolvencia,
               border: pw.Border.all(color: corSolvencia, width: 1.5),
-              borderRadius: pw.BorderRadius.circular(6),
+              borderRadius: pw.BorderRadius.circular(0),
             ),
             child: pw.Row(children: [
               pw.Expanded(
@@ -300,6 +307,56 @@ Future gerarPdfDashboardGeral(
             ])),
         pw.SizedBox(height: 20),
 
+        // 4. SAÚDE DOS CRs E ALERTAS INTELIGENTES
+        pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          pw.Expanded(
+              child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                pw.Text('SAÚDE E OFENSORES (Categorias)',
+                    style: pw.TextStyle(
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.bold,
+                        color: corAzul)),
+                pw.Divider(color: PdfColors.grey300),
+                pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildPontoSaude('Superávit', scr.qtdVerde, corCredito),
+                      _buildPontoSaude('Atenção', scr.qtdAmarelo, corAlerta),
+                      _buildPontoSaude('Déficit', scr.qtdVermelho, corDebito),
+                    ])
+              ])),
+          pw.SizedBox(width: 20),
+          pw.Expanded(
+              child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                pw.Text('PRESCRIÇÕES & ALERTAS',
+                    style: pw.TextStyle(
+                        fontSize: 12,
+                        fontWeight: pw.FontWeight.bold,
+                        color: corAzul)),
+                pw.Divider(color: PdfColors.grey300),
+                _buildAlertaInteligente(
+                    msgAlvoArrecadacao, corAlertaMeta, corAlertaMeta),
+                _buildAlertaInteligente(
+                    msgTravaCompras,
+                    isCaixaCongelado ? corDebito : corCredito,
+                    isCaixaCongelado ? corDebito : PdfColors.green800),
+                _buildAlertaInteligente(
+                    msgAlavancagem,
+                    isAlavancadoLocal ? corAlerta : corCredito,
+                    isAlavancadoLocal ? corAlerta : PdfColors.grey800),
+                if (msgRiscoRecebiveis.isNotEmpty)
+                  _buildAlertaInteligente(
+                      msgRiscoRecebiveis,
+                      isCaixaCongelado ? corAlerta : corAzul,
+                      isCaixaCongelado ? corAlerta : corAzul),
+              ]))
+        ]),
+pw.SizedBox(height: 20),
+
         // 1. FLUXO DO PERÍODO E LIQUIDEZ
         pw.Text('1. FLUXO DO PERÍODO E LIQUIDEZ',
             style: pw.TextStyle(
@@ -336,7 +393,7 @@ Future gerarPdfDashboardGeral(
         pw.SizedBox(height: 20),
 
         // 2. PERFORMANCE (DRE & DFC)
-        pw.Text('2. PERFORMANCE (DRE & DFC)',
+        pw.Text('PERFORMANCE E LIQUIDEZ',
             style: pw.TextStyle(
                 fontSize: 12, fontWeight: pw.FontWeight.bold, color: corAzul)),
         pw.Divider(color: PdfColors.grey300),
@@ -357,11 +414,11 @@ Future gerarPdfDashboardGeral(
                             fontSize: 10, fontWeight: pw.FontWeight.bold)),
                     pw.SizedBox(height: 8),
                     _buildLinhaResumo(
-                        labelEntradas,
+                        lblDreReceita,
                         currencyFormatter.format(dtDre.totalReceitas),
                         PdfColors.black),
                     _buildLinhaResumo(
-                        labelSaidas,
+                        lblDreCusto,
                         currencyFormatter.format(dtDre.toMap().containsKey('somaDespesasOperacionais') ? dtDre.toMap()['somaDespesasOperacionais'] : dtDre.totalDespesas),
                         PdfColors.black),
                     if (dtDre.toMap().containsKey('resultadoOperacional')) ...[
@@ -408,15 +465,12 @@ Future gerarPdfDashboardGeral(
                         style: pw.TextStyle(
                             fontSize: 10, fontWeight: pw.FontWeight.bold)),
                     pw.SizedBox(height: 8),
-                    _buildLinhaResumo(
-                        'Saldo Inicial',
-                        currencyFormatter.format(dtDfc.saldoInicial),
-                        PdfColors.grey800),
+
                     _buildLinhaResumo(
                         labelEntradas,
                         currencyFormatter.format(dtDfc.totalEntradas),
                         corCredito),
-                    _buildLinhaResumo(labelSaidas,
+                    _buildLinhaResumo('$labelSaidas ${(burnRatePeriodo * 100).toStringAsFixed(1)}%)',
                         currencyFormatter.format(dtDfc.totalSaidas), corDebito),
                     pw.Divider(color: PdfColors.grey300, thickness: 0.5),
                     _buildLinhaResumo(
@@ -440,7 +494,7 @@ Future gerarPdfDashboardGeral(
         pw.SizedBox(height: 20),
 
         // 3. PROJEÇÃO A PAGAR E RECEBER
-        pw.Text('3. PROJEÇÃO A PAGAR E RECEBER',
+        pw.Text('PROJEÇÃO DE OBRIGAÇÕES',
             style: pw.TextStyle(
                 fontSize: 12, fontWeight: pw.FontWeight.bold, color: corAzul)),
         pw.Divider(color: PdfColors.grey300),
@@ -448,11 +502,12 @@ Future gerarPdfDashboardGeral(
           children: [
             pw.Expanded(
               child: _buildBlocoProjecao(
-                  'A Pagar (Na Época)',
+                  'TOTAL A PAGAR (PASSIVO)',
                   pr.totalPagar,
                   pr.totalPagarAtrasado,
                   pr.totalPagarHoje,
-                  pr.totalPagarVencer,
+                  pagarCurto,
+                  pagarLongo,
                   corDebito,
                   corAlerta,
                   currencyFormatter,
@@ -461,11 +516,12 @@ Future gerarPdfDashboardGeral(
             pw.SizedBox(width: 10),
             pw.Expanded(
               child: _buildBlocoProjecao(
-                  'A Receber (Na Época)',
+                  'TOTAL A RECEBER (ATIVO)',
                   pr.totalReceber,
                   pr.totalReceberAtrasado,
                   pr.totalReceberHoje,
-                  pr.totalReceberVencer,
+                  receberCurto,
+                  receberLongo,
                   corCredito,
                   corAlerta,
                   currencyFormatter,
@@ -475,54 +531,7 @@ Future gerarPdfDashboardGeral(
         ),
         pw.SizedBox(height: 20),
 
-        // 4. SAÚDE DOS CRs E ALERTAS INTELIGENTES
-        pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-          pw.Expanded(
-              child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                pw.Text('SAÚDE DOS CRs',
-                    style: pw.TextStyle(
-                        fontSize: 12,
-                        fontWeight: pw.FontWeight.bold,
-                        color: corAzul)),
-                pw.Divider(color: PdfColors.grey300),
-                pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildPontoSaude('Superávit', scr.qtdVerde, corCredito),
-                      _buildPontoSaude('Atenção', scr.qtdAmarelo, corAlerta),
-                      _buildPontoSaude('Déficit', scr.qtdVermelho, corDebito),
-                    ])
-              ])),
-          pw.SizedBox(width: 20),
-          pw.Expanded(
-              child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                pw.Text('PRESCRIÇÕES & ALERTAS',
-                    style: pw.TextStyle(
-                        fontSize: 12,
-                        fontWeight: pw.FontWeight.bold,
-                        color: corAzul)),
-                pw.Divider(color: PdfColors.grey300),
-                _buildAlertaInteligente(
-                    msgAlvoArrecadacao, corAlertaMeta, corAlertaMeta),
-                _buildAlertaInteligente(
-                    msgTravaCompras,
-                    isCaixaCongelado ? corDebito : corCredito,
-                    isCaixaCongelado ? corDebito : PdfColors.green800),
-                _buildAlertaInteligente(
-                    msgAlavancagem,
-                    isAlavancadoLocal ? corAlerta : corCredito,
-                    isAlavancadoLocal ? corAlerta : PdfColors.grey800),
-                if (msgRiscoRecebiveis.isNotEmpty)
-                  _buildAlertaInteligente(
-                      msgRiscoRecebiveis,
-                      isCaixaCongelado ? corAlerta : corAzul,
-                      isCaixaCongelado ? corAlerta : corAzul),
-              ]))
-        ]),
+        
         pw.SizedBox(height: 20),
 
         // 5.1 COMPOSIÇÃO DOS SALDOS
@@ -704,7 +713,7 @@ pw.Widget _buildCaixaMetrica(
       padding: const pw.EdgeInsets.all(10),
       decoration: pw.BoxDecoration(
         color: corFundo,
-        borderRadius: pw.BorderRadius.circular(6),
+        borderRadius: pw.BorderRadius.circular(0),
         border: pw.Border.all(color: PdfColors.grey300, width: 0.5),
       ),
       child: pw.Column(
@@ -780,7 +789,8 @@ pw.Widget _buildBlocoProjecao(
     double total,
     double atrasado,
     double hoje,
-    double vencer,
+      double curto,
+      double longo,
     PdfColor corBase,
     PdfColor corAtraso,
     NumberFormat formatter,
@@ -789,13 +799,15 @@ pw.Widget _buildBlocoProjecao(
       total > 0 ? '${((atrasado / total) * 100).toStringAsFixed(1)}%' : '0%';
   String pctHoje =
       total > 0 ? '${((hoje / total) * 100).toStringAsFixed(1)}%' : '0%';
-  String pctVencer =
-      total > 0 ? '${((vencer / total) * 100).toStringAsFixed(1)}%' : '0%';
+  String pctCurto =
+        total > 0 ? '%' : '0%';
+    String pctLongo =
+        total > 0 ? '%' : '0%';
 
   return pw.Container(
     decoration: pw.BoxDecoration(
       border: pw.Border.all(color: PdfColors.grey300, width: 0.5),
-      borderRadius: pw.BorderRadius.circular(6),
+      borderRadius: pw.BorderRadius.circular(0),
     ),
     child: pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
@@ -838,8 +850,11 @@ pw.Widget _buildBlocoProjecao(
               _buildLinhaProjecaoDetalhe(labelMeio, formatter.format(hoje),
                   pctHoje, hoje > 0 ? PdfColors.orange700 : PdfColors.grey600),
               pw.SizedBox(height: 6),
-              _buildLinhaProjecaoDetalhe('A Vencer (Futuro)',
-                  formatter.format(vencer), pctVencer, PdfColors.black),
+              _buildLinhaProjecaoDetalhe('A Vencer (Até 1 Ano)',
+                  formatter.format(curto), pctCurto, PdfColors.black),
+              pw.SizedBox(height: 6),
+              _buildLinhaProjecaoDetalhe('Longo Prazo (> 1 Ano)',
+                  formatter.format(longo), pctLongo, PdfColors.black),
             ],
           ),
         ),
