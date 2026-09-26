@@ -59,7 +59,8 @@ Future gerarPdfDashboardGeral(
   bool isIgreja = tPerfil == 'IGREJA';
   bool isOng = tPerfil == 'OSC/ONG' || tPerfil == 'ONG' || tPerfil == 'OSC';
   bool isFamilia = tPerfil == 'FAMILIA' || tPerfil == 'FAMÍLIA';
-  bool isNegocio = tPerfil == 'NEGOCIO' || tPerfil == 'NEGÓCIO' || tPerfil == 'INDUSTRIA' || tPerfil == 'INDÚSTRIA';
+  bool isNegocio = tPerfil == 'NEGOCIO' || tPerfil == 'NEGÓCIO';
+  bool isIndustria = tPerfil == 'INDUSTRIA' || tPerfil == 'INDÚSTRIA';
 
   String lblTituloDfc = (isIgreja || isOng) ? 'Arrecadação vs Queima' : (isFamilia ? 'Entradas vs Saídas' : 'Fluxo de Caixa (Giro)');
   String labelEntradas = isIgreja ? 'Dízimos/Ofertas (Líquido)' : (isOng ? 'Doações/Receitas' : 'Entradas (Líquidas)');
@@ -193,37 +194,104 @@ Future gerarPdfDashboardGeral(
       0.0, (sum, c) => sum + (c.saldoAtual < 0 ? c.saldoAtual.abs() : 0.0));
   double dividaTotalCorrente = dividaFornecedoresMes + dividaCartoesMes;
 
-  // ALERTA 1: ALVO DE ARRECADAÇÃO
+  // ALERTA 1: ALVO DE ARRECADAÇÃO / RECEITAS
   double esforcoCaixaReal =
       dividaTotalCorrente - (caixaParaCalculo + receitasPrevistasMes);
   String msgAlvoArrecadacao = '';
   PdfColor corAlertaMeta = PdfColors.black;
+  
+  String valEsforco = currencyFormatter.format(esforcoCaixaReal);
 
-  String lblAlvo = (isIgreja || isOng) ? 'ALVO DE ARRECADAÇÃO' : 'ALVO DE RECEITAS';
   if (esforcoCaixaReal > 0) {
-    msgAlvoArrecadacao =
-        '$lblAlvo (FECHO DO MÊS): Faltam ${currencyFormatter.format(esforcoCaixaReal)} para fechar as obrigações deste mês sem recorrer a novos endividamentos.';
+    if (isIgreja) {
+      msgAlvoArrecadacao = 'ALVO DE ARRECADAÇÃO: Faltam $valEsforco para honrar os compromissos da igreja neste mês sem gerar novas dívidas.';
+    } else if (isOng) {
+      msgAlvoArrecadacao = 'META DE CAPTAÇÃO: Faltam $valEsforco para garantir as operações da instituição neste mês sem recorrer a empréstimos.';
+    } else if (isFamilia) {
+      msgAlvoArrecadacao = 'META DE RENDA: Faltam $valEsforco para fechar as contas de casa neste mês sem precisar entrar no cheque especial.';
+    } else if (isIndustria) {
+      msgAlvoArrecadacao = 'META DE PRODUÇÃO/VENDAS: Faltam $valEsforco em faturamento para cobrir o custo da planta e obrigações correntes.';
+    } else {
+      msgAlvoArrecadacao = 'META DE FATURAMENTO: Faltam $valEsforco para atingir o ponto de equilíbrio (break-even) e cobrir as obrigações.';
+    }
     corAlertaMeta = corDebito;
   } else {
-    String lblSobra = isFamilia ? 'Sobra Livre' : 'Superávit Livre';
-    msgAlvoArrecadacao =
-        'PONTO DE EQUILÍBRIO ATINGIDO: O caixa atual somado aos recebimentos agendados já garante o pagamento de 100% da operação do mês. O que entrar extra é $lblSobra para investimento.';
+    if (isIgreja) {
+      msgAlvoArrecadacao = 'COMPROMISSOS GARANTIDOS: O caixa atual mais as entradas previstas garantem 100% das obrigações da igreja. O que entrar extra é Superávit para projetos e missões.';
+    } else if (isOng) {
+      msgAlvoArrecadacao = 'OPERAÇÃO GARANTIDA: Os recursos disponíveis já cobrem 100% dos custos operacionais. Entradas extras formam Fundo de Reserva.';
+    } else if (isFamilia) {
+      msgAlvoArrecadacao = 'MÊS NO AZUL: Seu saldo e receitas já garantem 100% das contas pagas! O que sobrar é livre para investir, poupar ou lazer.';
+    } else if (isIndustria) {
+      msgAlvoArrecadacao = 'PONTO DE EQUILÍBRIO ATINGIDO: O giro da planta está pago. As próximas receitas geram Margem Líquida Livre para a operação.';
+    } else {
+      msgAlvoArrecadacao = 'BREAK-EVEN ATINGIDO: O caixa e recebíveis cobrem 100% da operação do mês. A partir de agora, o faturamento extra é Lucro Livre.';
+    }
     corAlertaMeta = PdfColors.green800;
   }
 
-  // ALERTA 2: TRAVA DE COMPRAS
+  // ALERTA 2: TRAVA DE COMPRAS / BLOQUEIO DE CAIXA
   bool isCaixaCongelado = dividaTotalCorrente > caixaParaCalculo;
-  String lblTrava = isFamilia ? 'FREIO DE GASTOS' : 'TRAVA DE COMPRAS';
-  final String msgTravaCompras = isCaixaCongelado
-      ? '$lblTrava: O dinheiro em caixa (${currencyFormatter.format(caixaParaCalculo)}) não cobre as obrigações ativas. PROIBIDO assumir novos compromissos.'
-      : 'CAIXA LIVRE: O saldo em caixa (${currencyFormatter.format(caixaParaCalculo)}) é maior que as dívidas do mês. Operação segura.';
+  String valCaixa = currencyFormatter.format(caixaParaCalculo);
+  String msgTravaCompras = '';
+  
+  if (isCaixaCongelado) {
+    if (isIgreja) {
+      msgTravaCompras = 'CONTENÇÃO DE DESPESAS: O dinheiro em caixa ($valCaixa) não cobre as contas abertas. Evite assumir novos compromissos financeiros.';
+    } else if (isOng) {
+      msgTravaCompras = 'ALERTA DE LIQUIDEZ: O caixa disponível ($valCaixa) é inferior às obrigações ativas. É necessário pausar novos gastos institucionais.';
+    } else if (isFamilia) {
+      msgTravaCompras = 'FREIO DE GASTOS: O saldo de $valCaixa não é suficiente para pagar o que já está devendo. Cancele qualquer compra que não seja essencial agora.';
+    } else if (isIndustria) {
+      msgTravaCompras = 'CONTINGENCIAMENTO: O caixa da empresa ($valCaixa) não suporta o passivo de giro atual. Necessário congelar ordens de compra não-críticas.';
+    } else {
+      msgTravaCompras = 'TRAVA DE COMPRAS: O dinheiro em caixa ($valCaixa) não cobre as obrigações de curto prazo. Suspenso o aval para novos compromissos.';
+    }
+  } else {
+    if (isIgreja) {
+      msgTravaCompras = 'CAIXA SAUDÁVEL: O saldo em caixa ($valCaixa) é maior que as dívidas da igreja. Situação financeira segura e sob controle.';
+    } else if (isOng) {
+      msgTravaCompras = 'CAIXA LIVRE: O fundo em caixa ($valCaixa) assegura o pagamento de todas as obrigações. Execução orçamentária segura.';
+    } else if (isFamilia) {
+      msgTravaCompras = 'CAIXA TRANQUILO: O saldo na sua conta ($valCaixa) é maior do que as suas dívidas do mês. Excelente saúde financeira.';
+    } else if (isIndustria) {
+      msgTravaCompras = 'LIQUIDEZ FOLGADA: O saldo em caixa ($valCaixa) cobre confortavelmente o passivo de curto prazo. Operação fabril segura.';
+    } else {
+      msgTravaCompras = 'CAIXA POSITIVO: O saldo em caixa ($valCaixa) excede as dívidas de giro. Margem segura para operar e investir.';
+    }
+  }
 
   // ALERTA 3: ALAVANCAGEM DE CARTÃO
   double limiteSeguro = caixaParaCalculo > 0 ? caixaParaCalculo * 0.30 : 0.0;
   bool isAlavancadoLocal = dividaCartoesMes > limiteSeguro;
-  final String msgAlavancagem = isAlavancadoLocal
-      ? 'ALERTA DE ALAVANCAGEM: A dívida de cartões (${currencyFormatter.format(dividaCartoesMes)}) está perigosamente acima da margem de segurança do seu caixa.'
-      : 'CRÉDITO SAUDÁVEL: O uso de cartões (${currencyFormatter.format(dividaCartoesMes)}) está protegido por liquidez (abaixo do teto seguro de ${currencyFormatter.format(limiteSeguro)}).';
+  String valCartoes = currencyFormatter.format(dividaCartoesMes);
+  String msgAlavancagem = '';
+  
+  if (isAlavancadoLocal) {
+    if (isIgreja) {
+      msgAlavancagem = 'CUIDADO COM CARTÕES: A fatura dos cartões ($valCartoes) está consumindo uma parte perigosa do caixa da igreja. Reduza o uso para não comprometer as reservas.';
+    } else if (isOng) {
+      msgAlavancagem = 'EXCESSO DE CARTÕES: A dívida alocada em cartões corporativos ($valCartoes) superou a margem de segurança do caixa da instituição.';
+    } else if (isFamilia) {
+      msgAlavancagem = 'PERIGO NO CARTÃO: A sua fatura ($valCartoes) está alta demais em relação ao dinheiro que você tem. Freie os cartões para evitar a bola de neve de juros!';
+    } else if (isIndustria) {
+      msgAlavancagem = 'RISCO DE ALAVANCAGEM: O volume lançado em cartões ($valCartoes) representa uma alavancagem de curto prazo excessiva para a liquidez imediata.';
+    } else {
+      msgAlavancagem = 'ALERTA DE ALAVANCAGEM: A dívida de cartões corporativos ($valCartoes) está perigosamente acima da margem de segurança do caixa.';
+    }
+  } else {
+    if (isIgreja) {
+      msgAlavancagem = 'USO SEGURO DE CARTÕES: As faturas ($valCartoes) estão num nível seguro em relação ao caixa da igreja.';
+    } else if (isOng) {
+      msgAlavancagem = 'CARTÕES CONTROLADOS: O uso de cartões corporativos ($valCartoes) está dentro das margens seguras de liquidez da instituição.';
+    } else if (isFamilia) {
+      msgAlavancagem = 'CARTÃO SOB CONTROLE: Suas faturas ($valCartoes) estão em um valor seguro e não ameaçam as suas economias.';
+    } else if (isIndustria) {
+      msgAlavancagem = 'CARTÕES CONTROLADOS: O uso de cartões corporativos ($valCartoes) não compromete a liquidez imediata da operação.';
+    } else {
+      msgAlavancagem = 'CRÉDITO SAUDÁVEL: A alavancagem em cartões corporativos ($valCartoes) está perfeitamente controlada pelo caixa.';
+    }
+  }
 
   // ALERTA 4: DEPENDÊNCIA DE RECEBÍVEIS
   String msgRiscoRecebiveis = '';
