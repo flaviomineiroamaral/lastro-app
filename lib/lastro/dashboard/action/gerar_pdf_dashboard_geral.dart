@@ -199,28 +199,31 @@ Future gerarPdfDashboardGeral(
   String msgAlvoArrecadacao = '';
   PdfColor corAlertaMeta = PdfColors.black;
 
+  String lblAlvo = (isIgreja || isOng) ? 'ALVO DE ARRECADAÇÃO' : 'ALVO DE RECEITAS';
   if (esforcoCaixaReal > 0) {
     msgAlvoArrecadacao =
-        'ALVO DE ARRECADAÇÃO (FECHO DO MÊS): O saldo em caixa somado às previsões de recebimento não é suficiente para quitar as obrigações deste período. É necessário gerar ${currencyFormatter.format(esforcoCaixaReal)} em novas receitas (arrecadação extra) para não fechar o mês no vermelho.';
+        '$lblAlvo (FECHO DO MÊS): Faltam ${currencyFormatter.format(esforcoCaixaReal)} para fechar as obrigações deste mês sem recorrer a novos endividamentos.';
     corAlertaMeta = corDebito;
   } else {
+    String lblSobra = isFamilia ? 'Sobra Livre' : 'Superávit Livre';
     msgAlvoArrecadacao =
-        'PONTO DE EQUILÍBRIO ATINGIDO: O caixa atual somado aos recebimentos agendados já garante o pagamento de 100% da operação do mês. O que entrar extra é Superávit Livre para investimento.';
+        'PONTO DE EQUILÍBRIO ATINGIDO: O caixa atual somado aos recebimentos agendados já garante o pagamento de 100% da operação do mês. O que entrar extra é $lblSobra para investimento.';
     corAlertaMeta = PdfColors.green800;
   }
 
   // ALERTA 2: TRAVA DE COMPRAS
   bool isCaixaCongelado = dividaTotalCorrente > caixaParaCalculo;
+  String lblTrava = isFamilia ? 'FREIO DE GASTOS' : 'TRAVA DE COMPRAS';
   final String msgTravaCompras = isCaixaCongelado
-      ? 'TRAVA DE COMPRAS (LIQUIDEZ CRÍTICA): O dinheiro em caixa (${currencyFormatter.format(caixaParaCalculo)}) não é suficiente para pagar as obrigações ativas do mês (${currencyFormatter.format(dividaTotalCorrente)}). PROIBIDO assumir novos compromissos.'
-      : 'CAIXA LIVRE: O saldo em caixa (${currencyFormatter.format(caixaParaCalculo)}) é maior que as dívidas do mês (${currencyFormatter.format(dividaTotalCorrente)}). Operação segura.';
+      ? '$lblTrava: O dinheiro em caixa (${currencyFormatter.format(caixaParaCalculo)}) não cobre as obrigações ativas. PROIBIDO assumir novos compromissos.'
+      : 'CAIXA LIVRE: O saldo em caixa (${currencyFormatter.format(caixaParaCalculo)}) é maior que as dívidas do mês. Operação segura.';
 
   // ALERTA 3: ALAVANCAGEM DE CARTÃO
   double limiteSeguro = caixaParaCalculo > 0 ? caixaParaCalculo * 0.30 : 0.0;
   bool isAlavancadoLocal = dividaCartoesMes > limiteSeguro;
   final String msgAlavancagem = isAlavancadoLocal
-      ? 'ALERTA DE ALAVANCAGEM: A dívida de cartões de crédito (${currencyFormatter.format(dividaCartoesMes)}) está acima da margem de segurança do caixa livre (${currencyFormatter.format(limiteSeguro)}). A operação está perigosamente financiada por dívida.'
-      : 'CRÉDITO SAUDÁVEL: O uso de cartões de crédito (${currencyFormatter.format(dividaCartoesMes)}) está protegido por liquidez. (Abaixo do teto seguro de ${currencyFormatter.format(limiteSeguro)}).';
+      ? 'ALERTA DE ALAVANCAGEM: A dívida de cartões (${currencyFormatter.format(dividaCartoesMes)}) está perigosamente acima da margem de segurança do seu caixa.'
+      : 'CRÉDITO SAUDÁVEL: O uso de cartões (${currencyFormatter.format(dividaCartoesMes)}) está protegido por liquidez (abaixo do teto seguro de ${currencyFormatter.format(limiteSeguro)}).';
 
   // ALERTA 4: DEPENDÊNCIA DE RECEBÍVEIS
   String msgRiscoRecebiveis = '';
