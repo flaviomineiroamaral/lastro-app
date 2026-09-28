@@ -465,41 +465,6 @@ Future gerarPdfDashboardGeral(
         ]),
 pw.SizedBox(height: 20),
 
-        // 1. FLUXO DO PERÍODO E LIQUIDEZ
-        pw.Text('1. FLUXO DO PERÍODO E LIQUIDEZ',
-            style: pw.TextStyle(
-                fontSize: 12, fontWeight: pw.FontWeight.bold, color: corAzul)),
-        pw.Divider(color: PdfColors.grey300),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          children: [
-            _buildCaixaMetrica(
-                'Saldo Inicial (Período)',
-                currencyFormatter.format(dtDfc.saldoInicial),
-                PdfColors.black,
-                corCinzaFundo),
-            _buildCaixaMetrica(
-                'Entradas (Período)',
-                currencyFormatter.format(dtDfc.totalEntradas),
-                corCredito,
-                corCinzaFundo),
-            _buildCaixaMetrica(
-                'Saídas (Período)',
-                currencyFormatter.format(dtDfc.totalSaidas),
-                corDebito,
-                corCinzaFundo,
-                subtitulo:
-                    'Queima: ${(burnRatePeriodo * 100).toStringAsFixed(1)}%',
-                corSub: burnRatePeriodo > 1.0 ? corDebito : PdfColors.grey600),
-            _buildCaixaMetrica(
-                labelCaixaMetrica,
-                currencyFormatter.format(caixaParaCalculo),
-                corPrimaria,
-                PdfColors.blue50),
-          ],
-        ),
-        pw.SizedBox(height: 20),
-
         // 2. PERFORMANCE (DRE & DFC)
         pw.Text('PERFORMANCE E LIQUIDEZ',
             style: pw.TextStyle(
@@ -587,12 +552,25 @@ pw.SizedBox(height: 20),
                         dtDfc.geracaoCaixa >= 0 ? corCredito : corDebito,
                         isBold: true),
                     pw.SizedBox(height: 4),
-                    pw.Text(
-                        'Saldo Final: ${currencyFormatter.format(dtDfc.saldoFinal)}',
-                        style: pw.TextStyle(
-                            fontSize: 9,
-                            fontWeight: pw.FontWeight.bold,
-                            color: PdfColors.black)),
+                    _buildLinhaResumo(
+                        'Saldo Inicial Acumulado',
+                        currencyFormatter.format(dtDfc.saldoInicial),
+                        PdfColors.grey600),
+                    _buildLinhaResumo(
+                        '(=) Saldo Final',
+                        currencyFormatter.format(dtDfc.saldoFinal),
+                        PdfColors.black,
+                        isBold: true),
+                    _buildLinhaResumo(
+                        '(-) Saldos Bloqueados/Investidos',
+                        currencyFormatter.format(dtDfc.saldoFinal - caixaParaCalculo),
+                        PdfColors.orange700),
+                    pw.Divider(color: PdfColors.grey300, thickness: 0.5),
+                    _buildLinhaResumo(
+                        '(=) $labelCaixaMetrica',
+                        currencyFormatter.format(caixaParaCalculo),
+                        PdfColors.black,
+                        isBold: true),
                   ],
                 ),
               ),
