@@ -9,9 +9,15 @@ class DTCacheMembrosLightStruct extends BaseStruct {
   DTCacheMembrosLightStruct({
     String? id,
     String? nomeCompleto,
+    String? cpf,
+    String? email,
+    String? telefone,
     bool? ativo,
   })  : _id = id,
         _nomeCompleto = nomeCompleto,
+        _cpf = cpf,
+        _email = email,
+        _telefone = telefone,
         _ativo = ativo;
 
   // "id" field.
@@ -28,6 +34,27 @@ class DTCacheMembrosLightStruct extends BaseStruct {
 
   bool hasNomeCompleto() => _nomeCompleto != null;
 
+  // "cpf" field.
+  String? _cpf;
+  String get cpf => _cpf ?? '';
+  set cpf(String? val) => _cpf = val;
+
+  bool hasCpf() => _cpf != null;
+
+  // "email" field.
+  String? _email;
+  String get email => _email ?? '';
+  set email(String? val) => _email = val;
+
+  bool hasEmail() => _email != null;
+
+  // "telefone" field.
+  String? _telefone;
+  String get telefone => _telefone ?? '';
+  set telefone(String? val) => _telefone = val;
+
+  bool hasTelefone() => _telefone != null;
+
   // "ativo" field.
   bool? _ativo;
   bool get ativo => _ativo ?? false;
@@ -39,6 +66,9 @@ class DTCacheMembrosLightStruct extends BaseStruct {
       DTCacheMembrosLightStruct(
         id: data['id'] as String?,
         nomeCompleto: data['nomeCompleto'] as String?,
+        cpf: data['cpf'] as String?,
+        email: data['email'] as String?,
+        telefone: data['telefone'] as String?,
         ativo: data['ativo'] as bool?,
       );
 
@@ -49,6 +79,9 @@ class DTCacheMembrosLightStruct extends BaseStruct {
   Map<String, dynamic> toMap() => {
         'id': _id,
         'nomeCompleto': _nomeCompleto,
+        'cpf': _cpf,
+        'email': _email,
+        'telefone': _telefone,
         'ativo': _ativo,
       }.withoutNulls;
 
@@ -60,6 +93,18 @@ class DTCacheMembrosLightStruct extends BaseStruct {
         ),
         'nomeCompleto': serializeParam(
           _nomeCompleto,
+          ParamType.String,
+        ),
+        'cpf': serializeParam(
+          _cpf,
+          ParamType.String,
+        ),
+        'email': serializeParam(
+          _email,
+          ParamType.String,
+        ),
+        'telefone': serializeParam(
+          _telefone,
           ParamType.String,
         ),
         'ativo': serializeParam(
@@ -81,6 +126,21 @@ class DTCacheMembrosLightStruct extends BaseStruct {
           ParamType.String,
           false,
         ),
+        cpf: deserializeParam(
+          data['cpf'],
+          ParamType.String,
+          false,
+        ),
+        email: deserializeParam(
+          data['email'],
+          ParamType.String,
+          false,
+        ),
+        telefone: deserializeParam(
+          data['telefone'],
+          ParamType.String,
+          false,
+        ),
         ativo: deserializeParam(
           data['ativo'],
           ParamType.bool,
@@ -96,20 +156,30 @@ class DTCacheMembrosLightStruct extends BaseStruct {
     return other is DTCacheMembrosLightStruct &&
         id == other.id &&
         nomeCompleto == other.nomeCompleto &&
+        cpf == other.cpf &&
+        email == other.email &&
+        telefone == other.telefone &&
         ativo == other.ativo;
   }
 
   @override
-  int get hashCode => const ListEquality().hash([id, nomeCompleto, ativo]);
+  int get hashCode => const ListEquality()
+      .hash([id, nomeCompleto, cpf, email, telefone, ativo]);
 }
 
 DTCacheMembrosLightStruct createDTCacheMembrosLightStruct({
   String? id,
   String? nomeCompleto,
+  String? cpf,
+  String? email,
+  String? telefone,
   bool? ativo,
 }) =>
     DTCacheMembrosLightStruct(
       id: id,
       nomeCompleto: nomeCompleto,
+      cpf: cpf,
+      email: email,
+      telefone: telefone,
       ativo: ativo,
     );

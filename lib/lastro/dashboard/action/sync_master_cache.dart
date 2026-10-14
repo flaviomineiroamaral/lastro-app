@@ -117,6 +117,12 @@ Future syncMasterCache(
           .map((d) => DTCacheMembrosLightStruct(
                 id: d['id'],
                 nomeCompleto: d['nome_completo']?.toString() ?? '',
+                cpf: d['cpf'] != null
+                    ? d['cpf'].toString().replaceAll(RegExp(r'\D'), '')
+                    : '',
+                telefone: d['telefone'] != null
+                    ? d['telefone'].toString().replaceAll(RegExp(r'\D'), '')
+                    : '',
                 ativo: d['ativo'] == true,
               ))
           .toList();

@@ -18,13 +18,13 @@ class BsPessoaWidget extends StatefulWidget {
     this.pIdPessoa,
     this.pNome,
     this.pCPF,
-    this.pWhatsapp,
+    this.pTelefone,
   });
 
   final String? pIdPessoa;
   final String? pNome;
   final String? pCPF;
-  final int? pWhatsapp;
+  final String? pTelefone;
 
   @override
   State<BsPessoaWidget> createState() => _BsPessoaWidgetState();
@@ -59,12 +59,7 @@ class _BsPessoaWidgetState extends State<BsPessoaWidget> {
     _model.cpfMask = MaskTextInputFormatter(mask: '###.###.###-##');
     _model.whatsappTextController ??= TextEditingController(
         text: widget.pIdPessoa != null && widget.pIdPessoa != ''
-            ? formatNumber(
-                widget.pWhatsapp,
-                formatType: FormatType.custom,
-                format: '(##) # ####-####',
-                locale: 'pt-br',
-              )
+            ? widget.pTelefone
             : '');
     _model.whatsappFocusNode ??= FocusNode();
 

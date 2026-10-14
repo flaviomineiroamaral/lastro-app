@@ -104,7 +104,7 @@ class _GerenciarPessoaWidgetState extends State<GerenciarPessoaWidget> {
                               child: Padding(
                                 padding: MediaQuery.viewInsetsOf(context),
                                 child: Container(
-                                  height: 300.0,
+                                  height: 400.0,
                                   child: BsPessoaWidget(),
                                 ),
                               ),
@@ -355,7 +355,7 @@ class _GerenciarPessoaWidgetState extends State<GerenciarPessoaWidget> {
                                                                         context),
                                                                 child:
                                                                     Container(
-                                                                  height: 300.0,
+                                                                  height: 400.0,
                                                                   child:
                                                                       BsPessoaWidget(
                                                                     pIdPessoa:
@@ -363,6 +363,12 @@ class _GerenciarPessoaWidgetState extends State<GerenciarPessoaWidget> {
                                                                             .id,
                                                                     pNome: listaMembrosItem
                                                                         .nomeCompleto,
+                                                                    pCPF:
+                                                                        listaMembrosItem
+                                                                            .cpf,
+                                                                    pTelefone:
+                                                                        listaMembrosItem
+                                                                            .telefone,
                                                                   ),
                                                                 ),
                                                               ),
