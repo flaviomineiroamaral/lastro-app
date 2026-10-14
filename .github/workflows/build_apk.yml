@@ -26,6 +26,8 @@ jobs:
   build_android:
     name: Compilar APK na Nuvem
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout do Codigo
@@ -58,10 +60,20 @@ jobs:
           echo "Renomeando o arquivo gerado para Lastro.apk..."
           mv build/app/outputs/flutter-apk/app-$BUILD_MODE.apk build/app/outputs/flutter-apk/Lastro.apk
 
-      - name: Disponibilizar APK para Download
+      - name: Disponibilizar APK para Download (Artifacts)
         uses: actions/upload-artifact@v4
         with:
           name: Lastro-App-${{ github.event.inputs.branch || 'flutterflow' }}-${{ github.event.inputs.build_mode || 'release' }}
           path: build/app/outputs/flutter-apk/Lastro.apk
           if-no-files-found: error
           retention-days: 7
+
+      - name: Atualizar APK no GitHub Releases
+        uses: softprops/action-gh-release@v2
+        if: success()
+        with:
+          tag_name: v1.0.0
+          name: "Lastro App - Última Versão (FlutterFlow)"
+          files: build/app/outputs/flutter-apk/Lastro.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
