@@ -17,7 +17,6 @@ import 'package:intl/intl.dart';
 
 Future gerarPdfDashboardGeral(
   String? nomeInstituicao,
-  String? tipoPerfilOrg,
   DTSaldoTotalOrgStruct? saldoTotal,
   List<DTSaldoContaStruct>? saldosContas,
   DTDfcSinteticoStruct? dfc,
@@ -27,9 +26,9 @@ Future gerarPdfDashboardGeral(
   DTResumoSaudeCRStruct? saudeCR,
   DTAlertasResumoStruct? alertas,
   DateTime? dataInicio,
-  DateTime? dataFim,
-  // NOTA: O parâmetro pendenciasMes foi APAGADO. Menos complexidade no FlutterFlow!
-) async {
+  DateTime? dataFim, [
+  String? tipoPerfilOrg,
+]) async {
   final doc = pw.Document(version: PdfVersion.pdf_1_5, compress: true);
 
   final currencyFormatter =
@@ -55,7 +54,9 @@ Future gerarPdfDashboardGeral(
           : nomeInstituicao.toUpperCase();
 
   // DICIONÁRIO DINÂMICO MULTI-PERFIL
-  String tPerfil = (tipoPerfilOrg ?? '').toUpperCase();
+  String tPerfil = (tipoPerfilOrg != null && tipoPerfilOrg.isNotEmpty)
+      ? tipoPerfilOrg.toUpperCase()
+      : FFAppState().currentOrganizationType.toUpperCase();
   bool isIgreja = tPerfil == 'IGREJA';
   bool isOng = tPerfil == 'OSC/ONG' || tPerfil == 'ONG' || tPerfil == 'OSC';
   bool isFamilia = tPerfil == 'FAMILIA' || tPerfil == 'FAMÍLIA';
