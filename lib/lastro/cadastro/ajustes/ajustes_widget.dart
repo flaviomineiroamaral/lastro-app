@@ -1,8 +1,6 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -202,9 +200,7 @@ class _AjustesWidgetState extends State<AjustesWidget> {
                                             } else if ((FFAppState()
                                                         .currentFunction ==
                                                     'Leitor') ||
-                                                (FFAppState().currentFunction ==
-                                                        null ||
-                                                    FFAppState()
+                                                (FFAppState()
                                                             .currentFunction ==
                                                         '')) {
                                               await showDialog(
@@ -364,9 +360,7 @@ class _AjustesWidgetState extends State<AjustesWidget> {
                                             } else if ((FFAppState()
                                                         .currentFunction ==
                                                     'Leitor') ||
-                                                (FFAppState().currentFunction ==
-                                                        null ||
-                                                    FFAppState()
+                                                (FFAppState()
                                                             .currentFunction ==
                                                         '')) {
                                               await showDialog(
@@ -526,9 +520,7 @@ class _AjustesWidgetState extends State<AjustesWidget> {
                                             } else if ((FFAppState()
                                                         .currentFunction ==
                                                     'Leitor') ||
-                                                (FFAppState().currentFunction ==
-                                                        null ||
-                                                    FFAppState()
+                                                (FFAppState()
                                                             .currentFunction ==
                                                         '')) {
                                               await showDialog(
@@ -688,9 +680,7 @@ class _AjustesWidgetState extends State<AjustesWidget> {
                                             } else if ((FFAppState()
                                                         .currentFunction ==
                                                     'Leitor') ||
-                                                (FFAppState().currentFunction ==
-                                                        null ||
-                                                    FFAppState()
+                                                (FFAppState()
                                                             .currentFunction ==
                                                         '')) {
                                               await showDialog(
@@ -956,9 +946,7 @@ class _AjustesWidgetState extends State<AjustesWidget> {
                                             } else if ((FFAppState()
                                                         .currentFunction ==
                                                     'Leitor') ||
-                                                (FFAppState().currentFunction ==
-                                                        null ||
-                                                    FFAppState()
+                                                (FFAppState()
                                                             .currentFunction ==
                                                         '')) {
                                               await showDialog(
@@ -1118,9 +1106,7 @@ class _AjustesWidgetState extends State<AjustesWidget> {
                                             } else if ((FFAppState()
                                                         .currentFunction ==
                                                     'Leitor') ||
-                                                (FFAppState().currentFunction ==
-                                                        null ||
-                                                    FFAppState()
+                                                (FFAppState()
                                                             .currentFunction ==
                                                         '')) {
                                               await showDialog(

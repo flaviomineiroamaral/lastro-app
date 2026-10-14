@@ -1,11 +1,9 @@
 // Automatic FlutterFlow imports
 import '/backend/schema/structs/index.dart';
 import '/backend/supabase/supabase.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import '/custom_code/actions/index.dart'; // Imports other custom actions
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
-import 'package:flutter/material.dart';
+// Imports other custom actions
+// Imports custom functions
+import 'package:flutter/material.dart' hide RepeatMode;
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -16,9 +14,18 @@ Future<DTDfcSinteticoStruct> getDfcSintetico(
 ) async {
   final supabase = Supabase.instance.client;
 
+  // O nosso "Escudo Protetor" contra quebras de JSON do Supabase
+  double parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
   try {
     // Garante que pegamos o início do dia na data local e forçamos para UTC
-    // Isso evita qualquer manipulação de fuso dentro do banco de dados.
+    // Isso evita qualquer manipulação de fuso dentro do banco de dados (Jogada de Mestre).
     final inicioUtc =
         DateTime.utc(dataInicio.year, dataInicio.month, dataInicio.day)
             .toIso8601String();
@@ -33,21 +40,31 @@ Future<DTDfcSinteticoStruct> getDfcSintetico(
     });
 
     if (response != null && response is List && response.isNotEmpty) {
-      final data = response.first;
+      final data = response.first as Map<String, dynamic>;
 
       return DTDfcSinteticoStruct(
-        saldoInicial: data['saldo_inicial']?.toDouble() ?? 0.0,
-        totalEntradas: data['total_entradas']?.toDouble() ?? 0.0,
-        totalSaidas: data['total_saidas']?.toDouble() ?? 0.0,
-        geracaoCaixa: data['geracao_caixa']?.toDouble() ?? 0.0,
-        saldoFinal: data['saldo_final']?.toDouble() ?? 0.0,
+        // Aceita snake_case (Padrão Supabase) ou camelCase (Padrão Dart) com parser inquebrável
+        saldoInicial:
+            parseDouble(data['saldo_inicial'] ?? data['saldoInicial']),
+        totalEntradas:
+            parseDouble(data['total_entradas'] ?? data['totalEntradas']),
+        totalSaidas: parseDouble(data['total_saidas'] ?? data['totalSaidas']),
+        geracaoCaixa:
+            parseDouble(data['geracao_caixa'] ?? data['geracaoCaixa']),
+        saldoFinal: parseDouble(data['saldo_final'] ?? data['saldoFinal']),
       );
     }
 
-    // Retorno de segurança
-    return DTDfcSinteticoStruct();
+    // Retorno de segurança caso não haja movimento no período
+    return DTDfcSinteticoStruct(
+      saldoInicial: 0.0,
+      totalEntradas: 0.0,
+      totalSaidas: 0.0,
+      geracaoCaixa: 0.0,
+      saldoFinal: 0.0,
+    );
   } catch (e) {
-    debugPrint('Erro crítico ao buscar DFC Sintético: $e');
+    debugPrint('🔴 Erro crítico ao buscar DFC Sintético: $e');
     return DTDfcSinteticoStruct();
   }
 }

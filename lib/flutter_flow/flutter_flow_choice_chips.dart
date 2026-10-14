@@ -1,6 +1,5 @@
 import 'form_field_controller.dart';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -131,7 +130,7 @@ class _FlutterFlowChoiceChipsState extends State<FlutterFlowChoiceChips> {
             labelPadding: style.labelPadding,
             avatar: option.iconData != null
                 ? FaIcon(
-                    option.iconData,
+                    FaIconData(option.iconData!),
                     size: style.iconSize,
                     color: style.iconColor,
                   )

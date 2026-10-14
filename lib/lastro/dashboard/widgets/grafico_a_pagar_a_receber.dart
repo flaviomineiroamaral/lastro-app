@@ -1,12 +1,9 @@
 // Automatic FlutterFlow imports
-import '/backend/schema/structs/index.dart';
-import '/backend/supabase/supabase.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/custom_code/widgets/index.dart'; // Imports other custom widgets
-import '/custom_code/actions/index.dart'; // Imports custom actions
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
-import 'package:flutter/material.dart';
+// Imports other custom widgets
+// Imports custom actions
+// Imports custom functions
+import 'package:flutter/material.dart' hide RepeatMode;
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -134,7 +131,7 @@ class _GraficoAPagarAReceberState extends State<GraficoAPagarAReceber> {
                     Text(
                       'TOTAL',
                       style: TextStyle(
-                          color: Colors.white.withOpacity(0.5), fontSize: 10),
+                          color: Colors.white.withValues(alpha: 0.5), fontSize: 10),
                     ),
                     const SizedBox(height: 2),
                     // Blindagem do centro do gráfico com largura máxima e scaleDown

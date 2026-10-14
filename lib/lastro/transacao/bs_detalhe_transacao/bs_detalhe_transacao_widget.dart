@@ -1,4 +1,3 @@
-import '/backend/schema/structs/index.dart';
 import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_choice_chips.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
@@ -9,15 +8,12 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/upload_data.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/flutter_flow/custom_functions.dart' as functions;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'bs_detalhe_transacao_model.dart';
 export 'bs_detalhe_transacao_model.dart';
@@ -57,10 +53,10 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
 
     // On component load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      if (widget!.pIdTransacao != null && widget!.pIdTransacao != '') {
+      if (widget.pIdTransacao != null && widget.pIdTransacao != '') {
         _model.retBSDetalheTransacao = await actions.getDetalheTransacao(
           FFAppState().currentOrganizationId,
-          widget!.pIdTransacao!,
+          widget.pIdTransacao!,
         );
         _model.vUrlComprovante = _model.retBSDetalheTransacao?.comprovativoUrl;
         _model.vDataPagamento = _model.retBSDetalheTransacao?.dataPagamento;
@@ -80,11 +76,11 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                 : (_model.retBSDetalheTransacao?.tipoOperacao == 'DEBITO'
                     ? 'DESPESA'
                     : 'TRANSFERENCIA');
-        _model.vIdTransacao = widget!.pIdTransacao;
+        _model.vIdTransacao = widget.pIdTransacao;
         _model.vNomeDaConta = null;
         _model.vMostrarAvancadas = false;
         _model.vDescricaoCategoria = null;
-        _model.vTipoConta = widget!.pTipoConta;
+        _model.vTipoConta = widget.pTipoConta;
         _model.inputDescricaoTextController?.text = _model.vDescricao!;
 
         _model.choTipoValueController?.value = [_model.vTipoOperacao];
@@ -101,9 +97,9 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
         return;
       } else {
         _model.vDataPagamento =
-            widget!.pIdConta == 'CARTAO' ? null : getCurrentTimestamp;
-        _model.vDataVencimento = widget!.pDataVencimentoSugerida != null
-            ? widget!.pDataVencimentoSugerida
+            widget.pIdConta == 'CARTAO' ? null : getCurrentTimestamp;
+        _model.vDataVencimento = widget.pDataVencimentoSugerida != null
+            ? widget.pDataVencimentoSugerida
             : getCurrentTimestamp;
         _model.vDataCompetencia = getCurrentTimestamp;
         _model.vIdCentroCusto = null;
@@ -113,8 +109,8 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
         _model.vDescricaoCategoria = null;
         _model.vIdCategoria = null;
         _model.vIdContaOrigem =
-            widget!.pIdConta != null && widget!.pIdConta != ''
-                ? widget!.pIdConta
+            widget.pIdConta != null && widget.pIdConta != ''
+                ? widget.pIdConta
                 : '';
         _model.vIdContaDestino = null;
         _model.vIdMembro = null;
@@ -123,7 +119,7 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
         _model.vTipoOperacao = 'DESPESA';
         _model.vStatus = true;
         _model.vIdTransacao = null;
-        _model.vTipoConta = widget!.pTipoConta;
+        _model.vTipoConta = widget.pTipoConta;
         safeSetState(() {});
         await Future.delayed(
           Duration(
@@ -209,8 +205,8 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                           padding: EdgeInsetsDirectional.fromSTEB(
                               20.0, 0.0, 0.0, 0.0),
                           child: Text(
-                            widget!.pIdTransacao == null ||
-                                    widget!.pIdTransacao == ''
+                            widget.pIdTransacao == null ||
+                                    widget.pIdTransacao == ''
                                 ? 'Nova Transação'
                                 : 'Editar Transação',
                             style: FlutterFlowTheme.of(context)
@@ -250,8 +246,8 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                     ChipData('DESPESA'),
                     ChipData('TRANSFERENCIA')
                   ],
-                  onChanged: (widget!.pIdTransacao != null &&
-                          widget!.pIdTransacao != '')
+                  onChanged: (widget.pIdTransacao != null &&
+                          widget.pIdTransacao != '')
                       ? null
                       : (val) => safeSetState(
                           () => _model.choTipoValue = val?.firstOrNull),
@@ -364,8 +360,8 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                               FlutterFlowTheme.of(context).secondaryBackground,
                           arredondamento: 8.0,
                           centralizarTexto: false,
-                          valorInicial: widget!.pIdTransacao != null &&
-                                  widget!.pIdTransacao != ''
+                          valorInicial: widget.pIdTransacao != null &&
+                                  widget.pIdTransacao != ''
                               ? _model.retBSDetalheTransacao?.valor
                               : _model.vValorFormulario,
                           acaoAoMudar: (valorDigitado) async {
@@ -599,8 +595,7 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                                                       return null;
                                                     }
                                                   }()) ||
-                                              (e.naturezaFluxo == null ||
-                                                  e.naturezaFluxo == '')))
+                                              (e.naturezaFluxo == '')))
                                       .toList()
                                       .map((e) => e.id)
                                       .toList()),
@@ -623,8 +618,7 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                                                           return null;
                                                         }
                                                       }()) ||
-                                                  (e.naturezaFluxo == null ||
-                                                      e.naturezaFluxo == '')))
+                                                  (e.naturezaFluxo == '')))
                                           .toList()),
                                   onChanged: (val) async {
                                     safeSetState(
@@ -899,8 +893,8 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                                     ? null
                                     : (newValue) async {
                                         safeSetState(() =>
-                                            _model.swtStatusValue = newValue!);
-                                        if (newValue!) {
+                                            _model.swtStatusValue = newValue);
+                                        if (newValue) {
                                           _model.vDataPagamento =
                                               _model.vTipoConta == 'CARTAO'
                                                   ? null
@@ -1293,9 +1287,9 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                                                               .firstOrNull
                                                               ?.tipo ==
                                                           'CARTAO') &&
-                                                      (widget!.pIdTransacao ==
+                                                      (widget.pIdTransacao ==
                                                               null ||
-                                                          widget!.pIdTransacao ==
+                                                          widget.pIdTransacao ==
                                                               '')
                                                   ? functions
                                                       .calcularVencimentoFatura(
@@ -2314,11 +2308,7 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                                               if (_model.choTipoValue ==
                                                   'TRANSFERENCIA') {
                                                 return '*';
-                                              } else if (_model
-                                                          .inputDescricaoTextController
-                                                          .text ==
-                                                      null ||
-                                                  _model.inputDescricaoTextController
+                                              } else if (_model.inputDescricaoTextController
                                                           .text ==
                                                       '') {
                                                 return _model
@@ -2454,11 +2444,7 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                                             await TransacoesTable().update(
                                           data: {
                                             'valor': _model.vValorFormulario,
-                                            'descricao': _model
-                                                            .inputDescricaoTextController
-                                                            .text ==
-                                                        null ||
-                                                    _model.inputDescricaoTextController
+                                            'descricao': _model.inputDescricaoTextController
                                                             .text ==
                                                         ''
                                                 ? _model.vDescricaoCategoria
@@ -2546,7 +2532,7 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                                           matchingRows: (rows) => rows
                                               .eqOrNull(
                                                 'id',
-                                                widget!.pIdTransacao,
+                                                widget.pIdTransacao,
                                               )
                                               .eqOrNull(
                                                 'organization_id',
@@ -2613,8 +2599,8 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                                         }
                                       }
                                     } else {
-                                      if (widget!.pIdTransacao != null &&
-                                          widget!.pIdTransacao != '') {
+                                      if (widget.pIdTransacao != null &&
+                                          widget.pIdTransacao != '') {
                                         await showDialog(
                                           context: context,
                                           builder: (dialogContext) {
@@ -2711,8 +2697,8 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                               ),
                             ),
                           ),
-                          if (widget!.pIdTransacao != null &&
-                              widget!.pIdTransacao != '')
+                          if (widget.pIdTransacao != null &&
+                              widget.pIdTransacao != '')
                             Expanded(
                               child: Align(
                                 alignment: AlignmentDirectional(0.0, 0.0),
@@ -2763,7 +2749,7 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                                                 )
                                                 .eqOrNull(
                                                   'id',
-                                                  widget!.pIdTransacao,
+                                                  widget.pIdTransacao,
                                                 ),
                                           );
                                         } else {

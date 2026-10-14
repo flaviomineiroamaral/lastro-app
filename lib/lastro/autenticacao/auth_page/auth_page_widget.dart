@@ -3,7 +3,7 @@ import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
+import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
 import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
@@ -176,10 +176,10 @@ class _AuthPageWidgetState extends State<AuthPageWidget>
                                       FlutterFlowTheme.of(context).primary,
                                   tabs: [
                                     Tab(
-                                      text: 'Já Tenho Conta',
+                                      text: 'Entrar na Conta',
                                     ),
                                     Tab(
-                                      text: 'Nova Conta',
+                                      text: 'Novo Usuário',
                                     ),
                                   ],
                                   controller: _model.tabBarController,
@@ -575,12 +575,82 @@ class _AuthPageWidgetState extends State<AuthPageWidget>
                                               ),
                                             ),
                                           ),
+                                          Align(
+                                            alignment:
+                                                AlignmentDirectional(1.0, 0.0),
+                                            child: Padding(
+                                              padding: EdgeInsetsDirectional
+                                                  .fromSTEB(
+                                                      0.0, 6.0, 24.0, 0.0),
+                                              child: InkWell(
+                                                splashColor: Colors.transparent,
+                                                focusColor: Colors.transparent,
+                                                hoverColor: Colors.transparent,
+                                                highlightColor:
+                                                    Colors.transparent,
+                                                onTap: () async {
+                                                  if (_model
+                                                      .emailLoginTextController
+                                                      .text
+                                                      .isEmpty) {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          'E-mail obrigatório!',
+                                                        ),
+                                                      ),
+                                                    );
+                                                    return;
+                                                  }
+                                                  await authManager
+                                                      .resetPassword(
+                                                    email: _model
+                                                        .emailLoginTextController
+                                                        .text,
+                                                    context: context,
+                                                  );
+                                                },
+                                                child: Text(
+                                                  'Esqueceu sua senha?',
+                                                  textAlign: TextAlign.end,
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        font: GoogleFonts.inter(
+                                                          fontWeight:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .bodyMedium
+                                                                  .fontWeight,
+                                                          fontStyle:
+                                                              FontStyle.italic,
+                                                        ),
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodyMedium
+                                                                .fontWeight,
+                                                        fontStyle:
+                                                            FontStyle.italic,
+                                                        decoration:
+                                                            TextDecoration
+                                                                .underline,
+                                                      ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                           Padding(
                                             padding:
                                                 EdgeInsetsDirectional.fromSTEB(
-                                                    24.0, 24.0, 24.0, 24.0),
+                                                    24.0, 24.0, 24.0, 12.0),
                                             child: FFButtonWidget(
                                               onPressed: () async {
+                                                var _shouldSetState = false;
                                                 GoRouter.of(context)
                                                     .prepareAuthEvent();
 
@@ -606,6 +676,7 @@ class _AuthPageWidgetState extends State<AuthPageWidget>
                                                     currentUserUid,
                                                   ),
                                                 );
+                                                _shouldSetState = true;
                                                 if (_model.minhaOrganizacao
                                                         ?.length ==
                                                     1) {
@@ -620,34 +691,54 @@ class _AuthPageWidgetState extends State<AuthPageWidget>
                                                   );
                                                   FFAppState()
                                                           .currentOrganizationId =
-                                                      _model.minhaOrganizacao!
-                                                          .elementAtOrNull(0)!
+                                                      _model
+                                                          .minhaOrganizacao!
+                                                          .firstOrNull!
                                                           .organizationId!;
                                                   FFAppState()
                                                           .currentOrganizationType =
-                                                      _model.minhaOrganizacao!
-                                                          .elementAtOrNull(0)!
+                                                      _model
+                                                          .minhaOrganizacao!
+                                                          .firstOrNull!
                                                           .tipoOrganizacao!;
                                                   FFAppState()
                                                           .currentOrganizationName =
-                                                      _model.minhaOrganizacao!
-                                                          .elementAtOrNull(0)!
+                                                      _model
+                                                          .minhaOrganizacao!
+                                                          .firstOrNull!
                                                           .nomeOrganizacao!;
                                                   FFAppState().currentUser =
                                                       valueOrDefault<String>(
-                                                    _model.minhaOrganizacao
-                                                        ?.elementAtOrNull(0)
+                                                    _model
+                                                        .minhaOrganizacao
+                                                        ?.firstOrNull
                                                         ?.nomeUtilizador,
                                                     'Sem Usuário',
                                                   );
                                                   FFAppState().currentFunction =
                                                       _model.minhaOrganizacao!
-                                                          .elementAtOrNull(0)!
-                                                          .funcao!;
+                                                          .firstOrNull!.funcao!;
                                                   FFAppState().currentPlanName =
-                                                      _model.minhaOrganizacao!
-                                                          .elementAtOrNull(0)!
+                                                      _model
+                                                          .minhaOrganizacao!
+                                                          .firstOrNull!
                                                           .planoOrganizacao!;
+                                                  FFAppState()
+                                                          .isbloqueadofinanceiro =
+                                                      _model
+                                                          .minhaOrganizacao!
+                                                          .firstOrNull!
+                                                          .isBloqueadoFinanceiro!;
+                                                  FFAppState().limitecrsplano =
+                                                      _model
+                                                          .minhaOrganizacao!
+                                                          .firstOrNull!
+                                                          .limiteCrsPlano!;
+                                                  FFAppState().limitecrsatual =
+                                                      _model
+                                                          .minhaOrganizacao!
+                                                          .firstOrNull!
+                                                          .limiteCrsAtual!;
                                                   safeSetState(() {});
                                                   FFAppState()
                                                       .dataFimGlob = FFAppState()
@@ -667,9 +758,13 @@ class _AuthPageWidgetState extends State<AuthPageWidget>
                                                           .dataInicioGlob;
                                                   safeSetState(() {});
 
-                                                  context.pushNamedAuth(
+                                                  context.goNamedAuth(
                                                       DashboardWidget.routeName,
                                                       context.mounted);
+
+                                                  if (_shouldSetState)
+                                                    safeSetState(() {});
+                                                  return;
                                                 } else if (_model
                                                         .minhaOrganizacao!
                                                         .length >
@@ -678,14 +773,23 @@ class _AuthPageWidgetState extends State<AuthPageWidget>
                                                       SelecaoOrganizacaoWidget
                                                           .routeName,
                                                       context.mounted);
+
+                                                  if (_shouldSetState)
+                                                    safeSetState(() {});
+                                                  return;
                                                 } else {
                                                   context.pushNamedAuth(
                                                       OnboardingPageWidget
                                                           .routeName,
                                                       context.mounted);
+
+                                                  if (_shouldSetState)
+                                                    safeSetState(() {});
+                                                  return;
                                                 }
 
-                                                safeSetState(() {});
+                                                if (_shouldSetState)
+                                                  safeSetState(() {});
                                               },
                                               text: 'ENTRAR',
                                               options: FFButtonOptions(
@@ -736,6 +840,212 @@ class _AuthPageWidgetState extends State<AuthPageWidget>
                                                     BorderRadius.circular(8.0),
                                               ),
                                             ),
+                                          ),
+                                          Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: [
+                                              Expanded(
+                                                child: Builder(
+                                                  builder: (context) => Padding(
+                                                    padding:
+                                                        EdgeInsetsDirectional
+                                                            .fromSTEB(24.0, 0.0,
+                                                                6.0, 24.0),
+                                                    child: FFButtonWidget(
+                                                      onPressed: () async {
+                                                        await showDialog(
+                                                          context: context,
+                                                          builder:
+                                                              (dialogContext) {
+                                                            return Dialog(
+                                                              elevation: 0,
+                                                              insetPadding:
+                                                                  EdgeInsets
+                                                                      .zero,
+                                                              backgroundColor:
+                                                                  Colors
+                                                                      .transparent,
+                                                              alignment: AlignmentDirectional(
+                                                                      0.0, 0.0)
+                                                                  .resolve(
+                                                                      Directionality.of(
+                                                                          context)),
+                                                              child:
+                                                                  GestureDetector(
+                                                                onTap: () {
+                                                                  FocusScope.of(
+                                                                          dialogContext)
+                                                                      .unfocus();
+                                                                  FocusManager
+                                                                      .instance
+                                                                      .primaryFocus
+                                                                      ?.unfocus();
+                                                                },
+                                                                child:
+                                                                    BsTopNotificacoesWidget(
+                                                                  pTipo:
+                                                                      'SUCESSO',
+                                                                  pMensagem:
+                                                                      'Você será redirencionado para nossa página de Licenciamento!',
+                                                                ),
+                                                              ),
+                                                            );
+                                                          },
+                                                        );
+
+                                                        await launchURL(
+                                                            'https://lastro-onepage.sigmasistemas.com.br/onboarding');
+                                                      },
+                                                      text: 'Criar Nova Conta',
+                                                      options: FFButtonOptions(
+                                                        width: double.infinity,
+                                                        height: 40.0,
+                                                        padding:
+                                                            EdgeInsetsDirectional
+                                                                .fromSTEB(
+                                                                    16.0,
+                                                                    0.0,
+                                                                    16.0,
+                                                                    0.0),
+                                                        iconPadding:
+                                                            EdgeInsetsDirectional
+                                                                .fromSTEB(
+                                                                    0.0,
+                                                                    0.0,
+                                                                    0.0,
+                                                                    0.0),
+                                                        color: FlutterFlowTheme
+                                                                .of(context)
+                                                            .primaryBackground,
+                                                        textStyle:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .titleSmall
+                                                                .override(
+                                                                  font: GoogleFonts
+                                                                      .interTight(
+                                                                    fontWeight: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .titleSmall
+                                                                        .fontWeight,
+                                                                    fontStyle: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .titleSmall
+                                                                        .fontStyle,
+                                                                  ),
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .primary,
+                                                                  letterSpacing:
+                                                                      0.0,
+                                                                  fontWeight: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .titleSmall
+                                                                      .fontWeight,
+                                                                  fontStyle: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .titleSmall
+                                                                      .fontStyle,
+                                                                ),
+                                                        elevation: 0.0,
+                                                        borderSide: BorderSide(
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .primary,
+                                                        ),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8.0),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: Padding(
+                                                  padding: EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                          6.0, 0.0, 24.0, 24.0),
+                                                  child: FFButtonWidget(
+                                                    onPressed: () async {
+                                                      context.pushNamed(
+                                                        AtivacaoWidget
+                                                            .routeName,
+                                                        queryParameters: {
+                                                          'serial':
+                                                              serializeParam(
+                                                            '',
+                                                            ParamType.String,
+                                                          ),
+                                                        }.withoutNulls,
+                                                      );
+                                                    },
+                                                    text: 'Ativar Conta',
+                                                    options: FFButtonOptions(
+                                                      width: double.infinity,
+                                                      height: 40.0,
+                                                      padding:
+                                                          EdgeInsetsDirectional
+                                                              .fromSTEB(
+                                                                  16.0,
+                                                                  0.0,
+                                                                  16.0,
+                                                                  0.0),
+                                                      iconPadding:
+                                                          EdgeInsetsDirectional
+                                                              .fromSTEB(
+                                                                  0.0,
+                                                                  0.0,
+                                                                  0.0,
+                                                                  0.0),
+                                                      color: FlutterFlowTheme
+                                                              .of(context)
+                                                          .primaryBackground,
+                                                      textStyle:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .titleSmall
+                                                              .override(
+                                                                font: GoogleFonts
+                                                                    .interTight(
+                                                                  fontWeight: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .titleSmall
+                                                                      .fontWeight,
+                                                                  fontStyle: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .titleSmall
+                                                                      .fontStyle,
+                                                                ),
+                                                                color: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .primary,
+                                                                letterSpacing:
+                                                                    0.0,
+                                                                fontWeight: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .titleSmall
+                                                                    .fontWeight,
+                                                                fontStyle: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .titleSmall
+                                                                    .fontStyle,
+                                                              ),
+                                                      elevation: 0.0,
+                                                      borderSide: BorderSide(
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .primary,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8.0),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                           Align(
                                             alignment:
@@ -1556,7 +1866,7 @@ class _AuthPageWidgetState extends State<AuthPageWidget>
                                                       .showSnackBar(
                                                     SnackBar(
                                                       content: Text(
-                                                        'Passwords don\'t match!',
+                                                        'As senhas não coincidem.',
                                                       ),
                                                     ),
                                                   );
@@ -1602,7 +1912,7 @@ class _AuthPageWidgetState extends State<AuthPageWidget>
 
                                                 safeSetState(() {});
                                               },
-                                              text: 'Criar Conta',
+                                              text: 'Criar Usuário',
                                               options: FFButtonOptions(
                                                 width: double.infinity,
                                                 height: 40.0,

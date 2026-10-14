@@ -1,12 +1,13 @@
 import '/backend/supabase/supabase.dart';
+import '/flutter_flow/ff_builtin_enums.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/provider.dart';
 import 'bs_pessoa_model.dart';
 export 'bs_pessoa_model.dart';
@@ -16,10 +17,14 @@ class BsPessoaWidget extends StatefulWidget {
     super.key,
     this.pIdPessoa,
     this.pNome,
+    this.pCPF,
+    this.pWhatsapp,
   });
 
   final String? pIdPessoa;
   final String? pNome;
+  final String? pCPF;
+  final int? pWhatsapp;
 
   @override
   State<BsPessoaWidget> createState() => _BsPessoaWidgetState();
@@ -40,11 +45,30 @@ class _BsPessoaWidgetState extends State<BsPessoaWidget> {
     _model = createModel(context, () => BsPessoaModel());
 
     _model.nomePessoaTextController ??= TextEditingController(
-        text: widget!.pIdPessoa != null && widget!.pIdPessoa != ''
-            ? widget!.pNome
+        text: widget.pIdPessoa != null && widget.pIdPessoa != ''
+            ? widget.pNome
             : '');
     _model.nomePessoaFocusNode ??= FocusNode();
 
+    _model.cpfTextController ??= TextEditingController(
+        text: widget.pIdPessoa != null && widget.pIdPessoa != ''
+            ? widget.pCPF
+            : '');
+    _model.cpfFocusNode ??= FocusNode();
+
+    _model.cpfMask = MaskTextInputFormatter(mask: '###.###.###-##');
+    _model.whatsappTextController ??= TextEditingController(
+        text: widget.pIdPessoa != null && widget.pIdPessoa != ''
+            ? formatNumber(
+                widget.pWhatsapp,
+                formatType: FormatType.custom,
+                format: '(##) # ####-####',
+                locale: 'pt-br',
+              )
+            : '');
+    _model.whatsappFocusNode ??= FocusNode();
+
+    _model.whatsappMask = MaskTextInputFormatter(mask: '(##) # ####-####');
     _model.switchValue = true;
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -93,7 +117,7 @@ class _BsPessoaWidgetState extends State<BsPessoaWidget> {
             Padding(
               padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
               child: Text(
-                widget!.pIdPessoa == null || widget!.pIdPessoa == ''
+                widget.pIdPessoa == null || widget.pIdPessoa == ''
                     ? 'Nova Pessoa'
                     : 'Editar Pessoa',
                 textAlign: TextAlign.center,
@@ -214,6 +238,213 @@ class _BsPessoaWidgetState extends State<BsPessoaWidget> {
               ),
             ),
             Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(6.0, 24.0, 6.0, 0.0),
+              child: Container(
+                width: 200.0,
+                child: TextFormField(
+                  controller: _model.cpfTextController,
+                  focusNode: _model.cpfFocusNode,
+                  autofocus: false,
+                  enabled: true,
+                  obscureText: false,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    labelText: 'CPF',
+                    labelStyle:
+                        FlutterFlowTheme.of(context).labelMedium.override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .fontWeight,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .fontStyle,
+                              ),
+                              letterSpacing: 0.0,
+                              fontWeight: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .fontWeight,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .fontStyle,
+                            ),
+                    hintText: 'Digite o CPF...',
+                    hintStyle:
+                        FlutterFlowTheme.of(context).labelMedium.override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .fontWeight,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .fontStyle,
+                              ),
+                              letterSpacing: 0.0,
+                              fontWeight: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .fontWeight,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .fontStyle,
+                            ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0x00000000),
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0x00000000),
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: FlutterFlowTheme.of(context).error,
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: FlutterFlowTheme.of(context).error,
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    filled: true,
+                    fillColor: FlutterFlowTheme.of(context).fundoText,
+                  ),
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        font: GoogleFonts.inter(
+                          fontWeight: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .fontWeight,
+                          fontStyle:
+                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                        ),
+                        letterSpacing: 0.0,
+                        fontWeight:
+                            FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                        fontStyle:
+                            FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                      ),
+                  keyboardType: (FFKeyboardType.number).flutterValue,
+                  cursorColor: FlutterFlowTheme.of(context).primaryText,
+                  enableInteractiveSelection: true,
+                  validator:
+                      _model.cpfTextControllerValidator.asValidator(context),
+                  inputFormatters: [_model.cpfMask],
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(6.0, 24.0, 6.0, 0.0),
+              child: Container(
+                width: 200.0,
+                child: TextFormField(
+                  controller: _model.whatsappTextController,
+                  focusNode: _model.whatsappFocusNode,
+                  autofocus: false,
+                  enabled: true,
+                  obscureText: false,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    labelText: 'Whatsapp',
+                    labelStyle:
+                        FlutterFlowTheme.of(context).labelMedium.override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .fontWeight,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .fontStyle,
+                              ),
+                              letterSpacing: 0.0,
+                              fontWeight: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .fontWeight,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .fontStyle,
+                            ),
+                    hintText: 'Digite whatsapp...',
+                    hintStyle:
+                        FlutterFlowTheme.of(context).labelMedium.override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .fontWeight,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .fontStyle,
+                              ),
+                              letterSpacing: 0.0,
+                              fontWeight: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .fontWeight,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .fontStyle,
+                            ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0x00000000),
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0x00000000),
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: FlutterFlowTheme.of(context).error,
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: FlutterFlowTheme.of(context).error,
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    filled: true,
+                    fillColor: FlutterFlowTheme.of(context).fundoText,
+                  ),
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        font: GoogleFonts.inter(
+                          fontWeight: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .fontWeight,
+                          fontStyle:
+                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                        ),
+                        letterSpacing: 0.0,
+                        fontWeight:
+                            FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                        fontStyle:
+                            FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                      ),
+                  cursorColor: FlutterFlowTheme.of(context).primaryText,
+                  enableInteractiveSelection: true,
+                  validator: _model.whatsappTextControllerValidator
+                      .asValidator(context),
+                  inputFormatters: [_model.whatsappMask],
+                ),
+              ),
+            ),
+            Padding(
               padding: EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 0.0, 0.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -249,7 +480,7 @@ class _BsPessoaWidgetState extends State<BsPessoaWidget> {
                     child: Switch.adaptive(
                       value: _model.switchValue!,
                       onChanged: (newValue) async {
-                        safeSetState(() => _model.switchValue = newValue!);
+                        safeSetState(() => _model.switchValue = newValue);
                       },
                       activeColor: FlutterFlowTheme.of(context).primary,
                       activeTrackColor: FlutterFlowTheme.of(context).fundoText,
@@ -271,18 +502,20 @@ class _BsPessoaWidgetState extends State<BsPessoaWidget> {
                           12.0, 12.0, 12.0, 12.0),
                       child: FFButtonWidget(
                         onPressed: () async {
-                          if (widget!.pIdPessoa != null &&
-                              widget!.pIdPessoa != '') {
+                          if (widget.pIdPessoa != null &&
+                              widget.pIdPessoa != '') {
                             await MembrosTable().update(
                               data: {
                                 'nome_completo':
                                     _model.nomePessoaTextController.text,
                                 'ativo': _model.switchValue,
+                                'cpf': _model.cpfTextController.text,
+                                'telefone': _model.whatsappTextController.text,
                               },
                               matchingRows: (rows) => rows
                                   .eqOrNull(
                                     'id',
-                                    widget!.pIdPessoa,
+                                    widget.pIdPessoa,
                                   )
                                   .eqOrNull(
                                     'organization_id',
@@ -312,6 +545,8 @@ class _BsPessoaWidgetState extends State<BsPessoaWidget> {
                               'nome_completo':
                                   _model.nomePessoaTextController.text,
                               'ativo': _model.switchValue,
+                              'telefone': _model.whatsappTextController.text,
+                              'cpf': _model.cpfTextController.text,
                             });
                             await showDialog(
                               context: context,
@@ -378,7 +613,7 @@ class _BsPessoaWidgetState extends State<BsPessoaWidget> {
                     ),
                   ),
                 ),
-                if (widget!.pIdPessoa != null && widget!.pIdPessoa != '')
+                if (widget.pIdPessoa != null && widget.pIdPessoa != '')
                   Expanded(
                     child: Align(
                       alignment: AlignmentDirectional(0.0, 0.0),
@@ -422,7 +657,7 @@ class _BsPessoaWidgetState extends State<BsPessoaWidget> {
                                       )
                                       .eqOrNull(
                                         'id',
-                                        widget!.pIdPessoa,
+                                        widget.pIdPessoa,
                                       ),
                                 );
                                 _shouldSetState = true;

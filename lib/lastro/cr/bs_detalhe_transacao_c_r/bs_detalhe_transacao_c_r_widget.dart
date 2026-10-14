@@ -2,10 +2,8 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import '/custom_code/widgets/index.dart' as custom_widgets;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -50,7 +48,7 @@ class _BsDetalheTransacaoCRWidgetState
     // On component load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       _model.vDataOperacao = getCurrentTimestamp;
-      _model.vValorFormulario = (widget!.pValorMaximoTrans!).abs();
+      _model.vValorFormulario = (widget.pValorMaximoTrans!).abs();
       safeSetState(() {});
     });
 
@@ -105,9 +103,9 @@ class _BsDetalheTransacaoCRWidgetState
               padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 12.0),
               child: Text(
                 () {
-                  if (widget!.pTipoTransacao == 'Alocar') {
+                  if (widget.pTipoTransacao == 'Alocar') {
                     return 'Alocar Subsídio';
-                  } else if (widget!.pTipoTransacao == 'Devolver') {
+                  } else if (widget.pTipoTransacao == 'Devolver') {
                     return 'Devolver Subsídio';
                   } else {
                     return 'Transferir Caixa';
@@ -425,11 +423,11 @@ class _BsDetalheTransacaoCRWidgetState
                 child: FFButtonWidget(
                   onPressed: () async {
                     var _shouldSetState = false;
-                    if (widget!.pValorDisponivel! >= _model.vValorFormulario!) {
-                      if (widget!.pTipoTransacao == 'Alocar') {
+                    if (widget.pValorDisponivel! >= _model.vValorFormulario!) {
+                      if (widget.pTipoTransacao == 'Alocar') {
                         _model.retAlocar = await actions.alocarSubsidio(
                           FFAppState().currentOrganizationId,
-                          widget!.pIdProjetoCR!,
+                          widget.pIdProjetoCR!,
                           _model.vValorFormulario!,
                           _model.observacaoTextController.text,
                           _model.vDataOperacao!,
@@ -474,12 +472,11 @@ class _BsDetalheTransacaoCRWidgetState
 
                         if (_shouldSetState) safeSetState(() {});
                         return;
-                      } else if (widget!.pTipoTransacao == 'Devolver') {
-                        if (_model.observacaoTextController.text != null &&
-                            _model.observacaoTextController.text != '') {
+                      } else if (widget.pTipoTransacao == 'Devolver') {
+                        if (_model.observacaoTextController.text != '') {
                           _model.retEstorno = await actions.estornarSubsidio(
                             FFAppState().currentOrganizationId,
-                            widget!.pIdProjetoCR!,
+                            widget.pIdProjetoCR!,
                             _model.vValorFormulario!,
                             _model.observacaoTextController.text,
                             _model.vDataOperacao!,
@@ -553,7 +550,7 @@ class _BsDetalheTransacaoCRWidgetState
                       } else {
                         _model.retRepassar = await actions.repassarArrecadacao(
                           FFAppState().currentOrganizationId,
-                          widget!.pIdProjetoCR!,
+                          widget.pIdProjetoCR!,
                           _model.vValorFormulario!,
                           _model.observacaoTextController.text,
                           _model.vDataOperacao!,

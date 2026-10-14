@@ -1,17 +1,16 @@
 // Automatic FlutterFlow imports
 import '/backend/schema/structs/index.dart';
 import '/backend/supabase/supabase.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import '/custom_code/actions/index.dart'; // Imports other custom actions
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
-import 'package:flutter/material.dart';
+// Imports other custom actions
+// Imports custom functions
+import 'package:flutter/material.dart' hide RepeatMode;
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
 Future<DTSaldoTotalOrgStruct> getSaldoTotalOrg(String orgId) async {
   final supabase = Supabase.instance.client;
 
+  // EXCELENTE: Função robusta de parser para evitar crashes de JSON dinâmico
   double parseDouble(dynamic value) {
     if (value == null) return 0.0;
     if (value is double) return value;
@@ -28,7 +27,7 @@ Future<DTSaldoTotalOrgStruct> getSaldoTotalOrg(String orgId) async {
     if (response != null && response is List && response.isNotEmpty) {
       final data = response.first as Map<String, dynamic>;
 
-      // 1. Extração Base dos Valores
+      // 1. Extração Base dos Valores Clássicos
       double entradas = parseDouble(data['total_entradas_geral']);
       double saidas = parseDouble(data['total_saidas_geral']);
       double disponivelReal = parseDouble(data['saldo_disponivel_real']);
@@ -37,8 +36,16 @@ Future<DTSaldoTotalOrgStruct> getSaldoTotalOrg(String orgId) async {
       double aPagar = parseDouble(data['total_a_pagar']);
       double resumoAtivoPassivo = parseDouble(data['resumo_ativo_passivo']);
 
+      // 2. EXTRAÇÃO CORRIGIDA DOS NOVOS CAMPOS PARA O PDF (Lê com ou sem underline)
+      double totalAtivos =
+          parseDouble(data['totalAtivos'] ?? data['total_ativos']);
+      double totalPassivos =
+          parseDouble(data['totalPassivos'] ?? data['total_passivos']);
+      double saldoBloqueado =
+          parseDouble(data['saldoBloqueado'] ?? data['saldo_bloqueado']);
+
       // ==========================================
-      // MOTOR DE INTELIGÊNCIA E ALERTAS
+      // MOTOR DE INTELIGÊNCIA E ALERTAS BASE
       // ==========================================
 
       // 1) BURN RATE (Taxa de Queima)
@@ -77,7 +84,7 @@ Future<DTSaldoTotalOrgStruct> getSaldoTotalOrg(String orgId) async {
         // Cenário C: Negativo
         statusSolvencia = 'CENÁRIO C (ALERTA VERMELHO)';
         msgSolvencia =
-            'INSOLVÊNCIA TÉCNICA: Mesmo com o dinheiro no banco, há um buraco de R\$ ${resumoAtivoPassivo.toStringAsFixed(2)}. O caixa já pertence aos credores. Entre em regime de guerra: corte despesas e foque na arrecadação imediata.';
+            'INSOLVÊNCIA TÉCNICA: Mesmo com o dinheiro no banco, há um buraco de R\$ ${resumoAtivoPassivo.abs().toStringAsFixed(2)}. O caixa já pertence aos credores. Entre em regime de guerra: corte despesas e foque na arrecadação imediata.';
       } else if (!isInsolvente && burnRate > 1.0) {
         // Cenário B: Positivo, mas máquina está inchada (Gastando mais do que arrecada)
         statusSolvencia = 'CENÁRIO B (ATENÇÃO)';
@@ -87,14 +94,14 @@ Future<DTSaldoTotalOrgStruct> getSaldoTotalOrg(String orgId) async {
         // Cenário A: Positivo e máquina saudável
         statusSolvencia = 'CENÁRIO A (SAUDÁVEL)';
         msgSolvencia =
-            'SUPERÁVIT REAL: Solvência forte (R\$ ${resumoAtivoPassivo.toStringAsFixed(2)}) e máquina eficiente. Momento ideal para expansões físicas, infraestrutura (Gigabit) ou aumento de repasses e subsídios institucionais.';
+            'SUPERÁVIT REAL: Solvência forte (R\$ ${resumoAtivoPassivo.toStringAsFixed(2)}) e máquina eficiente. Momento ideal para expansões físicas, infraestrutura ou aumento de repasses.';
       }
 
       // ==========================================
       // RETORNO ESTRUTURADO PARA O FLUTTERFLOW
       // ==========================================
       return DTSaldoTotalOrgStruct(
-        // Dados Financeiros Brutos
+        // Dados Financeiros Brutos Clássicos
         totalSaldoInicial: parseDouble(data['total_saldo_inicial']),
         totalEntradas: entradas,
         totalSaidas: saidas,
@@ -105,15 +112,18 @@ Future<DTSaldoTotalOrgStruct> getSaldoTotalOrg(String orgId) async {
         totalAPagar: aPagar,
         resumoAtivoPassivo: resumoAtivoPassivo,
 
-        // Alertas Anteriores
+        // OS 3 NOVOS CAMPOS QUE FALTAVAM PARA O PDF:
+        totalAtivos: totalAtivos,
+        totalPassivos: totalPassivos,
+        saldoBloqueado: saldoBloqueado,
+
+        // Alertas
         burnRate: burnRate,
         isAlavancado: isAlavancado,
         msgAlertaAlavancagem: msgAlavancagem,
         msgAlivioCaixa: msgAlivioCaixa,
         isCaixaComprometido: isCaixaComprometido,
         msgAlertaRetencao: msgRetencao,
-
-        // Novos Alertas de Solvência
         statusSolvencia: statusSolvencia,
         msgSolvencia: msgSolvencia,
         isInsolvente: isInsolvente,

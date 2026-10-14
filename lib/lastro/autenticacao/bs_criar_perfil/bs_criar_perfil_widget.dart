@@ -3,7 +3,6 @@ import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
@@ -562,8 +561,7 @@ class _BsCriarPerfilWidgetState extends State<BsCriarPerfilWidget> {
             FFButtonWidget(
               onPressed: () async {
                 var _shouldSetState = false;
-                if (_model.nomeOrganizacaoTextController.text != null &&
-                    _model.nomeOrganizacaoTextController.text != '') {
+                if (_model.nomeOrganizacaoTextController.text != '') {
                   _model.resultadoRPC = await actions.createOrganizationRPC(
                     _model.nomeOrganizacaoTextController.text,
                     _model.selectedType,

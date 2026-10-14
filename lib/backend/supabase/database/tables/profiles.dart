@@ -34,4 +34,11 @@ class ProfilesRow extends SupabaseDataRow {
 
   bool? get hasAskedPush => getField<bool>('hasAskedPush');
   set hasAskedPush(bool? value) => setField<bool>('hasAskedPush', value);
+
+  String? get whatsapp => getField<String>('whatsapp');
+  set whatsapp(String? value) => setField<String>('whatsapp', value);
+
+  String? get codigoIntegracao => getField<String>('codigo_integracao');
+  set codigoIntegracao(String? value) =>
+      setField<String>('codigo_integracao', value);
 }

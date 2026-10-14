@@ -1,13 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:from_css_color/from_css_color.dart';
 
 import '/backend/schema/structs/index.dart';
 
 import '/backend/supabase/supabase.dart';
 
-import '../../flutter_flow/lat_lng.dart';
 import '../../flutter_flow/place.dart';
 import '../../flutter_flow/uploaded_file.dart';
 
@@ -195,6 +193,9 @@ enum ParamType {
 
   DataStruct,
   SupabaseRow,
+
+  CustomClass,
+  CustomEnum,
 }
 
 dynamic deserializeParam<T>(
@@ -252,12 +253,22 @@ dynamic deserializeParam<T>(
       case ParamType.SupabaseRow:
         final data = json.decode(param) as Map<String, dynamic>;
         switch (T) {
+          case AssinaturasB2bRow:
+            return AssinaturasB2bRow(data);
+          case AssinaturasB2cRow:
+            return AssinaturasB2cRow(data);
           case CentrosCustoRow:
             return CentrosCustoRow(data);
+          case CodigosParceriaRow:
+            return CodigosParceriaRow(data);
           case ContasBancariasRow:
             return ContasBancariasRow(data);
+          case ContratosB2bRow:
+            return ContratosB2bRow(data);
           case HistoricoSaldosRow:
             return HistoricoSaldosRow(data);
+          case LeadsComercialRow:
+            return LeadsComercialRow(data);
           case MembrosRow:
             return MembrosRow(data);
           case ObrigacoesRecorrentesRow:
@@ -270,8 +281,12 @@ dynamic deserializeParam<T>(
             return OrganizationMembersRow(data);
           case OrganizationsRow:
             return OrganizationsRow(data);
+          case ParametrosSistemaRow:
+            return ParametrosSistemaRow(data);
           case PlanoContasRow:
             return PlanoContasRow(data);
+          case PlanosComerciaisRow:
+            return PlanosComerciaisRow(data);
           case ProfilesRow:
             return ProfilesRow(data);
           case TransacoesRow:

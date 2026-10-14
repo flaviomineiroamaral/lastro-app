@@ -5,7 +5,6 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/lastro/geral/bs_filtro_periodo/bs_filtro_periodo_widget.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
 import '/lastro/transacao/bs_detalhe_transacao/bs_detalhe_transacao_widget.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/custom_functions.dart' as functions;
 import 'package:flutter/material.dart';
@@ -55,7 +54,7 @@ class _BsTransacaoWidgetState extends State<BsTransacaoWidget> {
       safeSetState(() {});
       _model.retDadosExtratoPeriodo = await actions.getExtratoPorPeriodo(
         FFAppState().currentOrganizationId,
-        widget!.pIdConta!,
+        widget.pIdConta!,
         FFAppState().dataInicioGlob!,
         FFAppState().dataFimGlob!,
       );
@@ -206,7 +205,7 @@ class _BsTransacaoWidgetState extends State<BsTransacaoWidget> {
                                   _model.retDadosExtratoPeriodoFiltro =
                                       await actions.getExtratoPorPeriodo(
                                     FFAppState().currentOrganizationId,
-                                    widget!.pIdConta!,
+                                    widget.pIdConta!,
                                     FFAppState().dataInicioGlob!,
                                     FFAppState().dataFimGlob!,
                                   );
@@ -311,7 +310,7 @@ class _BsTransacaoWidgetState extends State<BsTransacaoWidget> {
                                 await actions.gerarPdfExtrato(
                                   FFAppState().currentOrganizationName,
                                   _model.dadosExtratoPeriodo.toList(),
-                                  widget!.pNomeConta,
+                                  widget.pNomeConta,
                                   FFAppState().dataInicioGlob,
                                   FFAppState().dataFimGlob,
                                 );
@@ -331,7 +330,7 @@ class _BsTransacaoWidgetState extends State<BsTransacaoWidget> {
                           padding: EdgeInsetsDirectional.fromSTEB(
                               4.0, 12.0, 0.0, 20.0),
                           child: Text(
-                            'Conta: ${widget!.pNomeConta}',
+                            'Conta: ${widget.pNomeConta}',
                             textAlign: TextAlign.center,
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
@@ -363,7 +362,7 @@ class _BsTransacaoWidgetState extends State<BsTransacaoWidget> {
                               _model.retDadosExtratoPeriodoPull =
                                   await actions.getExtratoPorPeriodo(
                                 FFAppState().currentOrganizationId,
-                                widget!.pIdConta!,
+                                widget.pIdConta!,
                                 FFAppState().dataInicioGlob!,
                                 FFAppState().dataFimGlob!,
                               );
@@ -556,9 +555,6 @@ class _BsTransacaoWidgetState extends State<BsTransacaoWidget> {
                                                                 'Leitor') ||
                                                             (FFAppState()
                                                                         .currentFunction ==
-                                                                    null ||
-                                                                FFAppState()
-                                                                        .currentFunction ==
                                                                     '')) {
                                                           await showDialog(
                                                             context: context,
@@ -593,7 +589,7 @@ class _BsTransacaoWidgetState extends State<BsTransacaoWidget> {
                                                             safeSetState(() {});
                                                           return;
                                                         } else {
-                                                          if ((widget!.pTipoConta !=
+                                                          if ((widget.pTipoConta !=
                                                                   'VIRTUAL') &&
                                                               (listaExtratoItem
                                                                       .status ==
@@ -618,10 +614,10 @@ class _BsTransacaoWidgetState extends State<BsTransacaoWidget> {
                                                                         listaExtratoItem
                                                                             .transacaoId,
                                                                     pIdConta:
-                                                                        widget!
+                                                                        widget
                                                                             .pIdConta,
                                                                     pTipoConta:
-                                                                        widget!
+                                                                        widget
                                                                             .pTipoConta,
                                                                   ),
                                                                 );
@@ -635,7 +631,7 @@ class _BsTransacaoWidgetState extends State<BsTransacaoWidget> {
                                                                     .getExtratoPorPeriodo(
                                                               FFAppState()
                                                                   .currentOrganizationId,
-                                                              widget!.pIdConta!,
+                                                              widget.pIdConta!,
                                                               FFAppState()
                                                                   .dataInicioGlob!,
                                                               FFAppState()
@@ -1004,8 +1000,7 @@ class _BsTransacaoWidgetState extends State<BsTransacaoWidget> {
                   onPressed: () async {
                     var _shouldSetState = false;
                     if ((FFAppState().currentFunction == 'Leitor') ||
-                        (FFAppState().currentFunction == null ||
-                            FFAppState().currentFunction == '')) {
+                        (FFAppState().currentFunction == '')) {
                       await showDialog(
                         context: context,
                         builder: (dialogContext) {
@@ -1036,14 +1031,14 @@ class _BsTransacaoWidgetState extends State<BsTransacaoWidget> {
                             padding: MediaQuery.viewInsetsOf(context),
                             child: BsDetalheTransacaoWidget(
                               pIdTransacao: '',
-                              pIdConta: widget!.pIdConta,
-                              pTipoConta: widget!.pTipoConta,
+                              pIdConta: widget.pIdConta,
+                              pTipoConta: widget.pTipoConta,
                               pDataVencimentoSugerida:
-                                  widget!.pTipoConta == 'CARTAO'
+                                  widget.pTipoConta == 'CARTAO'
                                       ? functions.calcularVencimentoFatura(
                                           getCurrentTimestamp,
-                                          widget!.pDiaFechFatura!,
-                                          widget!.pDiaVencCartao!)
+                                          widget.pDiaFechFatura!,
+                                          widget.pDiaVencCartao!)
                                       : getCurrentTimestamp,
                             ),
                           );
@@ -1053,7 +1048,7 @@ class _BsTransacaoWidgetState extends State<BsTransacaoWidget> {
                       _model.retDadosExtratoPeriodoDTNovo =
                           await actions.getExtratoPorPeriodo(
                         FFAppState().currentOrganizationId,
-                        widget!.pIdConta!,
+                        widget.pIdConta!,
                         FFAppState().dataInicioGlob!,
                         FFAppState().dataFimGlob!,
                       );

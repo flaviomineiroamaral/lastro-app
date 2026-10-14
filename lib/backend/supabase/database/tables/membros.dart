@@ -38,7 +38,4 @@ class MembrosRow extends SupabaseDataRow {
 
   DateTime? get criadoEm => getField<DateTime>('criado_em');
   set criadoEm(DateTime? value) => setField<DateTime>('criado_em', value);
-
-  bool? get teste => getField<bool>('teste');
-  set teste(bool? value) => setField<bool>('teste', value);
 }

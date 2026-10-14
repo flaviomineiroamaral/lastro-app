@@ -1,12 +1,9 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'bs_top_notificacoes_model.dart';
 export 'bs_top_notificacoes_model.dart';
 
@@ -43,7 +40,7 @@ class _BsTopNotificacoesWidgetState extends State<BsTopNotificacoesWidget> {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(
         Duration(
-          milliseconds: 3000,
+          milliseconds: 4000,
         ),
       );
       Navigator.pop(context);
@@ -76,9 +73,9 @@ class _BsTopNotificacoesWidgetState extends State<BsTopNotificacoesWidget> {
           ),
           decoration: BoxDecoration(
             color: () {
-              if (widget!.pTipo == 'SUCESSO') {
+              if (widget.pTipo == 'SUCESSO') {
                 return FlutterFlowTheme.of(context).secondary;
-              } else if (widget!.pTipo == 'ERRO') {
+              } else if (widget.pTipo == 'ERRO') {
                 return FlutterFlowTheme.of(context).error;
               } else {
                 return FlutterFlowTheme.of(context).primary;
@@ -107,7 +104,7 @@ class _BsTopNotificacoesWidgetState extends State<BsTopNotificacoesWidget> {
                   padding: EdgeInsetsDirectional.fromSTEB(12.0, 8.0, 12.0, 8.0),
                   child: AutoSizeText(
                     valueOrDefault<String>(
-                      widget!.pMensagem,
+                      widget.pMensagem,
                       'Processo concluído com sucesso!',
                     ),
                     textAlign: TextAlign.center,

@@ -1,12 +1,9 @@
 // Automatic FlutterFlow imports
-import '/backend/schema/structs/index.dart';
-import '/backend/supabase/supabase.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/custom_code/widgets/index.dart'; // Imports other custom widgets
-import '/custom_code/actions/index.dart'; // Imports custom actions
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
-import 'package:flutter/material.dart';
+// Imports other custom widgets
+// Imports custom actions
+// Imports custom functions
+import 'package:flutter/material.dart' hide RepeatMode;
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -171,7 +168,7 @@ class _GraficoDFCState extends State<GraficoDFC> {
                 barTouchData: BarTouchData(
                   enabled: true,
                   touchTooltipData: BarTouchTooltipData(
-                    tooltipBgColor: const Color(0xFF1A1D21).withOpacity(0.95),
+                    tooltipBgColor: const Color(0xFF1A1D21).withValues(alpha: 0.95),
                     fitInsideHorizontally: true,
                     fitInsideVertically: true,
                     tooltipPadding: const EdgeInsets.symmetric(
@@ -317,7 +314,7 @@ class _GraficoDFCState extends State<GraficoDFC> {
                       return FlLine(
                           color: const Color(0xFF3D4449), strokeWidth: 1.5);
                     return FlLine(
-                        color: Colors.white.withOpacity(0.05),
+                        color: Colors.white.withValues(alpha: 0.05),
                         strokeWidth: 1,
                         dashArray: [4, 4]);
                   },

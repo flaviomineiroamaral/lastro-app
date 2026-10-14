@@ -1,22 +1,17 @@
 import '/backend/api_requests/api_calls.dart';
 import '/backend/schema/structs/index.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import '/flutter_flow/upload_data.dart';
-import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
-import '/custom_code/actions/index.dart' as actions;
-import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
 import 'importar_widget.dart' show ImportarWidget;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class ImportarModel extends FlutterFlowModel<ImportarWidget> {
+  ///  Local state fields for this page.
+
+  String? textoExtraidoDoPDF;
+
+  String? sehaDigitada;
+
   ///  State fields for stateful widgets in this page.
 
   bool isDataUploading_arquivoOfx = false;
@@ -30,15 +25,23 @@ class ImportarModel extends FlutterFlowModel<ImportarWidget> {
       FFUploadedFile(bytes: Uint8List.fromList([]), originalFilename: '');
 
   // Stores action output result for [Custom Action - extrairTextoPDF] action in ListTile widget.
-  String? textoBruto;
+  String? primeiraExtracaoTextoBruto;
+  // Stores action output result for [Bottom Sheet - bs_SenhaPDF] action in ListTile widget.
+  String? retSenhaDigitada;
+  // Stores action output result for [Custom Action - extrairTextoPDF] action in ListTile widget.
+  String? segundaExtracaoTextoBruto;
   // Stores action output result for [Custom Action - pdfParaBase64] action in ListTile widget.
-  String? base64Gerado0;
+  String? base64GeradoParaLerVisual;
   // Stores action output result for [Backend Call - API (LerFaturaGeminiVisual)] action in ListTile widget.
   ApiCallResponse? respostaIAVisual0;
+  // Stores action output result for [Custom Action - prepararTextoParaIA] action in ListTile widget.
+  String? retTextoExtraidoParaIA;
+  // Stores action output result for [Custom Action - parsePdfFaturaRegex1] action in ListTile widget.
+  List<OfxTransactionStruct>? resultadoRegex;
   // Stores action output result for [Backend Call - API (LerFaturaGemini)] action in ListTile widget.
   ApiCallResponse? respostaIA;
   // Stores action output result for [Custom Action - pdfParaBase64] action in ListTile widget.
-  String? base64Gerado;
+  String? base64GeradoParaLerVisual1;
   // Stores action output result for [Backend Call - API (LerFaturaGeminiVisual)] action in ListTile widget.
   ApiCallResponse? respostaIAVisual;
   bool isDataUploading_meuCsv = false;

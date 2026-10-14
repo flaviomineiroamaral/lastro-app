@@ -1,14 +1,8 @@
 import '/backend/supabase/supabase.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
-import '/custom_code/actions/index.dart' as actions;
 import 'bs_pessoa_widget.dart' show BsPessoaWidget;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 class BsPessoaModel extends FlutterFlowModel<BsPessoaWidget> {
   ///  State fields for stateful widgets in this component.
@@ -17,6 +11,16 @@ class BsPessoaModel extends FlutterFlowModel<BsPessoaWidget> {
   FocusNode? nomePessoaFocusNode;
   TextEditingController? nomePessoaTextController;
   String? Function(BuildContext, String?)? nomePessoaTextControllerValidator;
+  // State field(s) for CPF widget.
+  FocusNode? cpfFocusNode;
+  TextEditingController? cpfTextController;
+  late MaskTextInputFormatter cpfMask;
+  String? Function(BuildContext, String?)? cpfTextControllerValidator;
+  // State field(s) for Whatsapp widget.
+  FocusNode? whatsappFocusNode;
+  TextEditingController? whatsappTextController;
+  late MaskTextInputFormatter whatsappMask;
+  String? Function(BuildContext, String?)? whatsappTextControllerValidator;
   // State field(s) for Switch widget.
   bool? switchValue;
   // Stores action output result for [Backend Call - Delete Row(s)] action in btnExcluir widget.
@@ -29,5 +33,11 @@ class BsPessoaModel extends FlutterFlowModel<BsPessoaWidget> {
   void dispose() {
     nomePessoaFocusNode?.dispose();
     nomePessoaTextController?.dispose();
+
+    cpfFocusNode?.dispose();
+    cpfTextController?.dispose();
+
+    whatsappFocusNode?.dispose();
+    whatsappTextController?.dispose();
   }
 }

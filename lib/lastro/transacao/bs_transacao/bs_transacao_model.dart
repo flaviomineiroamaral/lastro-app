@@ -1,18 +1,7 @@
 import '/backend/schema/structs/index.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import '/lastro/geral/bs_filtro_periodo/bs_filtro_periodo_widget.dart';
-import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import '/lastro/transacao/bs_detalhe_transacao/bs_detalhe_transacao_widget.dart';
-import 'dart:ui';
-import '/custom_code/actions/index.dart' as actions;
-import '/flutter_flow/custom_functions.dart' as functions;
 import 'bs_transacao_widget.dart' show BsTransacaoWidget;
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class BsTransacaoModel extends FlutterFlowModel<BsTransacaoWidget> {
   ///  Local state fields for this component.

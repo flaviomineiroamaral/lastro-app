@@ -7,7 +7,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/flutter_flow/custom_functions.dart' as functions;
@@ -49,63 +48,63 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
 
     // On component load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      if (widget!.pIdObrigacao != null && widget!.pIdObrigacao != '') {
-        _model.vDescricao = widget!.pItemDadosObrigacoes?.descricao;
-        _model.vValorEstimado = widget!.pItemDadosObrigacoes?.valorEstimado;
-        _model.vCategoriaId = widget!.pItemDadosObrigacoes?.categoriaId;
-        _model.vCentroResultadoId = widget!.pItemDadosObrigacoes?.centroCustoId;
-        _model.vContaId = widget!.pItemDadosObrigacoes?.contaBancariaId;
-        _model.vPeriodicidade = widget!.pItemDadosObrigacoes?.periodicidade;
-        _model.vDiaVencimento = widget!.pItemDadosObrigacoes?.diaVencimento;
-        _model.vMesVencimento = widget!.pItemDadosObrigacoes?.mesVencimento;
+      if (widget.pIdObrigacao != null && widget.pIdObrigacao != '') {
+        _model.vDescricao = widget.pItemDadosObrigacoes?.descricao;
+        _model.vValorEstimado = widget.pItemDadosObrigacoes?.valorEstimado;
+        _model.vCategoriaId = widget.pItemDadosObrigacoes?.categoriaId;
+        _model.vCentroResultadoId = widget.pItemDadosObrigacoes?.centroCustoId;
+        _model.vContaId = widget.pItemDadosObrigacoes?.contaBancariaId;
+        _model.vPeriodicidade = widget.pItemDadosObrigacoes?.periodicidade;
+        _model.vDiaVencimento = widget.pItemDadosObrigacoes?.diaVencimento;
+        _model.vMesVencimento = widget.pItemDadosObrigacoes?.mesVencimento;
         _model.vDiaAntecedencia =
-            widget!.pItemDadosObrigacoes!.diasAntecedencia;
-        _model.vAtivo = widget!.pItemDadosObrigacoes!.ativo;
+            widget.pItemDadosObrigacoes!.diasAntecedencia;
+        _model.vAtivo = widget.pItemDadosObrigacoes!.ativo;
         safeSetState(() {});
         safeSetState(() {
           _model.inputDescricaoTextController?.text =
-              widget!.pItemDadosObrigacoes!.descricao;
+              widget.pItemDadosObrigacoes!.descricao;
         });
         safeSetState(() {
           _model.ddCategoriaValueController?.value =
-              widget!.pItemDadosObrigacoes!.categoriaId;
-          _model.ddCategoriaValue = widget!.pItemDadosObrigacoes!.categoriaId;
+              widget.pItemDadosObrigacoes!.categoriaId;
+          _model.ddCategoriaValue = widget.pItemDadosObrigacoes!.categoriaId;
         });
         safeSetState(() {
           _model.ddCentroDeCustoValueController?.value =
-              widget!.pItemDadosObrigacoes!.centroCustoId;
+              widget.pItemDadosObrigacoes!.centroCustoId;
           _model.ddCentroDeCustoValue =
-              widget!.pItemDadosObrigacoes!.centroCustoId;
+              widget.pItemDadosObrigacoes!.centroCustoId;
         });
         safeSetState(() {
           _model.ddContaOrigemValueController?.value =
-              widget!.pItemDadosObrigacoes!.contaBancariaId;
+              widget.pItemDadosObrigacoes!.contaBancariaId;
           _model.ddContaOrigemValue =
-              widget!.pItemDadosObrigacoes!.contaBancariaId;
+              widget.pItemDadosObrigacoes!.contaBancariaId;
         });
         safeSetState(() {
           _model.choTipoValueController?.value = [
-            widget!.pItemDadosObrigacoes!.periodicidade
+            widget.pItemDadosObrigacoes!.periodicidade
           ];
         });
         safeSetState(() {
           _model.ddDiaValueController?.value =
-              widget!.pItemDadosObrigacoes!.diaVencimento;
-          _model.ddDiaValue = widget!.pItemDadosObrigacoes!.diaVencimento;
+              widget.pItemDadosObrigacoes!.diaVencimento;
+          _model.ddDiaValue = widget.pItemDadosObrigacoes!.diaVencimento;
         });
         safeSetState(() {
           _model.ddMesValueController?.value =
-              widget!.pItemDadosObrigacoes!.mesVencimento;
-          _model.ddMesValue = widget!.pItemDadosObrigacoes!.mesVencimento;
+              widget.pItemDadosObrigacoes!.mesVencimento;
+          _model.ddMesValue = widget.pItemDadosObrigacoes!.mesVencimento;
         });
         safeSetState(() {
           _model.ddAntecedenciaValueController?.value =
-              widget!.pItemDadosObrigacoes!.diasAntecedencia;
+              widget.pItemDadosObrigacoes!.diasAntecedencia;
           _model.ddAntecedenciaValue =
-              widget!.pItemDadosObrigacoes!.diasAntecedencia;
+              widget.pItemDadosObrigacoes!.diasAntecedencia;
         });
         safeSetState(() {
-          _model.swtStatusValue = widget!.pItemDadosObrigacoes!.ativo;
+          _model.swtStatusValue = widget.pItemDadosObrigacoes!.ativo;
         });
         return;
       } else {
@@ -203,8 +202,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                             padding: EdgeInsetsDirectional.fromSTEB(
                                 20.0, 0.0, 0.0, 0.0),
                             child: Text(
-                              widget!.pIdObrigacao == null ||
-                                      widget!.pIdObrigacao == ''
+                              widget.pIdObrigacao == null ||
+                                      widget.pIdObrigacao == ''
                                   ? 'Nova Obrigação'
                                   : 'Editar Obrigação',
                               style: FlutterFlowTheme.of(context)
@@ -853,8 +852,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                 0.0, 0.0, 0.0, 6.0),
                             child: FlutterFlowChoiceChips(
                               options: [ChipData('MENSAL'), ChipData('ANUAL')],
-                              onChanged: (widget!.pIdObrigacao != null &&
-                                      widget!.pIdObrigacao != '')
+                              onChanged: (widget.pIdObrigacao != null &&
+                                      widget.pIdObrigacao != '')
                                   ? null
                                   : (val) async {
                                       safeSetState(() => _model.choTipoValue =
@@ -1495,8 +1494,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                 value: _model.swtStatusValue!,
                                 onChanged: (newValue) async {
                                   safeSetState(
-                                      () => _model.swtStatusValue = newValue!);
-                                  if (newValue!) {
+                                      () => _model.swtStatusValue = newValue);
+                                  if (newValue) {
                                     _model.vAtivo = !_model.vAtivo;
                                     safeSetState(() {});
                                   } else {
@@ -1549,9 +1548,6 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                         var _shouldSetState = false;
                                         if ((_model.inputDescricaoTextController
                                                         .text ==
-                                                    null ||
-                                                _model.inputDescricaoTextController
-                                                        .text ==
                                                     '') ||
                                             (_model.vValorEstimado! <= 0.0) ||
                                             (_model.ddCategoriaValue == null ||
@@ -1582,8 +1578,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                             safeSetState(() {});
                                           return;
                                         } else {
-                                          if (widget!.pIdObrigacao == null ||
-                                              widget!.pIdObrigacao == '') {
+                                          if (widget.pIdObrigacao == null ||
+                                              widget.pIdObrigacao == '') {
                                             _model.retInsertObrigacoes =
                                                 await ObrigacoesRecorrentesTable()
                                                     .insert({
@@ -1731,7 +1727,7 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                     )
                                                     .eqOrNull(
                                                       'id',
-                                                      widget!.pIdObrigacao,
+                                                      widget.pIdObrigacao,
                                                     ),
                                               );
                                               _shouldSetState = true;
@@ -1786,7 +1782,7 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                     )
                                                     .eqOrNull(
                                                       'id',
-                                                      widget!.pIdObrigacao,
+                                                      widget.pIdObrigacao,
                                                     ),
                                               );
                                               _shouldSetState = true;
@@ -1880,8 +1876,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                   ),
                                 ),
                               ),
-                              if (widget!.pIdObrigacao != null &&
-                                  widget!.pIdObrigacao != '')
+                              if (widget.pIdObrigacao != null &&
+                                  widget.pIdObrigacao != '')
                                 Expanded(
                                   child: Align(
                                     alignment: AlignmentDirectional(0.0, 0.0),
@@ -1935,7 +1931,7 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                     )
                                                     .eqOrNull(
                                                       'id',
-                                                      widget!.pIdObrigacao,
+                                                      widget.pIdObrigacao,
                                                     ),
                                               );
                                               _shouldSetState = true;

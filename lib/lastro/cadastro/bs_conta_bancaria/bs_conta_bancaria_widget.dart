@@ -5,7 +5,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
@@ -57,21 +56,21 @@ class _BsContaBancariaWidgetState extends State<BsContaBancariaWidget> {
     _model = createModel(context, () => BsContaBancariaModel());
 
     _model.nomeContaTextController ??= TextEditingController(
-        text: widget!.pIdConta != null && widget!.pIdConta != ''
-            ? widget!.pNomeConta
+        text: widget.pIdConta != null && widget.pIdConta != ''
+            ? widget.pNomeConta
             : '');
     _model.nomeContaFocusNode ??= FocusNode();
 
     _model.diaFaturaTextController ??= TextEditingController(
-        text: widget!.pIdConta != null && widget!.pIdConta != ''
-            ? widget!.pDiaVencimento?.toString()
+        text: widget.pIdConta != null && widget.pIdConta != ''
+            ? widget.pDiaVencimento?.toString()
             : '');
     _model.diaFaturaFocusNode ??= FocusNode();
 
     _model.diaFaturaMask = MaskTextInputFormatter(mask: '##');
     _model.diaFechamentoTextController ??= TextEditingController(
-        text: widget!.pIdConta != null && widget!.pIdConta != ''
-            ? widget!.pDiaFechamento?.toString()
+        text: widget.pIdConta != null && widget.pIdConta != ''
+            ? widget.pDiaFechamento?.toString()
             : '');
     _model.diaFechamentoFocusNode ??= FocusNode();
 
@@ -124,7 +123,7 @@ class _BsContaBancariaWidgetState extends State<BsContaBancariaWidget> {
             Padding(
               padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
               child: Text(
-                widget!.pIdConta == null || widget!.pIdConta == ''
+                widget.pIdConta == null || widget.pIdConta == ''
                     ? 'Nova Conta'
                     : 'Editar Conta',
                 textAlign: TextAlign.center,
@@ -298,7 +297,7 @@ class _BsContaBancariaWidgetState extends State<BsContaBancariaWidget> {
                   child: FlutterFlowDropDown<String>(
                     controller: _model.ddTipoValueController ??=
                         FormFieldController<String>(
-                      _model.ddTipoValue ??= widget!.pTipo,
+                      _model.ddTipoValue ??= widget.pTipo,
                     ),
                     options: [
                       'CORRENTE',
@@ -344,7 +343,7 @@ class _BsContaBancariaWidgetState extends State<BsContaBancariaWidget> {
                         EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
                     hidesUnderline: true,
                     disabled:
-                        widget!.pIdConta != null && widget!.pIdConta != '',
+                        widget.pIdConta != null && widget.pIdConta != '',
                     isOverButton: false,
                     isSearchable: false,
                     isMultiSelect: false,
@@ -403,9 +402,9 @@ class _BsContaBancariaWidgetState extends State<BsContaBancariaWidget> {
                             corBorda: FlutterFlowTheme.of(context).fundoText,
                             arredondamento: 8.0,
                             centralizarTexto: false,
-                            valorInicial: widget!.pIdConta != null &&
-                                    widget!.pIdConta != ''
-                                ? widget!.pSaldoInicial
+                            valorInicial: widget.pIdConta != null &&
+                                    widget.pIdConta != ''
+                                ? widget.pSaldoInicial
                                 : 0.0,
                             acaoAoMudar: (valorDigitado) async {
                               _model.vValorSaldoInicial = valorDigitado;
@@ -480,9 +479,9 @@ class _BsContaBancariaWidgetState extends State<BsContaBancariaWidget> {
                                       FlutterFlowTheme.of(context).fundoText,
                                   arredondamento: 8.0,
                                   centralizarTexto: false,
-                                  valorInicial: widget!.pIdConta != null &&
-                                          widget!.pIdConta != ''
-                                      ? widget!.pLimite
+                                  valorInicial: widget.pIdConta != null &&
+                                          widget.pIdConta != ''
+                                      ? widget.pLimite
                                       : 0.0,
                                   acaoAoMudar: (valorDigitado) async {
                                     _model.vValorLimite = valorDigitado;
@@ -898,7 +897,7 @@ class _BsContaBancariaWidgetState extends State<BsContaBancariaWidget> {
                       child: Switch.adaptive(
                         value: _model.switchValue!,
                         onChanged: (newValue) async {
-                          safeSetState(() => _model.switchValue = newValue!);
+                          safeSetState(() => _model.switchValue = newValue);
                         },
                         activeColor: FlutterFlowTheme.of(context).primary,
                         activeTrackColor:
@@ -924,8 +923,8 @@ class _BsContaBancariaWidgetState extends State<BsContaBancariaWidget> {
                           12.0, 12.0, 12.0, 12.0),
                       child: FFButtonWidget(
                         onPressed: () async {
-                          if (widget!.pIdConta != null &&
-                              widget!.pIdConta != '') {
+                          if (widget.pIdConta != null &&
+                              widget.pIdConta != '') {
                             await ContasBancariasTable().update(
                               data: {
                                 'nome': _model.nomeContaTextController.text,
@@ -941,7 +940,7 @@ class _BsContaBancariaWidgetState extends State<BsContaBancariaWidget> {
                               matchingRows: (rows) => rows
                                   .eqOrNull(
                                     'id',
-                                    widget!.pIdConta,
+                                    widget.pIdConta,
                                   )
                                   .eqOrNull(
                                     'organization_id',
@@ -1044,7 +1043,7 @@ class _BsContaBancariaWidgetState extends State<BsContaBancariaWidget> {
                     ),
                   ),
                 ),
-                if (widget!.pIdConta != null && widget!.pIdConta != '')
+                if (widget.pIdConta != null && widget.pIdConta != '')
                   Expanded(
                     child: Align(
                       alignment: AlignmentDirectional(0.0, 0.0),
@@ -1088,7 +1087,7 @@ class _BsContaBancariaWidgetState extends State<BsContaBancariaWidget> {
                                       )
                                       .eqOrNull(
                                         'id',
-                                        widget!.pIdConta,
+                                        widget.pIdConta,
                                       ),
                                 );
                                 _shouldSetState = true;

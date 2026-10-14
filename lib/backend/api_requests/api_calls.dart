@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
-import '../schema/structs/index.dart';
 
 import 'package:flutter/foundation.dart';
 
@@ -21,13 +19,7 @@ class LerFaturaGeminiCall {
     {
       "parts": [
         {
-          "text": "Você é um extrator de dados financeiros sênior. Vou fornecer um arquivo PDF. Leia visualmente. Extraia APENAS as compras confirmadas e devolva EXCLUSIVAMENTE um array JSON. REGRAS RÍGIDAS: 1. 'date': Data exata da COMPRA. ATENÇÃO: Se a fatura mostrar apenas dia/mês (ex: 12/01), deduza o ano usando o vencimento da fatura. É PROIBIDO usar a data de vencimento como data da compra. Formato 'AAAA-MM-DDT00:00:00.000Z'. 2. 'dueDate': Data de VENCIMENTO DA FATURA. Se não achar, null. Formato 'AAAA-MM-DDT00:00:00.000Z'. 3. 'description': Nome do estabelecimento. 4. 'amount': Valor decimal usando ponto (Ex: 150.50). 5. IGNORE: pagamentos, simulações, juros, saldos. 6. Devolva apenas o [ { ... } ]."
-        },
-        {
-          "inlineData": {
-            "mimeType": "application/pdf",
-            "data": "<pdfBase64>"
-          }
+          "text": "Você é um extrator de dados financeiros sênior. Vou fornecer o texto de uma fatura. Extraia APENAS as compras confirmadas e devolva EXCLUSIVAMENTE um array JSON. REGRAS RÍGIDAS: 1. 'date': Data exata da COMPRA. ATENÇÃO: Se a fatura mostrar apenas dia/mês (ex: 12/01), deduza o ano usando o vencimento da fatura. É PROIBIDO usar a data de vencimento como data da compra. Formato 'AAAA-MM-DDT00:00:00.000Z'. 2. 'dueDate': Data de VENCIMENTO DA FATURA. Se não achar, null. Formato 'AAAA-MM-DDT00:00:00.000Z'. 3. 'description': Nome do estabelecimento. 4. 'amount': Valor decimal usando ponto (Ex: 150.50). 5. IGNORE: pagamentos, simulações, juros, saldos. 6. Devolva apenas o [ { ... } ]. TEXTO DA FATURA AQUI: ${textoFatura}"
         }
       ]
     }
@@ -39,7 +31,7 @@ class LerFaturaGeminiCall {
     return ApiManager.instance.makeApiCall(
       callName: 'LerFaturaGemini',
       apiUrl:
-          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAq1Jk05mwvVbOtBnlqaviKbYkNb9B0ss0',
+          'https://fierce-gorge-10603-4854bc8b7c1f.herokuapp.com/https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AQ.Ab8RN6KR3gPw-YuZFQQ68_RKSUJLcRnbfzCzd7xGxG4uWXE6BA',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -54,7 +46,7 @@ class LerFaturaGeminiCall {
     );
   }
 
-  static dynamic? resultadoExtraido(dynamic response) => getJsonField(
+  static dynamic resultadoExtraido(dynamic response) => getJsonField(
         response,
         r'''$''',
       );
@@ -75,7 +67,7 @@ class LerFaturaGeminiVisualCall {
         {
           "inlineData": {
             "mimeType": "application/pdf",
-            "data": "${escapeStringForJson(pdfBase64)}"
+            "data": ${pdfBase64 == null ? 'null' : '"${pdfBase64}"'}
           }
         }
       ]
@@ -88,7 +80,7 @@ class LerFaturaGeminiVisualCall {
     return ApiManager.instance.makeApiCall(
       callName: 'LerFaturaGeminiVisual',
       apiUrl:
-          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAq1Jk05mwvVbOtBnlqaviKbYkNb9B0ss0',
+          'https://fierce-gorge-10603-4854bc8b7c1f.herokuapp.com/https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AQ.Ab8RN6KR3gPw-YuZFQQ68_RKSUJLcRnbfzCzd7xGxG4uWXE6BA',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -103,7 +95,7 @@ class LerFaturaGeminiVisualCall {
     );
   }
 
-  static dynamic? resultadoExtraido(dynamic response) => getJsonField(
+  static dynamic resultadoExtraido(dynamic response) => getJsonField(
         response,
         r'''$''',
       );
@@ -151,15 +143,4 @@ String _serializeJson(dynamic jsonVar, [bool isList = false]) {
     }
     return isList ? '[]' : '{}';
   }
-}
-
-String? escapeStringForJson(String? input) {
-  if (input == null) {
-    return null;
-  }
-  return input
-      .replaceAll('\\', '\\\\')
-      .replaceAll('"', '\\"')
-      .replaceAll('\n', '\\n')
-      .replaceAll('\t', '\\t');
 }

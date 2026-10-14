@@ -5,7 +5,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -52,22 +51,22 @@ class _BsCategoriaWidgetState extends State<BsCategoriaWidget> {
     _model = createModel(context, () => BsCategoriaModel());
 
     _model.codigoContabilTextController ??=
-        TextEditingController(text: widget!.pCodigoContabil);
+        TextEditingController(text: widget.pCodigoContabil);
     _model.codigoContabilFocusNode ??= FocusNode();
 
     _model.nomeCategoriaTextController ??= TextEditingController(
-        text: widget!.pIdCategoria != null && widget!.pIdCategoria != ''
-            ? widget!.pNomeCategoria
+        text: widget.pIdCategoria != null && widget.pIdCategoria != ''
+            ? widget.pNomeCategoria
             : '');
     _model.nomeCategoriaFocusNode ??= FocusNode();
 
     _model.instrucaoUsoTextController ??= TextEditingController(
-        text: widget!.pIdCategoria != null && widget!.pIdCategoria != ''
-            ? widget!.pInstrucaoUso
+        text: widget.pIdCategoria != null && widget.pIdCategoria != ''
+            ? widget.pInstrucaoUso
             : '');
     _model.instrucaoUsoFocusNode ??= FocusNode();
 
-    _model.swPermiteLancamentoValue = widget!.pPermitirLancamento;
+    _model.swPermiteLancamentoValue = widget.pPermitirLancamento;
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -115,7 +114,7 @@ class _BsCategoriaWidgetState extends State<BsCategoriaWidget> {
             Padding(
               padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
               child: Text(
-                widget!.pIdCategoria == null || widget!.pIdCategoria == ''
+                widget.pIdCategoria == null || widget.pIdCategoria == ''
                     ? 'Nova Categoria'
                     : 'Editar Categoria',
                 textAlign: TextAlign.center,
@@ -138,7 +137,7 @@ class _BsCategoriaWidgetState extends State<BsCategoriaWidget> {
               child: FlutterFlowDropDown<String>(
                 controller: _model.ddTipoValueController ??=
                     FormFieldController<String>(
-                  _model.ddTipoValue ??= widget!.pTipo,
+                  _model.ddTipoValue ??= widget.pTipo,
                 ),
                 options: ['RECEITA', 'DESPESA', 'ATIVO', 'PASSIVO', 'PL'],
                 onChanged: (val) =>
@@ -389,8 +388,8 @@ class _BsCategoriaWidgetState extends State<BsCategoriaWidget> {
                 controller: _model.ddNaturezaFluxoValueController ??=
                     FormFieldController<String>(
                   _model.ddNaturezaFluxoValue ??=
-                      widget!.pIdCategoria != null && widget!.pIdCategoria != ''
-                          ? widget!.pNaturezaFluxo
+                      widget.pIdCategoria != null && widget.pIdCategoria != ''
+                          ? widget.pNaturezaFluxo
                           : '',
                 ),
                 options: ['ENTRADA', 'SAIDA'],
@@ -569,7 +568,7 @@ class _BsCategoriaWidgetState extends State<BsCategoriaWidget> {
                       value: _model.swPermiteLancamentoValue!,
                       onChanged: (newValue) async {
                         safeSetState(
-                            () => _model.swPermiteLancamentoValue = newValue!);
+                            () => _model.swPermiteLancamentoValue = newValue);
                       },
                       activeColor: FlutterFlowTheme.of(context).primary,
                       activeTrackColor: FlutterFlowTheme.of(context).fundoText,
@@ -589,10 +588,8 @@ class _BsCategoriaWidgetState extends State<BsCategoriaWidget> {
                     var _shouldSetState = false;
                     if ((_model.ddTipoValue == null ||
                             _model.ddTipoValue == '') &&
-                        (_model.nomeCategoriaTextController.text == null ||
-                            _model.nomeCategoriaTextController.text == '') &&
-                        (_model.codigoContabilTextController.text == null ||
-                            _model.codigoContabilTextController.text == '')) {
+                        (_model.nomeCategoriaTextController.text == '') &&
+                        (_model.codigoContabilTextController.text == '')) {
                       await showDialog(
                         context: context,
                         builder: (dialogContext) {
@@ -613,8 +610,8 @@ class _BsCategoriaWidgetState extends State<BsCategoriaWidget> {
                       if (_shouldSetState) safeSetState(() {});
                       return;
                     } else {
-                      if (widget!.pIdCategoria != null &&
-                          widget!.pIdCategoria != '') {
+                      if (widget.pIdCategoria != null &&
+                          widget.pIdCategoria != '') {
                         await PlanoContasTable().update(
                           data: {
                             'nome': _model.nomeCategoriaTextController.text,
@@ -627,7 +624,7 @@ class _BsCategoriaWidgetState extends State<BsCategoriaWidget> {
                           matchingRows: (rows) => rows
                               .eqOrNull(
                                 'id',
-                                widget!.pIdCategoria,
+                                widget.pIdCategoria,
                               )
                               .eqOrNull(
                                 'organization_id',

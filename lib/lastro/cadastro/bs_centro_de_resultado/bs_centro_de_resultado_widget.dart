@@ -3,7 +3,6 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/custom_functions.dart' as functions;
 import 'package:flutter/material.dart';
@@ -55,21 +54,21 @@ class _BsCentroDeResultadoWidgetState extends State<BsCentroDeResultadoWidget> {
 
     // On component load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      _model.corSelecionada = widget!.pCorSelecionada!;
+      _model.corSelecionada = widget.pCorSelecionada!;
       safeSetState(() {});
     });
 
     _model.nomeCentroDeResultadoTextController ??= TextEditingController(
-        text: widget!.pIdCentroResultado != null &&
-                widget!.pIdCentroResultado != ''
-            ? widget!.pNome
+        text: widget.pIdCentroResultado != null &&
+                widget.pIdCentroResultado != ''
+            ? widget.pNome
             : '');
     _model.nomeCentroDeResultadoFocusNode ??= FocusNode();
 
-    _model.swtIsFundoValue = widget!.pIsFundo;
-    _model.swtIsPadraoValue = widget!.pIsPadrao!;
-    _model.swtAcumuloValue = widget!.pPermiteAcumulo;
-    _model.swtAtivoValue = widget!.pAtivo!;
+    _model.swtIsFundoValue = widget.pIsFundo;
+    _model.swtIsPadraoValue = widget.pIsPadrao!;
+    _model.swtAcumuloValue = widget.pPermiteAcumulo;
+    _model.swtAtivoValue = widget.pAtivo!;
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -116,8 +115,8 @@ class _BsCentroDeResultadoWidgetState extends State<BsCentroDeResultadoWidget> {
             Padding(
               padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
               child: Text(
-                widget!.pIdCentroResultado == null ||
-                        widget!.pIdCentroResultado == ''
+                widget.pIdCentroResultado == null ||
+                        widget.pIdCentroResultado == ''
                     ? 'Novo Centro de Resultado'
                     : 'Editar Centro de Resultado',
                 textAlign: TextAlign.center,
@@ -301,8 +300,8 @@ class _BsCentroDeResultadoWidgetState extends State<BsCentroDeResultadoWidget> {
                                       height: 35.0,
                                       decoration: BoxDecoration(
                                         color: valueOrDefault<Color>(
-                                          widget!.pIdCentroResultado != null &&
-                                                  widget!.pIdCentroResultado !=
+                                          widget.pIdCentroResultado != null &&
+                                                  widget.pIdCentroResultado !=
                                                       ''
                                               ? valueOrDefault<Color>(
                                                   functions
@@ -382,10 +381,10 @@ class _BsCentroDeResultadoWidgetState extends State<BsCentroDeResultadoWidget> {
                           ? null
                           : (newValue) async {
                               safeSetState(
-                                  () => _model.swtIsFundoValue = newValue!);
-                              if (newValue!) {
+                                  () => _model.swtIsFundoValue = newValue);
+                              if (newValue) {
                                 safeSetState(() {
-                                  _model.swtIsPadraoValue = widget!.pIsPadrao!;
+                                  _model.swtIsPadraoValue = widget.pIsPadrao!;
                                 });
                               }
                             },
@@ -440,10 +439,10 @@ class _BsCentroDeResultadoWidgetState extends State<BsCentroDeResultadoWidget> {
                           ? null
                           : (newValue) async {
                               safeSetState(
-                                  () => _model.swtIsPadraoValue = newValue!);
-                              if (newValue!) {
+                                  () => _model.swtIsPadraoValue = newValue);
+                              if (newValue) {
                                 safeSetState(() {
-                                  _model.swtIsFundoValue = widget!.pIsFundo;
+                                  _model.swtIsFundoValue = widget.pIsFundo;
                                 });
                               }
                             },
@@ -493,12 +492,12 @@ class _BsCentroDeResultadoWidgetState extends State<BsCentroDeResultadoWidget> {
                     child: Switch.adaptive(
                       value: _model.swtAcumuloValue!,
                       onChanged: (newValue) async {
-                        safeSetState(() => _model.swtAcumuloValue = newValue!);
+                        safeSetState(() => _model.swtAcumuloValue = newValue);
 
-                        if (!newValue!) {
+                        if (!newValue) {
                           safeSetState(() {
-                            _model.swtIsFundoValue = widget!.pIsFundo;
-                            _model.swtIsPadraoValue = widget!.pIsPadrao!;
+                            _model.swtIsFundoValue = widget.pIsFundo;
+                            _model.swtIsPadraoValue = widget.pIsPadrao!;
                           });
                         }
                       },
@@ -548,12 +547,12 @@ class _BsCentroDeResultadoWidgetState extends State<BsCentroDeResultadoWidget> {
                     child: Switch.adaptive(
                       value: _model.swtAtivoValue!,
                       onChanged: (newValue) async {
-                        safeSetState(() => _model.swtAtivoValue = newValue!);
+                        safeSetState(() => _model.swtAtivoValue = newValue);
 
-                        if (!newValue!) {
+                        if (!newValue) {
                           safeSetState(() {
-                            _model.swtIsFundoValue = widget!.pIsFundo;
-                            _model.swtIsPadraoValue = widget!.pIsPadrao!;
+                            _model.swtIsFundoValue = widget.pIsFundo;
+                            _model.swtIsPadraoValue = widget.pIsPadrao!;
                           });
                         }
                       },
@@ -577,8 +576,8 @@ class _BsCentroDeResultadoWidgetState extends State<BsCentroDeResultadoWidget> {
                           12.0, 12.0, 12.0, 12.0),
                       child: FFButtonWidget(
                         onPressed: () async {
-                          if (widget!.pIdCentroResultado != null &&
-                              widget!.pIdCentroResultado != '') {
+                          if (widget.pIdCentroResultado != null &&
+                              widget.pIdCentroResultado != '') {
                             await CentrosCustoTable().update(
                               data: {
                                 'nome': _model
@@ -592,7 +591,7 @@ class _BsCentroDeResultadoWidgetState extends State<BsCentroDeResultadoWidget> {
                               matchingRows: (rows) => rows
                                   .eqOrNull(
                                     'id',
-                                    widget!.pIdCentroResultado,
+                                    widget.pIdCentroResultado,
                                   )
                                   .eqOrNull(
                                     'organization_id',
@@ -695,8 +694,8 @@ class _BsCentroDeResultadoWidgetState extends State<BsCentroDeResultadoWidget> {
                     ),
                   ),
                 ),
-                if (widget!.pIdCentroResultado != null &&
-                    widget!.pIdCentroResultado != '')
+                if (widget.pIdCentroResultado != null &&
+                    widget.pIdCentroResultado != '')
                   Expanded(
                     child: Align(
                       alignment: AlignmentDirectional(0.0, 0.0),
@@ -740,7 +739,7 @@ class _BsCentroDeResultadoWidgetState extends State<BsCentroDeResultadoWidget> {
                                       )
                                       .eqOrNull(
                                         'id',
-                                        widget!.pIdCentroResultado,
+                                        widget.pIdCentroResultado,
                                       ),
                                 );
                                 _shouldSetState = true;

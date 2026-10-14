@@ -1,97 +1,129 @@
 // Automatic FlutterFlow imports
 import '/backend/schema/structs/index.dart';
 import '/backend/supabase/supabase.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import '/custom_code/actions/index.dart'; // Imports other custom actions
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
-import 'package:flutter/material.dart';
+// Imports other custom actions
+// Imports custom functions
+import 'package:flutter/material.dart' hide RepeatMode;
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
 Future<DTAlertasResumoStruct?> getAlertasDashboard(String orgId) async {
   final supabase = Supabase.instance.client;
 
+  // ==========================================
+  // FUNÇÕES DE PARSING INTELIGENTE E SEGURO
+  // ==========================================
+  double parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
+  int parseInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  DateTime? parseDate(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
+  }
+
   try {
-    // ⚠️ Aponta para o novo nome padronizado
+    // Aponta para o novo nome padronizado
     final response = await supabase.rpc('fn_alertas_dashboard', params: {
       'p_org_id': orgId,
     });
 
     if (response != null && response is List && response.isNotEmpty) {
-      final data = response.first;
+      final data = response.first as Map<String, dynamic>;
 
-      // PARSING DA LISTA JSONB DE CARTÕES INDIVIDUAIS
+      // ==========================================
+      // PARSING DA LISTA JSON DE CARTÕES
+      // ==========================================
       List<DTCartaoResumoStruct> cartoesMapeados = [];
-      if (data['detalhes_cartoes'] != null) {
-        final List<dynamic> jsonCartoes = data['detalhes_cartoes'];
+      if (data['detalhes_cartoes'] != null || data['detalhesCartoes'] != null) {
+        final List<dynamic> jsonCartoes =
+            data['detalhes_cartoes'] ?? data['detalhesCartoes'];
 
         for (var cartao in jsonCartoes) {
           cartoesMapeados.add(DTCartaoResumoStruct(
-            idCartao: cartao['id']?.toString() ?? '',
+            idCartao: cartao['id']?.toString() ??
+                cartao['idCartao']?.toString() ??
+                '',
             nome: cartao['nome']?.toString() ?? 'Cartão Desconhecido',
+
+            // Aceita snake_case ou camelCase
             limiteTotal:
-                double.tryParse(cartao['limite_total']?.toString() ?? '0') ??
-                    0.0,
-            limiteRestante:
-                double.tryParse(cartao['limite_restante']?.toString() ?? '0') ??
-                    0.0,
-            melhorDiaCompra: cartao['melhor_dia_compra'] != null
-                ? DateTime.tryParse(cartao['melhor_dia_compra'].toString())
-                : null,
+                parseDouble(cartao['limite_total'] ?? cartao['limiteTotal']),
+            limiteRestante: parseDouble(
+                cartao['limite_restante'] ?? cartao['limiteRestante']),
+            melhorDiaCompra: parseDate(
+                cartao['melhor_dia_compra'] ?? cartao['melhorDiaCompra']),
+
+            // DICA: Se a sua base de dados já envia o valor da fatura, descomente a linha abaixo
+            // no seu FlutterFlow (após criar o campo "faturaAtual" no DTCartaoResumoStruct)
+            // faturaAtual: parseDouble(cartao['fatura_atual'] ?? cartao['faturaAtual']),
           ));
         }
       }
 
-      // RETORNO GLOBAL
+      // ==========================================
+      // RETORNO GLOBAL DO DASHBOARD
+      // ==========================================
       return DTAlertasResumoStruct(
-        qtdVencidas: int.tryParse(data['qtd_vencidas']?.toString() ?? '0') ?? 0,
+        // Contas a Pagar
+        qtdVencidas: parseInt(data['qtd_vencidas'] ?? data['qtdVencidas']),
         valorVencidas:
-            double.tryParse(data['valor_vencidas']?.toString() ?? '0') ?? 0.0,
-        qtdHoje: int.tryParse(data['qtd_hoje']?.toString() ?? '0') ?? 0,
-        valorHoje:
-            double.tryParse(data['valor_hoje']?.toString() ?? '0') ?? 0.0,
+            parseDouble(data['valor_vencidas'] ?? data['valorVencidas']),
+        qtdHoje: parseInt(data['qtd_hoje'] ?? data['qtdHoje']),
+        valorHoje: parseDouble(data['valor_hoje'] ?? data['valorHoje']),
+
+        // Cartões Geral
         qtdFaturasCartao:
-            int.tryParse(data['qtd_faturas_cartao']?.toString() ?? '0') ?? 0,
-        valorFaturasCartao:
-            double.tryParse(data['valor_faturas_cartao']?.toString() ?? '0') ??
-                0.0,
+            parseInt(data['qtd_faturas_cartao'] ?? data['qtdFaturasCartao']),
+        valorFaturasCartao: parseDouble(
+            data['valor_faturas_cartao'] ?? data['valorFaturasCartao']),
 
-        // Cartões Vencidos (Passado)
-        qtdCartoesVencidos:
-            int.tryParse(data['qtd_cartoes_vencidos']?.toString() ?? '0') ?? 0,
-        valorCartoesVencidos: double.tryParse(
-                data['valor_cartoes_vencidos']?.toString() ?? '0') ??
-            0.0,
+        // Faturas Vencidas (Passado)
+        qtdCartoesVencidos: parseInt(
+            data['qtd_cartoes_vencidos'] ?? data['qtdCartoesVencidos']),
+        valorCartoesVencidos: parseDouble(
+            data['valor_cartoes_vencidos'] ?? data['valorCartoesVencidos']),
 
-        // Métrica de Hoje
+        // Faturas a Vencer Hoje
         qtdCartoesHoje:
-            int.tryParse(data['qtd_cartoes_hoje']?.toString() ?? '0') ?? 0,
+            parseInt(data['qtd_cartoes_hoje'] ?? data['qtdCartoesHoje']),
         valorCartoesHoje:
-            double.tryParse(data['valor_cartoes_hoje']?.toString() ?? '0') ??
-                0.0,
+            parseDouble(data['valor_cartoes_hoje'] ?? data['valorCartoesHoje']),
 
-        // Cartões a Vencer (Futuro)
+        // Faturas a Vencer (Futuro)
         qtdCartoesAVencer:
-            int.tryParse(data['qtd_cartoes_a_vencer']?.toString() ?? '0') ?? 0,
-        valorCartoesAVencer: double.tryParse(
-                data['valor_cartoes_a_vencer']?.toString() ?? '0') ??
-            0.0,
+            parseInt(data['qtd_cartoes_a_vencer'] ?? data['qtdCartoesAVencer']),
+        valorCartoesAVencer: parseDouble(
+            data['valor_cartoes_a_vencer'] ?? data['valorCartoesAVencer']),
 
-        limiteRestanteTotal:
-            double.tryParse(data['limite_restante_total']?.toString() ?? '0') ??
-                0.0,
-        proximoMelhorDiaCompra: data['proximo_melhor_dia_compra_global'] != null
-            ? DateTime.tryParse(
-                data['proximo_melhor_dia_compra_global'].toString())
-            : null,
+        // Limites Globais
+        limiteRestanteTotal: parseDouble(
+            data['limite_restante_total'] ?? data['limiteRestanteTotal']),
+        proximoMelhorDiaCompra: parseDate(
+            data['proximo_melhor_dia_compra_global'] ??
+                data['proximoMelhorDiaCompraGlobal']),
 
+        // A Lista Aninhada
         listaCartoes: cartoesMapeados,
       );
     }
     return null;
   } catch (e) {
-    debugPrint('Erro CRÍTICO ao buscar Alertas e Cartões do Dashboard: $e');
+    debugPrint('🔴 Erro CRÍTICO ao buscar Alertas e Cartões do Dashboard: $e');
     return null;
   }
 }

@@ -1,9 +1,7 @@
 import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +41,7 @@ class _PrevisaoWidgetState extends State<PrevisaoWidget>
       length: 2,
       initialIndex: min(
           valueOrDefault<int>(
-            widget!.pTipo,
+            widget.pTipo,
             0,
           ),
           1),
@@ -82,8 +80,7 @@ class _PrevisaoWidgetState extends State<PrevisaoWidget>
                   builder: (context) => FloatingActionButton(
                     onPressed: () async {
                       if ((FFAppState().currentFunction == 'Leitor') ||
-                          (FFAppState().currentFunction == null ||
-                              FFAppState().currentFunction == '')) {
+                          (FFAppState().currentFunction == '')) {
                         await showDialog(
                           context: context,
                           builder: (dialogContext) {
@@ -472,7 +469,7 @@ class _PrevisaoWidgetState extends State<PrevisaoWidget>
                                                                         onTap:
                                                                             () async {
                                                                           if ((FFAppState().currentFunction == 'Leitor') ||
-                                                                              (FFAppState().currentFunction == null || FFAppState().currentFunction == '')) {
+                                                                              (FFAppState().currentFunction == '')) {
                                                                             await showDialog(
                                                                               context: context,
                                                                               builder: (dialogContext) {

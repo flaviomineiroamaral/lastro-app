@@ -6,7 +6,6 @@ import '/lastro/cr/bs_detalhe_transacao_c_r/bs_detalhe_transacao_c_r_widget.dart
 import '/lastro/cr/bs_transacoes_por_c_r/bs_transacoes_por_c_r_widget.dart';
 import '/lastro/geral/bs_filtro_periodo/bs_filtro_periodo_widget.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/flutter_flow/custom_functions.dart' as functions;
@@ -1860,7 +1859,7 @@ class _BsCRWidgetState extends State<BsCRWidget> {
                                                                             var _shouldSetState =
                                                                                 false;
                                                                             if ((FFAppState().currentFunction == 'Leitor') ||
-                                                                                (FFAppState().currentFunction == null || FFAppState().currentFunction == '')) {
+                                                                                (FFAppState().currentFunction == '')) {
                                                                               await showDialog(
                                                                                 context: context,
                                                                                 builder: (dialogContext) {
@@ -1988,7 +1987,7 @@ class _BsCRWidgetState extends State<BsCRWidget> {
                                                                             var _shouldSetState =
                                                                                 false;
                                                                             if ((FFAppState().currentFunction == 'Leitor') ||
-                                                                                (FFAppState().currentFunction == null || FFAppState().currentFunction == '')) {
+                                                                                (FFAppState().currentFunction == '')) {
                                                                               await showDialog(
                                                                                 context: context,
                                                                                 builder: (dialogContext) {
@@ -2118,7 +2117,7 @@ class _BsCRWidgetState extends State<BsCRWidget> {
                                                                             var _shouldSetState =
                                                                                 false;
                                                                             if ((FFAppState().currentFunction == 'Leitor') ||
-                                                                                (FFAppState().currentFunction == null || FFAppState().currentFunction == '')) {
+                                                                                (FFAppState().currentFunction == '')) {
                                                                               await showDialog(
                                                                                 context: context,
                                                                                 builder: (dialogContext) {

@@ -1,11 +1,9 @@
 // Automatic FlutterFlow imports
 import '/backend/schema/structs/index.dart';
 import '/backend/supabase/supabase.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import '/custom_code/actions/index.dart'; // Imports other custom actions
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
-import 'package:flutter/material.dart';
+// Imports other custom actions
+// Imports custom functions
+import 'package:flutter/material.dart' hide RepeatMode;
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -15,6 +13,15 @@ Future<DTDreSinteticoStruct> getDreSintetico(
   DateTime dataFim,
 ) async {
   final supabase = Supabase.instance.client;
+
+  // Escudo Protetor contra falhas de tipagem do JSON (Impede o crash de Strings numéricas)
+  double parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
 
   try {
     // Formata as datas para YYYY-MM-DD garantindo a leitura correta no PostgreSQL
@@ -34,23 +41,36 @@ Future<DTDreSinteticoStruct> getDreSintetico(
 
     // Como garantimos no banco que sempre voltará 1 linha agregada, lemos o índice [0]
     if (response != null && response is List && response.isNotEmpty) {
-      final data = response[0];
+      final data = response[0] as Map<String, dynamic>;
 
-      // Mapeia os novos nomes de retorno (soma_receitas) para a Struct original do FlutterFlow
       return DTDreSinteticoStruct(
-        totalReceitas: data['soma_receitas']?.toDouble() ?? 0.0,
-        totalDespesas: data['soma_despesas']?.toDouble() ?? 0.0,
-        resultadoLiquido: data['soma_liquido']?.toDouble() ?? 0.0,
-        margemLucro: data['margem_lucro_percentual']?.toDouble() ?? 0.0,
+        // Extração Base Consolidada (Lê snake_case ou camelCase)
+        totalReceitas:
+            parseDouble(data['soma_receitas'] ?? data['totalReceitas']),
+        totalDespesas:
+            parseDouble(data['soma_despesas'] ?? data['totalDespesas']),
+        resultadoLiquido:
+            parseDouble(data['soma_liquido'] ?? data['resultadoLiquido']),
+        margemLucro:
+            parseDouble(data['margem_lucro_percentual'] ?? data['margemLucro']),
+
+        // EXTRAÇÃO AVANÇADA PARA O PDF (Para quebrar o DRE entre Operação e Financeiro)
+        somaDespesasOperacionais: parseDouble(
+            data['soma_despesas_operacionais'] ??
+                data['somaDespesasOperacionais']),
+        resultadoOperacional: parseDouble(
+            data['resultado_operacional'] ?? data['resultadoOperacional']),
+        somaDespesasFinanceiras: parseDouble(
+            data['soma_despesas_financeiras'] ??
+                data['somaDespesasFinanceiras']),
       );
     }
 
     // Retorno zerado de segurança caso o banco retorne um array vazio
     return DTDreSinteticoStruct();
   } catch (e) {
-    // É recomendado usar log ou integração com Sentry/Crashlytics em vez de apenas print
-    // para não perder rastreabilidade em produção.
-    print('Erro crítico ao buscar DRE Sintético no período: $e');
+    // O seu comentário sobre o Sentry/Crashlytics está certíssimo!
+    debugPrint('🔴 Erro crítico ao buscar DRE Sintético no período: $e');
     return DTDreSinteticoStruct();
   }
 }

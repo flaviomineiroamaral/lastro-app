@@ -4,7 +4,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
 import '/lastro/transacao/bs_detalhe_transacao/bs_detalhe_transacao_widget.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/custom_functions.dart' as functions;
 import 'package:flutter/material.dart';
@@ -58,32 +57,32 @@ class _BsTransacoesPorCategoriaWidgetState
 
     // On component load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      if (widget!.pTipo == 'DRE') {
+      if (widget.pTipo == 'DRE') {
         _model.retListaDetalheCategoriaDRE =
             await actions.getDetalhesCategoriaDRE(
           FFAppState().currentOrganizationId,
-          widget!.pInicioMesAno!,
-          widget!.pFinalMesAno!,
-          widget!.pIdCategoria!,
+          widget.pInicioMesAno!,
+          widget.pFinalMesAno!,
+          widget.pIdCategoria!,
         );
         _model.listaDetalheDreCategoria = _model.retListaDetalheCategoriaDRE!
             .toList()
             .cast<DTDetalheDreCategoriaStruct>();
-        _model.totalCategoria = widget!.pValorTotal;
+        _model.totalCategoria = widget.pValorTotal;
         safeSetState(() {});
         return;
       } else {
         _model.retListaDetalheCategoriaDFC =
             await actions.getDetalhesCategoriaDFC(
           FFAppState().currentOrganizationId,
-          widget!.pInicioMesAno!,
-          widget!.pFinalMesAno!,
-          widget!.pIdCategoria!,
+          widget.pInicioMesAno!,
+          widget.pFinalMesAno!,
+          widget.pIdCategoria!,
         );
         _model.listaDetalheDfcCategoria = _model.retListaDetalheCategoriaDFC!
             .toList()
             .cast<DTDetalheDfcCategoriaStruct>();
-        _model.totalCategoria = widget!.pValorTotal;
+        _model.totalCategoria = widget.pValorTotal;
         safeSetState(() {});
         return;
       }
@@ -193,7 +192,7 @@ class _BsTransacoesPorCategoriaWidgetState
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              '${widget!.pNomeCategoria}',
+                              '${widget.pNomeCategoria}',
                               textAlign: TextAlign.center,
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
@@ -262,12 +261,12 @@ class _BsTransacoesPorCategoriaWidgetState
                               child: Text(
                                 'De ${dateTimeFormat(
                                   "dd/MM/y",
-                                  widget!.pInicioMesAno,
+                                  widget.pInicioMesAno,
                                   locale:
                                       FFLocalizations.of(context).languageCode,
                                 )} até ${dateTimeFormat(
                                   "dd/MM/y",
-                                  widget!.pFinalMesAno,
+                                  widget.pFinalMesAno,
                                   locale:
                                       FFLocalizations.of(context).languageCode,
                                 )}',
@@ -299,23 +298,23 @@ class _BsTransacoesPorCategoriaWidgetState
                               0.0, 12.0, 0.0, 0.0),
                           child: FFButtonWidget(
                             onPressed: () async {
-                              if (widget!.pTipo == 'DRE') {
+                              if (widget.pTipo == 'DRE') {
                                 await actions.gerarPdfDetalheCategoriaDRE(
                                   FFAppState().currentOrganizationName,
                                   _model.listaDetalheDreCategoria.toList(),
-                                  widget!.pNomeCategoria!,
+                                  widget.pNomeCategoria!,
                                   _model.totalCategoria!,
-                                  widget!.pInicioMesAno!,
-                                  widget!.pFinalMesAno!,
+                                  widget.pInicioMesAno!,
+                                  widget.pFinalMesAno!,
                                 );
                               } else {
                                 await actions.gerarPdfDetalheCategoriaDFC(
                                   FFAppState().currentOrganizationName,
                                   _model.listaDetalheDfcCategoria.toList(),
-                                  widget!.pNomeCategoria!,
+                                  widget.pNomeCategoria!,
                                   _model.totalCategoria!,
-                                  widget!.pInicioMesAno!,
-                                  widget!.pFinalMesAno!,
+                                  widget.pInicioMesAno!,
+                                  widget.pFinalMesAno!,
                                 );
                               }
                             },
@@ -368,13 +367,13 @@ class _BsTransacoesPorCategoriaWidgetState
                   decoration: BoxDecoration(),
                   child: RefreshIndicator(
                     onRefresh: () async {
-                      if (widget!.pTipo == 'DFC') {
+                      if (widget.pTipo == 'DFC') {
                         _model.retListaDetalheCategoriaDFCPull =
                             await actions.getDetalhesCategoriaDFC(
                           FFAppState().currentOrganizationId,
-                          widget!.pInicioMesAno!,
-                          widget!.pFinalMesAno!,
-                          widget!.pIdCategoria!,
+                          widget.pInicioMesAno!,
+                          widget.pFinalMesAno!,
+                          widget.pIdCategoria!,
                         );
                         _model.retSomaListaDetalheCategoriaDFCPull =
                             await actions.somarDetalhesDfc(
@@ -391,9 +390,9 @@ class _BsTransacoesPorCategoriaWidgetState
                         _model.retListaDetalheCategoriaDREPull =
                             await actions.getDetalhesCategoriaDRE(
                           FFAppState().currentOrganizationId,
-                          widget!.pInicioMesAno!,
-                          widget!.pFinalMesAno!,
-                          widget!.pIdCategoria!,
+                          widget.pInicioMesAno!,
+                          widget.pFinalMesAno!,
+                          widget.pIdCategoria!,
                         );
                         _model.retSomaListaDetalheCategoriaDREPull =
                             await actions.somarDetalhesDre(
@@ -415,7 +414,7 @@ class _BsTransacoesPorCategoriaWidgetState
                         children: [
                           Builder(
                             builder: (context) {
-                              if (widget!.pTipo == 'DFC') {
+                              if (widget.pTipo == 'DFC') {
                                 return Builder(
                                   builder: (context) {
                                     final listaItemDetalheCategoria = _model
@@ -552,9 +551,6 @@ class _BsTransacoesPorCategoriaWidgetState
                                                               'Leitor') ||
                                                           (FFAppState()
                                                                       .currentFunction ==
-                                                                  null ||
-                                                              FFAppState()
-                                                                      .currentFunction ==
                                                                   '')) {
                                                         await showDialog(
                                                           context: context,
@@ -619,10 +615,10 @@ class _BsTransacoesPorCategoriaWidgetState
                                                                 .getDetalhesCategoriaDFC(
                                                           FFAppState()
                                                               .currentOrganizationId,
-                                                          widget!
+                                                          widget
                                                               .pInicioMesAno!,
-                                                          widget!.pFinalMesAno!,
-                                                          widget!.pIdCategoria!,
+                                                          widget.pFinalMesAno!,
+                                                          widget.pIdCategoria!,
                                                         );
                                                         _shouldSetState = true;
                                                         _model.retSomaListaDetalheCategoriaDFCBS =
@@ -1200,9 +1196,6 @@ class _BsTransacoesPorCategoriaWidgetState
                                                             'Leitor') ||
                                                         (FFAppState()
                                                                     .currentFunction ==
-                                                                null ||
-                                                            FFAppState()
-                                                                    .currentFunction ==
                                                                 '')) {
                                                       ScaffoldMessenger.of(
                                                               context)
@@ -1264,9 +1257,9 @@ class _BsTransacoesPorCategoriaWidgetState
                                                               .getDetalhesCategoriaDRE(
                                                         FFAppState()
                                                             .currentOrganizationId,
-                                                        widget!.pInicioMesAno!,
-                                                        widget!.pFinalMesAno!,
-                                                        widget!.pIdCategoria!,
+                                                        widget.pInicioMesAno!,
+                                                        widget.pFinalMesAno!,
+                                                        widget.pIdCategoria!,
                                                       );
                                                       _shouldSetState = true;
                                                       _model.retSomaListaDetalheCategoriaDREBS =

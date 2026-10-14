@@ -1,5 +1,5 @@
 import '/auth/supabase_auth/auth_util.dart';
-import '/backend/schema/structs/index.dart';
+import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -11,7 +11,6 @@ import '/lastro/geral/bs_filtro_periodo/bs_filtro_periodo_widget.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
 import '/lastro/transacao/bs_detalhe_transacao/bs_detalhe_transacao_widget.dart';
 import '/lastro/transacao/bs_transacao/bs_transacao_widget.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/flutter_flow/custom_functions.dart' as functions;
@@ -46,39 +45,59 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => DashboardModel());
+    _model.setOnUpdate(onUpdate: () => safeSetState(() {}));
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      await Future.wait([
-        Future(() async {
-          await actions.syncMasterCache(
-            FFAppState().currentOrganizationId,
-            true,
-            true,
-            true,
-            true,
-          );
-          FFAppState().dataFimGlob = FFAppState().dataFimGlob == null
-              ? functions.getUltimoDiaDoMesAtual()
-              : FFAppState().dataFimGlob;
-          FFAppState().dataInicioGlob = FFAppState().dataInicioGlob == null
-              ? functions.getPrimeiroDiaDoMesAtual()
-              : FFAppState().dataInicioGlob;
-          safeSetState(() {});
-          _model.dataInicio = _model.dataInicio == null
-              ? FFAppState().dataInicioGlob
-              : _model.dataInicio;
-          _model.dataFim = _model.dataFim == null
-              ? FFAppState().dataFimGlob
-              : _model.dataFim;
-          safeSetState(() {});
-          await _model.abAtualizaDashboard(context);
-          safeSetState(() {});
-        }),
-        Future(() async {
-          await actions.acionarGeradorRecorrencias();
-        }),
-      ]);
+      _model.minhaOrganizacao = await ViewMembrosEquipeTable().queryRows(
+        queryFn: (q) => q
+            .eqOrNull(
+              'organization_id',
+              FFAppState().currentOrganizationId,
+            )
+            .eqOrNull(
+              'profile_id',
+              currentUserUid,
+            ),
+      );
+      if (_model.minhaOrganizacao?.firstOrNull?.isBloqueadoFinanceiro == true) {
+        context.goNamed(BloqueioFinanceiroWidget.routeName);
+
+        return;
+      } else {
+        await Future.wait([
+          Future(() async {
+            await actions.syncMasterCache(
+              FFAppState().currentOrganizationId,
+              true,
+              true,
+              true,
+              true,
+            );
+            FFAppState().dataFimGlob = FFAppState().dataFimGlob == null
+                ? functions.getUltimoDiaDoMesAtual()
+                : FFAppState().dataFimGlob;
+            FFAppState().dataInicioGlob = FFAppState().dataInicioGlob == null
+                ? functions.getPrimeiroDiaDoMesAtual()
+                : FFAppState().dataInicioGlob;
+            safeSetState(() {});
+            _model.dataInicio = _model.dataInicio == null
+                ? FFAppState().dataInicioGlob
+                : _model.dataInicio;
+            _model.dataFim = _model.dataFim == null
+                ? FFAppState().dataFimGlob
+                : _model.dataFim;
+            safeSetState(() {});
+            await _model.abAtualizaDashboard(context);
+            safeSetState(() {});
+            return;
+          }),
+          Future(() async {
+            await actions.acionarGeradorRecorrencias();
+            return;
+          }),
+        ]);
+      }
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
@@ -116,8 +135,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                     builder: (context) => FloatingActionButton(
                       onPressed: () async {
                         if ((FFAppState().currentFunction == 'Leitor') ||
-                            (FFAppState().currentFunction == null ||
-                                FFAppState().currentFunction == '')) {
+                            (FFAppState().currentFunction == '')) {
                           await showDialog(
                             context: context,
                             builder: (dialogContext) {
@@ -675,26 +693,30 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                                               .transparent,
                                                           onTap: () async {
                                                             await actions
-                                                                .gerarPdfDashboardGeral(
+                                                                .gerarPdfDashboardGeralNew(
                                                               FFAppState()
                                                                   .currentOrganizationName,
+                                                              FFAppState()
+                                                                  .currentOrganizationType,
                                                               _model
                                                                   .dadosSaldoTotalOrg,
                                                               _model
-                                                                  .dadosSaldosContasPorPeriodo
+                                                                  .dadosSaldoContas
                                                                   .toList(),
                                                               _model
                                                                   .dadosDfcSintetico,
                                                               _model
                                                                   .dadosDRESintetico,
                                                               _model
-                                                                  .dadosContasAPagarReceberRetroativa,
+                                                                  .dadosResumoContasAPagarReceber,
                                                               _model
                                                                   .dadosResumoSaudeCR,
                                                               _model
                                                                   .dadosAlertaDashboard,
-                                                              _model.dataInicio,
-                                                              _model.dataFim,
+                                                              FFAppState()
+                                                                  .dataInicioGlob,
+                                                              FFAppState()
+                                                                  .dataFimGlob,
                                                             );
                                                           },
                                                           child: Icon(
@@ -1749,8 +1771,8 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                                                           child:
                                                                               Text(
                                                                             _model.dadosAlertaDashboard!.qtdVencidas > 0
-                                                                                ? 'Atenção! Existem ${_model.dadosAlertaDashboard?.qtdVencidas?.toString()} contas que somam ${functions.formatarMoeda(_model.dadosAlertaDashboard?.valorVencidas, false)} aguardando pagamento.'
-                                                                                : 'Você possui ${_model.dadosAlertaDashboard?.qtdHoje?.toString()} contas no valor total de ${functions.formatarMoeda(_model.dadosAlertaDashboard?.valorHoje, false)} vencendo hoje.',
+                                                                                ? 'Atenção! Existem ${_model.dadosAlertaDashboard?.qtdVencidas.toString()} contas que somam ${functions.formatarMoeda(_model.dadosAlertaDashboard?.valorVencidas, false)} aguardando pagamento.'
+                                                                                : 'Você possui ${_model.dadosAlertaDashboard?.qtdHoje.toString()} contas no valor total de ${functions.formatarMoeda(_model.dadosAlertaDashboard?.valorHoje, false)} vencendo hoje.',
                                                                             textAlign:
                                                                                 TextAlign.start,
                                                                             style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -1801,9 +1823,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                                                     .currentFunction ==
                                                                 'Leitor') ||
                                                             (FFAppState()
-                                                                        .currentFunction ==
-                                                                    null ||
-                                                                FFAppState()
                                                                         .currentFunction ==
                                                                     '')) {
                                                           ScaffoldMessenger.of(
@@ -3622,7 +3641,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                                                               EdgeInsets.all(8.0),
                                                                           child:
                                                                               AutoSizeText(
-                                                                            'Atenção: ${_model.dadosResumoSaudeCR?.qtdVermelho?.toString()} departamentos estão operando em déficit neste período.',
+                                                                            'Atenção: ${_model.dadosResumoSaudeCR?.qtdVermelho.toString()} departamentos estão operando em déficit neste período.',
                                                                             textAlign:
                                                                                 TextAlign.center,
                                                                             minFontSize:

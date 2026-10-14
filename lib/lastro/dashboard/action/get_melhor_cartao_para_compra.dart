@@ -1,11 +1,7 @@
 // Automatic FlutterFlow imports
 import '/backend/schema/structs/index.dart';
-import '/backend/supabase/supabase.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import '/custom_code/actions/index.dart'; // Imports other custom actions
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
-import 'package:flutter/material.dart';
+// Imports other custom actions
+// Imports custom functions
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -13,47 +9,45 @@ DTCartaoResumoStruct? getMelhorCartaoParaCompra(
   List<DTCartaoResumoStruct> listaCartoes,
   double? valorDaCompra,
 ) {
-  // Barreira de segurança: se não há cartões, não há recomendação
+  // 1. Barreira de segurança: se não há cartões, aborta instantaneamente
   if (listaCartoes.isEmpty) {
     return null;
   }
 
-  // 1. Filtra apenas os cartões que possuem limite suficiente
-  // Se o valorDaCompra for nulo, consideramos qualquer cartão com limite > 0
-  double valorNecessario = valorDaCompra ?? 0.01;
+  // 2. Blindagem contra Nulos, Zeros e Valores Negativos
+  double valorNecessario =
+      (valorDaCompra != null && valorDaCompra > 0) ? valorDaCompra : 0.01;
 
+  // 3. Filtra apenas os cartões que aguentam a pancada
   List<DTCartaoResumoStruct> cartoesValidos = listaCartoes
-      .where((cartao) => cartao.limiteRestante >= valorNecessario)
+      .where((cartao) => (cartao.limiteRestante ?? 0.0) >= valorNecessario)
       .toList();
 
-  // 2. Se nenhum cartão suportar o valor, retorna nulo (o app deve avisar o usuário)
+  // Se nenhum cartão suportar o valor, retorna nulo (o App deve exibir um alerta)
   if (cartoesValidos.isEmpty) {
     return null;
   }
 
-  // 3. A Lógica Financeira (Sorting)
-  // O melhor cartão é aquele que está mais LONGE do próximo fechamento (melhorDiaCompra maior),
-  // garantindo o maior prazo de pagamento possível (até 40 dias de fôlego).
+  // 4. A Lógica Financeira de Ouro (Sorting)
   cartoesValidos.sort((a, b) {
-    // Se algum não tiver o melhor dia configurado, jogamos para o final da fila
+    // Tratamento para datas nulas (empurra para o fim da fila)
     if (a.melhorDiaCompra == null && b.melhorDiaCompra == null) {
-      // Desempate por quem tem mais limite
-      return b.limiteRestante.compareTo(a.limiteRestante);
+      return (b.limiteRestante ?? 0.0).compareTo(a.limiteRestante ?? 0.0);
     }
     if (a.melhorDiaCompra == null) return 1;
     if (b.melhorDiaCompra == null) return -1;
 
-    // Compara as datas. Queremos a data mais distante no futuro (Descending)
+    // Compara as datas: Traz a data mais distante no futuro para o topo da lista
     int dataComparacao = b.melhorDiaCompra!.compareTo(a.melhorDiaCompra!);
 
-    // Se as datas forem exatamente iguais, o desempate é quem tem maior limite sobrando
+    // Desempate de Ouro: Se fecham no mesmo dia, usa o que tem mais limite disponível
     if (dataComparacao == 0) {
-      return b.limiteRestante.compareTo(a.limiteRestante);
+      return (b.limiteRestante ?? 0.0).compareTo(a.limiteRestante ?? 0.0);
     }
 
     return dataComparacao;
   });
 
-  // Retorna o campeão (O primeiro da lista ordenada)
+  // Retorna o grande campeão
   return cartoesValidos.first;
 }

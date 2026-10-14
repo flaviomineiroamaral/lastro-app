@@ -2,14 +2,12 @@ import '/backend/api_requests/api_calls.dart';
 import '/backend/schema/structs/index.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/upload_data.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
+import '/lastro/importacao/bs_senha_p_d_f/bs_senha_p_d_f_widget.dart';
 import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -198,8 +196,6 @@ class _ImportarWidgetState extends State<ImportarWidget> {
                                                     .currentFunction ==
                                                 'Leitor') ||
                                             (FFAppState().currentFunction ==
-                                                    null ||
-                                                FFAppState().currentFunction ==
                                                     '')) {
                                           await showDialog(
                                             context: context,
@@ -440,8 +436,6 @@ class _ImportarWidgetState extends State<ImportarWidget> {
                                                     .currentFunction ==
                                                 'Leitor') ||
                                             (FFAppState().currentFunction ==
-                                                    null ||
-                                                FFAppState().currentFunction ==
                                                     '')) {
                                           await showDialog(
                                             context: context,
@@ -520,13 +514,75 @@ class _ImportarWidgetState extends State<ImportarWidget> {
                                             }
                                           }
 
-                                          _model.textoBruto =
+                                          _model.textoExtraidoDoPDF = null;
+                                          _model.sehaDigitada = null;
+                                          safeSetState(() {});
+                                          _model.primeiraExtracaoTextoBruto =
                                               await actions.extrairTextoPDF(
                                             _model
                                                 .uploadedLocalFile_pdfCarregado,
+                                            null,
                                           );
                                           _shouldSetState = true;
-                                          if (_model.textoBruto ==
+                                          _model.textoExtraidoDoPDF =
+                                              _model.primeiraExtracaoTextoBruto;
+                                          safeSetState(() {});
+                                          while (_model.textoExtraidoDoPDF ==
+                                              'ERRO_SENHA') {
+                                            await showModalBottomSheet(
+                                              isScrollControlled: true,
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              enableDrag: false,
+                                              context: context,
+                                              builder: (context) {
+                                                return GestureDetector(
+                                                  onTap: () {
+                                                    FocusScope.of(context)
+                                                        .unfocus();
+                                                    FocusManager
+                                                        .instance.primaryFocus
+                                                        ?.unfocus();
+                                                  },
+                                                  child: Padding(
+                                                    padding:
+                                                        MediaQuery.viewInsetsOf(
+                                                            context),
+                                                    child: Container(
+                                                      height: 300.0,
+                                                      child: BsSenhaPDFWidget(
+                                                        pUpArquivoPDF: _model
+                                                            .uploadedLocalFile_pdfCarregado,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ).then((value) => safeSetState(() =>
+                                                _model.retSenhaDigitada =
+                                                    value));
+
+                                            _shouldSetState = true;
+                                            if (_model.retSenhaDigitada ==
+                                                    null ||
+                                                _model.retSenhaDigitada == '') {
+                                              break;
+                                            } else {
+                                              _model.segundaExtracaoTextoBruto =
+                                                  await actions.extrairTextoPDF(
+                                                _model
+                                                    .uploadedLocalFile_pdfCarregado,
+                                                _model.retSenhaDigitada,
+                                              );
+                                              _shouldSetState = true;
+                                              _model.textoExtraidoDoPDF = _model
+                                                  .segundaExtracaoTextoBruto;
+                                              _model.sehaDigitada =
+                                                  _model.retSenhaDigitada;
+                                              safeSetState(() {});
+                                            }
+                                          }
+                                          if (_model.textoExtraidoDoPDF ==
                                               'ERRO_IMAGEM') {
                                             await showDialog(
                                               context: context,
@@ -562,16 +618,18 @@ class _ImportarWidgetState extends State<ImportarWidget> {
                                               },
                                             );
 
-                                            _model.base64Gerado0 =
+                                            _model.base64GeradoParaLerVisual =
                                                 await actions.pdfParaBase64(
                                               _model
                                                   .uploadedLocalFile_pdfCarregado,
+                                              _model.sehaDigitada,
                                             );
                                             _shouldSetState = true;
                                             _model.respostaIAVisual0 =
                                                 await LerFaturaGeminiVisualCall
                                                     .call(
-                                              pdfBase64: _model.base64Gerado0,
+                                              pdfBase64: _model
+                                                  .base64GeradoParaLerVisual,
                                             );
 
                                             _shouldSetState = true;
@@ -626,26 +684,22 @@ class _ImportarWidgetState extends State<ImportarWidget> {
                                               return;
                                             }
                                           } else {
-                                            _model.respostaIA =
-                                                await LerFaturaGeminiCall.call(
-                                              textoFatura: _model.textoBruto,
+                                            _model.retTextoExtraidoParaIA =
+                                                await actions
+                                                    .prepararTextoParaIA(
+                                              _model.textoExtraidoDoPDF!,
                                             );
-
                                             _shouldSetState = true;
-                                            if (((_model.respostaIA
-                                                            ?.statusCode ??
-                                                        200) ==
-                                                    200) &&
-                                                (_model.respostaIA?.succeeded ??
-                                                    true)) {
+                                            _model.resultadoRegex =
+                                                await actions
+                                                    .parsePdfFaturaRegex1(
+                                              _model.retTextoExtraidoParaIA!,
+                                            );
+                                            _shouldSetState = true;
+                                            if (_model.resultadoRegex!.length >
+                                                0) {
                                               FFAppState().tempImportacaoOFX =
-                                                  functions
-                                                      .jsonToOfx(getJsonField(
-                                                        (_model.respostaIA
-                                                                ?.jsonBody ??
-                                                            ''),
-                                                        r'''$.candidates[0].content.parts[0].text''',
-                                                      ).toString())
+                                                  _model.resultadoRegex!
                                                       .toList()
                                                       .cast<
                                                           OfxTransactionStruct>();
@@ -659,123 +713,81 @@ class _ImportarWidgetState extends State<ImportarWidget> {
                                                 safeSetState(() {});
                                               return;
                                             } else {
-                                              if ((_model.respostaIA
-                                                          ?.statusCode ??
-                                                      200) ==
-                                                  429) {
-                                                await showDialog(
-                                                  context: context,
-                                                  builder: (dialogContext) {
-                                                    return Dialog(
-                                                      elevation: 0,
-                                                      insetPadding:
-                                                          EdgeInsets.zero,
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      alignment:
-                                                          AlignmentDirectional(
-                                                                  -1.0, 0.0)
-                                                              .resolve(
-                                                                  Directionality.of(
-                                                                      context)),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(
-                                                                  dialogContext)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child:
-                                                            BsTopNotificacoesWidget(
-                                                          pTipo: 'ERRO',
-                                                          pMensagem:
-                                                              'Os servidores da Inteligência Artificial estão ocupados neste momento. Por favor, aguarde 1 a 2 minutos e tente novamente.',
-                                                        ),
-                                                      ),
-                                                    );
-                                                  },
-                                                );
+                                              _model.respostaIA =
+                                                  await LerFaturaGeminiCall
+                                                      .call(
+                                                textoFatura: _model
+                                                    .retTextoExtraidoParaIA,
+                                              );
+
+                                              _shouldSetState = true;
+                                              if (((_model.respostaIA
+                                                              ?.statusCode ??
+                                                          200) ==
+                                                      200) &&
+                                                  (_model.respostaIA
+                                                          ?.succeeded ??
+                                                      true)) {
+                                                FFAppState().tempImportacaoOFX =
+                                                    functions
+                                                        .jsonToOfx(getJsonField(
+                                                          (_model.respostaIA
+                                                                  ?.jsonBody ??
+                                                              ''),
+                                                          r'''$.candidates[0].content.parts[0].text''',
+                                                        ).toString())
+                                                        .toList()
+                                                        .cast<
+                                                            OfxTransactionStruct>();
+                                                safeSetState(() {});
+
+                                                context.pushNamed(
+                                                    SelecionarTransacoesWidget
+                                                        .routeName);
 
                                                 if (_shouldSetState)
                                                   safeSetState(() {});
                                                 return;
                                               } else {
-                                                await showDialog(
-                                                  context: context,
-                                                  builder: (dialogContext) {
-                                                    return Dialog(
-                                                      elevation: 0,
-                                                      insetPadding:
-                                                          EdgeInsets.zero,
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      alignment:
-                                                          AlignmentDirectional(
-                                                                  -1.0, 0.0)
-                                                              .resolve(
-                                                                  Directionality.of(
-                                                                      context)),
-                                                      child: GestureDetector(
-                                                        onTap: () {
-                                                          FocusScope.of(
-                                                                  dialogContext)
-                                                              .unfocus();
-                                                          FocusManager.instance
-                                                              .primaryFocus
-                                                              ?.unfocus();
-                                                        },
-                                                        child:
-                                                            BsTopNotificacoesWidget(
-                                                          pTipo: 'AVISO',
-                                                          pMensagem:
-                                                              'Enviando  sua fatura para extração de dados por IA!',
+                                                if ((_model.respostaIA
+                                                            ?.statusCode ??
+                                                        200) ==
+                                                    429) {
+                                                  await showDialog(
+                                                    context: context,
+                                                    builder: (dialogContext) {
+                                                      return Dialog(
+                                                        elevation: 0,
+                                                        insetPadding:
+                                                            EdgeInsets.zero,
+                                                        backgroundColor:
+                                                            Colors.transparent,
+                                                        alignment:
+                                                            AlignmentDirectional(
+                                                                    -1.0, 0.0)
+                                                                .resolve(
+                                                                    Directionality.of(
+                                                                        context)),
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            FocusScope.of(
+                                                                    dialogContext)
+                                                                .unfocus();
+                                                            FocusManager
+                                                                .instance
+                                                                .primaryFocus
+                                                                ?.unfocus();
+                                                          },
+                                                          child:
+                                                              BsTopNotificacoesWidget(
+                                                            pTipo: 'ERRO',
+                                                            pMensagem:
+                                                                'Os servidores da Inteligência Artificial estão ocupados neste momento. Por favor, aguarde 1 a 2 minutos e tente novamente.',
+                                                          ),
                                                         ),
-                                                      ),
-                                                    );
-                                                  },
-                                                );
-
-                                                _model.base64Gerado =
-                                                    await actions.pdfParaBase64(
-                                                  _model
-                                                      .uploadedLocalFile_pdfCarregado,
-                                                );
-                                                _shouldSetState = true;
-                                                _model.respostaIAVisual =
-                                                    await LerFaturaGeminiVisualCall
-                                                        .call(
-                                                  pdfBase64:
-                                                      _model.base64Gerado,
-                                                );
-
-                                                _shouldSetState = true;
-                                                if (((_model.respostaIAVisual
-                                                                ?.statusCode ??
-                                                            200) ==
-                                                        200) &&
-                                                    (_model.respostaIAVisual
-                                                            ?.succeeded ??
-                                                        true)) {
-                                                  FFAppState()
-                                                          .tempImportacaoOFX =
-                                                      functions
-                                                          .jsonToOfx(
-                                                              getJsonField(
-                                                            (_model.respostaIAVisual
-                                                                    ?.jsonBody ??
-                                                                ''),
-                                                            r'''$.candidates[0].content.parts[0].text''',
-                                                          ).toString())
-                                                          .toList()
-                                                          .cast<
-                                                              OfxTransactionStruct>();
-                                                  safeSetState(() {});
-
-                                                  context.pushNamed(
-                                                      SelecionarTransacoesWidget
-                                                          .routeName);
+                                                      );
+                                                    },
+                                                  );
 
                                                   if (_shouldSetState)
                                                     safeSetState(() {});
@@ -808,18 +820,102 @@ class _ImportarWidgetState extends State<ImportarWidget> {
                                                           },
                                                           child:
                                                               BsTopNotificacoesWidget(
-                                                            pTipo: 'ERRO',
+                                                            pTipo: 'AVISO',
                                                             pMensagem:
-                                                                'Ocorreu um erro ao comunicar com o servidor. Verifique a sua ligação à internet ou tente novamente mais tarde.',
+                                                                'Enviando  sua fatura para extração de dados por IA!',
                                                           ),
                                                         ),
                                                       );
                                                     },
                                                   );
 
-                                                  if (_shouldSetState)
+                                                  _model.base64GeradoParaLerVisual1 =
+                                                      await actions
+                                                          .pdfParaBase64(
+                                                    _model
+                                                        .uploadedLocalFile_pdfCarregado,
+                                                    _model.sehaDigitada,
+                                                  );
+                                                  _shouldSetState = true;
+                                                  _model.respostaIAVisual =
+                                                      await LerFaturaGeminiVisualCall
+                                                          .call(
+                                                    pdfBase64: _model
+                                                        .base64GeradoParaLerVisual1,
+                                                  );
+
+                                                  _shouldSetState = true;
+                                                  if (((_model.respostaIAVisual
+                                                                  ?.statusCode ??
+                                                              200) ==
+                                                          200) &&
+                                                      (_model.respostaIAVisual
+                                                              ?.succeeded ??
+                                                          true)) {
+                                                    FFAppState()
+                                                            .tempImportacaoOFX =
+                                                        functions
+                                                            .jsonToOfx(
+                                                                getJsonField(
+                                                              (_model.respostaIAVisual
+                                                                      ?.jsonBody ??
+                                                                  ''),
+                                                              r'''$.candidates[0].content.parts[0].text''',
+                                                            ).toString())
+                                                            .toList()
+                                                            .cast<
+                                                                OfxTransactionStruct>();
                                                     safeSetState(() {});
-                                                  return;
+
+                                                    context.pushNamed(
+                                                        SelecionarTransacoesWidget
+                                                            .routeName);
+
+                                                    if (_shouldSetState)
+                                                      safeSetState(() {});
+                                                    return;
+                                                  } else {
+                                                    await showDialog(
+                                                      context: context,
+                                                      builder: (dialogContext) {
+                                                        return Dialog(
+                                                          elevation: 0,
+                                                          insetPadding:
+                                                              EdgeInsets.zero,
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          alignment: AlignmentDirectional(
+                                                                  -1.0, 0.0)
+                                                              .resolve(
+                                                                  Directionality.of(
+                                                                      context)),
+                                                          child:
+                                                              GestureDetector(
+                                                            onTap: () {
+                                                              FocusScope.of(
+                                                                      dialogContext)
+                                                                  .unfocus();
+                                                              FocusManager
+                                                                  .instance
+                                                                  .primaryFocus
+                                                                  ?.unfocus();
+                                                            },
+                                                            child:
+                                                                BsTopNotificacoesWidget(
+                                                              pTipo: 'ERRO',
+                                                              pMensagem:
+                                                                  'Ocorreu um erro ao comunicar com o servidor. Verifique a sua ligação à internet ou tente novamente mais tarde.',
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    );
+
+                                                    if (_shouldSetState)
+                                                      safeSetState(() {});
+                                                    return;
+                                                  }
                                                 }
                                               }
                                             }
@@ -833,7 +929,11 @@ class _ImportarWidgetState extends State<ImportarWidget> {
                                         color: Colors.transparent,
                                         child: ListTile(
                                           leading: FaIcon(
-                                            FontAwesomeIcons.solidFilePdf,
+                                            FaIconData(const IconData(
+                                                /* solidFilePdf */ 0xf1c1,
+                                                fontFamily: 'FontAwesomeSolid',
+                                                fontPackage:
+                                                    'font_awesome_flutter')),
                                             color: FlutterFlowTheme.of(context)
                                                 .secondaryText,
                                           ),
@@ -943,8 +1043,6 @@ class _ImportarWidgetState extends State<ImportarWidget> {
                                                     .currentFunction ==
                                                 'Leitor') ||
                                             (FFAppState().currentFunction ==
-                                                    null ||
-                                                FFAppState().currentFunction ==
                                                     '')) {
                                           await showDialog(
                                             context: context,
@@ -1124,7 +1222,11 @@ class _ImportarWidgetState extends State<ImportarWidget> {
                                         color: Colors.transparent,
                                         child: ListTile(
                                           leading: FaIcon(
-                                            FontAwesomeIcons.fileCsv,
+                                            FaIconData(const IconData(
+                                                /* fileCsv */ 0xf6dd,
+                                                fontFamily: 'FontAwesomeSolid',
+                                                fontPackage:
+                                                    'font_awesome_flutter')),
                                             color: FlutterFlowTheme.of(context)
                                                 .secondaryText,
                                           ),

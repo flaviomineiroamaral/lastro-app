@@ -30,3 +30,10 @@ export '/lastro/cartao/liquidar_cartao/liquidar_cartao_widget.dart'
     show LiquidarCartaoWidget;
 export '/lastro/cadastro/gerenciar_obrigacoes/gerenciar_obrigacoes_widget.dart'
     show GerenciarObrigacoesWidget;
+export '/lastro/importacao/conciliacao_staging_page/conciliacao_staging_page_widget.dart'
+    show ConciliacaoStagingPageWidget;
+export '/lastro/autenticacao/ativacao/ativacao_widget.dart' show AtivacaoWidget;
+export '/obsoletos/onboarding_page_old/onboarding_page_old_widget.dart'
+    show OnboardingPageOldWidget;
+export '/lastro/autenticacao/bloqueio_financeiro/bloqueio_financeiro_widget.dart'
+    show BloqueioFinanceiroWidget;

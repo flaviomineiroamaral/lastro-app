@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 
 import '/backend/schema/structs/index.dart';
@@ -13,10 +11,7 @@ import '/auth/base_auth_user_provider.dart';
 
 import '/main.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/lat_lng.dart';
-import '/flutter_flow/place.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import 'serialization_util.dart';
 
 import '/index.dart';
 
@@ -218,6 +213,33 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: GerenciarObrigacoesWidget.routePath,
           requireAuth: true,
           builder: (context, params) => GerenciarObrigacoesWidget(),
+        ),
+        FFRoute(
+          name: ConciliacaoStagingPageWidget.routeName,
+          path: ConciliacaoStagingPageWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => ConciliacaoStagingPageWidget(),
+        ),
+        FFRoute(
+          name: AtivacaoWidget.routeName,
+          path: AtivacaoWidget.routePath,
+          builder: (context, params) => AtivacaoWidget(
+            serial: params.getParam(
+              'serial',
+              ParamType.String,
+            ),
+          ),
+        ),
+        FFRoute(
+          name: OnboardingPageOldWidget.routeName,
+          path: OnboardingPageOldWidget.routePath,
+          builder: (context, params) => OnboardingPageOldWidget(),
+        ),
+        FFRoute(
+          name: BloqueioFinanceiroWidget.routeName,
+          path: BloqueioFinanceiroWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => BloqueioFinanceiroWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
@@ -404,9 +426,13 @@ class FFRoute {
           final child = appStateNotifier.loading
               ? Container(
                   color: FlutterFlowTheme.of(context).primaryBackground,
-                  child: Image.asset(
-                    'assets/images/Splash_LASTRO_(1).png',
-                    fit: BoxFit.cover,
+                  child: Center(
+                    child: Image.asset(
+                      'assets/images/Splash_LASTRO_(1).png',
+                      width: MediaQuery.sizeOf(context).width * 0.8,
+                      height: MediaQuery.sizeOf(context).height * 0.8,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 )
               : page;
@@ -425,6 +451,10 @@ class FFRoute {
                     duration: transitionInfo.duration,
                     reverseDuration: transitionInfo.duration,
                     alignment: transitionInfo.alignment,
+                    curve: transitionInfo.transitionType ==
+                            PageTransitionType.scale
+                        ? const Interval(0.0, 0.5)
+                        : Curves.linear,
                     child: child,
                   ).buildTransitions(
                     context,

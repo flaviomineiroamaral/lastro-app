@@ -1,18 +1,16 @@
 // Automatic FlutterFlow imports
 import '/backend/schema/structs/index.dart';
 import '/backend/supabase/supabase.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import '/custom_code/actions/index.dart'; // Imports other custom actions
-import '/flutter_flow/custom_functions.dart'; // Imports custom functions
-import 'package:flutter/material.dart';
+// Imports other custom actions
+// Imports custom functions
+import 'package:flutter/material.dart' hide RepeatMode;
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
 Future<List<DTSaldoContaStruct>> getSaldosContasPorPeriodo(
   String orgId,
-  DateTime dataInicio, // NOVO: Parâmetro de filtro (Filme)
-  DateTime dataFim, // NOVO: Parâmetro de filtro (Filme)
+  DateTime dataInicio, // Parâmetro de filtro (Filme)
+  DateTime dataFim, // Parâmetro de filtro (Filme)
 ) async {
   final supabase = Supabase.instance.client;
 
@@ -42,20 +40,19 @@ Future<List<DTSaldoContaStruct>> getSaldosContasPorPeriodo(
       'p_data_fim': dataFim.toIso8601String(),
     });
 
-    // Mapeamento seguro para o Data Type (com CamelCase conforme definimos)
+    // Mapeamento seguro para o Data Type
     if (response != null && response is List) {
       return response
           .map((data) => DTSaldoContaStruct(
-                contaId: data['conta_id']?.toString() ?? '',
-                nomeConta: data['nome_conta']?.toString() ?? '',
-                tipoConta: data['tipo_conta']?.toString() ?? '',
-                saldoInicial: parseDouble(data['saldo_inicial']) ?? 0.0,
-                totalEntradas: parseDouble(data['total_entradas']) ?? 0.0,
-                totalSaidas: parseDouble(data['total_saidas']) ?? 0.0,
-                saldoAtual: parseDouble(data['saldo_atual']) ?? 0.0,
-                diaFechamento: parseInt(data['dia_fechamento']) ?? 0,
-                diaVencimento: parseInt(data['dia_vencimento']) ?? 0,
-              ))
+              contaId: data['conta_id']?.toString() ?? '',
+              nomeConta: data['nome_conta']?.toString() ?? '',
+              tipoConta: data['tipo_conta']?.toString() ?? '',
+              saldoInicial: parseDouble(data['saldo_inicial']),
+              totalEntradas: parseDouble(data['total_entradas']),
+              totalSaidas: parseDouble(data['total_saidas']),
+              saldoAtual: parseDouble(data['saldo_atual']),
+              diaFechamento: parseInt(data['dia_fechamento']),
+              diaVencimento: parseInt(data['dia_vencimento'])))
           .toList();
     }
 

@@ -1,9 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'
+    show ChangeNotifier, Color, Colors, VoidCallback;
 import '/backend/schema/structs/index.dart';
-import '/backend/api_requests/api_manager.dart';
-import 'backend/supabase/supabase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'flutter_flow/flutter_flow_util.dart';
 
 class FFAppState extends ChangeNotifier {
   static FFAppState _instance = FFAppState._internal();
@@ -259,6 +257,24 @@ class FFAppState extends ChangeNotifier {
 
   void insertAtIndexInCacheMembros(int index, DTCacheMembrosLightStruct value) {
     cacheMembros.insert(index, value);
+  }
+
+  bool _isbloqueadofinanceiro = false;
+  bool get isbloqueadofinanceiro => _isbloqueadofinanceiro;
+  set isbloqueadofinanceiro(bool value) {
+    _isbloqueadofinanceiro = value;
+  }
+
+  int _limitecrsplano = 0;
+  int get limitecrsplano => _limitecrsplano;
+  set limitecrsplano(int value) {
+    _limitecrsplano = value;
+  }
+
+  int _limitecrsatual = 0;
+  int get limitecrsatual => _limitecrsatual;
+  set limitecrsatual(int value) {
+    _limitecrsatual = value;
   }
 }
 

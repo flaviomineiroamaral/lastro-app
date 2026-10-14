@@ -4,10 +4,8 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import '/custom_code/widgets/index.dart' as custom_widgets;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -51,10 +49,10 @@ class _BsConfirmarPagamentoWidgetState
 
     // On component load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      _model.vDataPagamento = widget!.pDataPagamento == null
+      _model.vDataPagamento = widget.pDataPagamento == null
           ? getCurrentTimestamp
-          : widget!.pDataPagamento;
-      _model.vValorFormulario = widget!.pValorTotal;
+          : widget.pDataPagamento;
+      _model.vValorFormulario = widget.pValorTotal;
       safeSetState(() {});
     });
 
@@ -269,9 +267,9 @@ class _BsConfirmarPagamentoWidgetState
                 onTap: () async {
                   final _datePickedDate = await showDatePicker(
                     context: context,
-                    initialDate: ((widget!.pDataPagamento == null
+                    initialDate: ((widget.pDataPagamento == null
                             ? getCurrentTimestamp
-                            : widget!.pDataPagamento) ??
+                            : widget.pDataPagamento) ??
                         DateTime.now()),
                     firstDate: DateTime(1900),
                     lastDate: DateTime(2050),
@@ -323,9 +321,9 @@ class _BsConfirmarPagamentoWidgetState
                     });
                   } else if (_model.datePicked != null) {
                     safeSetState(() {
-                      _model.datePicked = (widget!.pDataPagamento == null
+                      _model.datePicked = (widget.pDataPagamento == null
                           ? getCurrentTimestamp
-                          : widget!.pDataPagamento);
+                          : widget.pDataPagamento);
                     });
                   }
                   _model.vDataPagamento = _model.datePicked;
@@ -385,15 +383,17 @@ class _BsConfirmarPagamentoWidgetState
                 padding: EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 0.0),
                 child: FFButtonWidget(
                   onPressed: () async {
+                    var _shouldSetState = false;
                     _model.resultado =
                         await actions.liquidarEGerarTransferencia(
-                      widget!.pItensSelecionados!.toList(),
+                      widget.pItensSelecionados!.toList(),
                       _model.vDataPagamento!,
                       _model.vValorFormulario!,
                       _model.ddContaOrigemValue!,
-                      widget!.pContaCartao!,
+                      widget.pContaCartao!,
                       FFAppState().currentOrganizationId,
                     );
+                    _shouldSetState = true;
                     Navigator.pop(context);
                     if (_model.resultado == 'SUCESSO') {
                       await showDialog(
@@ -412,6 +412,9 @@ class _BsConfirmarPagamentoWidgetState
                           );
                         },
                       );
+
+                      if (_shouldSetState) safeSetState(() {});
+                      return;
                     } else {
                       await showDialog(
                         context: context,
@@ -429,9 +432,12 @@ class _BsConfirmarPagamentoWidgetState
                           );
                         },
                       );
+
+                      if (_shouldSetState) safeSetState(() {});
+                      return;
                     }
 
-                    safeSetState(() {});
+                    if (_shouldSetState) safeSetState(() {});
                   },
                   text: 'Confirmar',
                   icon: Icon(

@@ -67,8 +67,6 @@ export '/lastro/cr/actions/gerar_pdf_balancete_c_r.dart'
 export '/lastro/dashboard/action/get_conciliacao_dashboard.dart'
     show getConciliacaoDashboard;
 export '/lastro/cr/actions/repassar_arrecadacao.dart' show repassarArrecadacao;
-export '/lastro/dashboard/action/gerar_pdf_dashboard_geral.dart'
-    show gerarPdfDashboardGeral;
 export '/lastro/cadastro/action/get_obrigacoes_recorrentes.dart'
     show getObrigacoesRecorrentes;
 export '/lastro/cadastro/action/gerar_p_d_f_plano_de_conta.dart'
@@ -84,3 +82,21 @@ export '/lastro/dashboard/action/get_projecao_titulos_retroativa.dart'
 export '/lastro/cr/actions/get_cr_sintetico_por_id.dart'
     show getCrSinteticoPorId;
 export '/lastro/dfc/action/gerar_csv_dfc.dart' show gerarCsvDfc;
+export '/custom_code/actions/preparar_texto_para_i_a.dart'
+    show prepararTextoParaIA;
+export '/lastro/importacao/action/parse_pdf_fatura_regex1.dart'
+    show parsePdfFaturaRegex1;
+export '/lastro/importacao/action/aprovar_lote_staging.dart'
+    show aprovarLoteStaging;
+export '/lastro/importacao/action/aprovar_item_staging.dart'
+    show aprovarItemStaging;
+export '/lastro/importacao/action/descartar_item_staging.dart'
+    show descartarItemStaging;
+export '/lastro/autenticacao/action/get_contrato_b2_b_by_serial.dart'
+    show getContratoB2BBySerial;
+export '/custom_code/actions/create_account_supabase.dart'
+    show createAccountSupabase;
+export '/lastro/dashboard/action/gerar_pdf_dashboard_geral_new.dart'
+    show gerarPdfDashboardGeralNew;
+export '/custom_code/actions/ativar_serial_custom_action.dart'
+    show ativarSerialCustomAction;

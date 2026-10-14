@@ -9,12 +9,10 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/upload_data.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -51,7 +49,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      if (widget!.pIdAgendamento == null || widget!.pIdAgendamento == '') {
+      if (widget.pIdAgendamento == null || widget.pIdAgendamento == '') {
         _model.vDataPagamento = null;
         _model.vDataVencimento = getCurrentTimestamp;
         _model.vDataCompetencia = getCurrentTimestamp;
@@ -72,22 +70,22 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
           _model.choTipoValueController?.value = [_model.vTipoOperacao];
         });
       } else {
-        _model.vUrlComprovante = widget!.pViewAgendamento?.comprovativoUrl;
-        _model.vDataPagamento = widget!.pViewAgendamento?.dataPagamento;
-        _model.vDataVencimento = widget!.pViewAgendamento?.dataVencimento;
-        _model.vDataCompetencia = widget!.pViewAgendamento?.dataCompetencia;
-        _model.vIdCategoria = widget!.pViewAgendamento?.categoriaId;
-        _model.vIdContaOrigem = widget!.pViewAgendamento?.contaId;
-        _model.vIdCentroCusto = widget!.pViewAgendamento?.centroCustoId;
-        _model.vIdMembro = widget!.pViewAgendamento?.membroId;
-        _model.vDescricao = widget!.pViewAgendamento?.descricao;
-        _model.vValorFormulario = widget!.pViewAgendamento!.valor!;
-        _model.vStatus = widget!.pViewAgendamento?.status != 'PENDENTE';
+        _model.vUrlComprovante = widget.pViewAgendamento?.comprovativoUrl;
+        _model.vDataPagamento = widget.pViewAgendamento?.dataPagamento;
+        _model.vDataVencimento = widget.pViewAgendamento?.dataVencimento;
+        _model.vDataCompetencia = widget.pViewAgendamento?.dataCompetencia;
+        _model.vIdCategoria = widget.pViewAgendamento?.categoriaId;
+        _model.vIdContaOrigem = widget.pViewAgendamento?.contaId;
+        _model.vIdCentroCusto = widget.pViewAgendamento?.centroCustoId;
+        _model.vIdMembro = widget.pViewAgendamento?.membroId;
+        _model.vDescricao = widget.pViewAgendamento?.descricao;
+        _model.vValorFormulario = widget.pViewAgendamento!.valor!;
+        _model.vStatus = widget.pViewAgendamento?.status != 'PENDENTE';
         _model.vTipoOperacao =
-            widget!.pViewAgendamento?.tipoOperacao == 'CREDITO'
+            widget.pViewAgendamento?.tipoOperacao == 'CREDITO'
                 ? 'A Receber'
                 : 'A Pagar';
-        _model.vIdTransacao = widget!.pViewAgendamento?.transacaoId;
+        _model.vIdTransacao = widget.pViewAgendamento?.transacaoId;
         _model.mostrarAvancadas = false;
         _model.vDescricaoCategoria = null;
         safeSetState(() {});
@@ -163,7 +161,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                   },
                 ),
                 title: Text(
-                  widget!.pIdAgendamento == null || widget!.pIdAgendamento == ''
+                  widget.pIdAgendamento == null || widget.pIdAgendamento == ''
                       ? 'Novo Agendamento'
                       : 'Editar Agendamento',
                   style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -216,8 +214,8 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                 ChipData('A Receber'),
                                 ChipData('A Pagar')
                               ],
-                              onChanged: (widget!.pIdAgendamento != null &&
-                                      widget!.pIdAgendamento != '')
+                              onChanged: (widget.pIdAgendamento != null &&
+                                      widget.pIdAgendamento != '')
                                   ? null
                                   : (val) => safeSetState(() =>
                                       _model.choTipoValue = val?.firstOrNull),
@@ -346,9 +344,9 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                     arredondamento: 8.0,
                                     centralizarTexto: false,
                                     valorInicial:
-                                        widget!.pIdAgendamento != null &&
-                                                widget!.pIdAgendamento != ''
-                                            ? widget!.pViewAgendamento?.valor
+                                        widget.pIdAgendamento != null &&
+                                                widget.pIdAgendamento != ''
+                                            ? widget.pViewAgendamento?.valor
                                             : _model.vValorFormulario,
                                     acaoAoMudar: (valorDigitado) async {
                                       _model.vValorFormulario = valorDigitado;
@@ -934,7 +932,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                           : (newValue) async {
                                               safeSetState(() =>
                                                   _model.swtRecorrenteValue =
-                                                      newValue!);
+                                                      newValue);
                                             },
                                       activeColor: ((_model.vTipoOperacao ==
                                                   'TRANSFERENCIA') &&
@@ -972,8 +970,8 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                     ),
                                   ],
                                 ),
-                                if (widget!.pIdAgendamento == null ||
-                                    widget!.pIdAgendamento == '')
+                                if (widget.pIdAgendamento == null ||
+                                    widget.pIdAgendamento == '')
                                   Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -1526,7 +1524,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                         : (newValue) async {
                                                             safeSetState(() =>
                                                                 _model.swtManterCompFixaValue =
-                                                                    newValue!);
+                                                                    newValue);
                                                           },
                                                     activeColor: ((_model
                                                                     .vTipoOperacao ==
@@ -1661,8 +1659,8 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                   : (newValue) async {
                                                       safeSetState(() => _model
                                                               .swtStatusValue =
-                                                          newValue!);
-                                                      if (newValue!) {
+                                                          newValue);
+                                                      if (newValue) {
                                                         _model.vDataPagamento =
                                                             _model.vTipoConta ==
                                                                     'CARTAO'
@@ -2423,10 +2421,10 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                           FormFieldController<
                                                               String>(
                                                         _model
-                                                            .ddCentroDeCustoValue ??= widget!
+                                                            .ddCentroDeCustoValue ??= widget
                                                                         .pIdAgendamento ==
                                                                     null ||
-                                                                widget!.pIdAgendamento ==
+                                                                widget.pIdAgendamento ==
                                                                     ''
                                                             ? (_model.vTipoOperacao ==
                                                                     'A Receber'
@@ -3132,9 +3130,9 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                             null) &&
                                                         (_model.vValorFormulario >
                                                             0.0))) {
-                                                  if (widget!.pIdAgendamento ==
+                                                  if (widget.pIdAgendamento ==
                                                           null ||
-                                                      widget!.pIdAgendamento ==
+                                                      widget.pIdAgendamento ==
                                                           '') {
                                                     if (_model
                                                             .swtRecorrenteValue ==
@@ -3152,9 +3150,6 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                         _model.vTipoConta,
                                                         valueOrDefault<String>(
                                                           _model.inputDescricaoTextController
-                                                                          .text ==
-                                                                      null ||
-                                                                  _model.inputDescricaoTextController
                                                                           .text ==
                                                                       ''
                                                               ? _model
@@ -3281,9 +3276,6 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                             valueOrDefault<
                                                                 String>(
                                                           _model.inputDescricaoTextController
-                                                                          .text ==
-                                                                      null ||
-                                                                  _model.inputDescricaoTextController
                                                                           .text ==
                                                                       ''
                                                               ? _model
@@ -3526,11 +3518,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                       data: {
                                                         'valor': _model
                                                             .vValorFormulario,
-                                                        'descricao': _model
-                                                                        .inputDescricaoTextController
-                                                                        .text ==
-                                                                    null ||
-                                                                _model.inputDescricaoTextController
+                                                        'descricao': _model.inputDescricaoTextController
                                                                         .text ==
                                                                     ''
                                                             ? _model
@@ -3580,7 +3568,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                           rows
                                                               .eqOrNull(
                                                                 'id',
-                                                                widget!
+                                                                widget
                                                                     .pIdAgendamento,
                                                               )
                                                               .eqOrNull(
@@ -3595,7 +3583,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                             (_model.rowUpdateRegistro)!
                                                                 .isNotEmpty) ==
                                                         false) {
-                                                      if ((widget!.pViewAgendamento
+                                                      if ((widget.pViewAgendamento
                                                                   ?.status ==
                                                               'PENDENTE') &&
                                                           _model
@@ -3639,7 +3627,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                             );
                                                           },
                                                         );
-                                                      } else if ((widget!
+                                                      } else if ((widget
                                                                   .pViewAgendamento
                                                                   ?.status ==
                                                               'CONCILIADO') &&
@@ -3726,7 +3714,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                         );
                                                       }
                                                     } else {
-                                                      if ((widget!.pViewAgendamento
+                                                      if ((widget.pViewAgendamento
                                                                   ?.status ==
                                                               'PENDENTE') &&
                                                           _model
@@ -3769,7 +3757,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                             );
                                                           },
                                                         );
-                                                      } else if ((widget!
+                                                      } else if ((widget
                                                                   .pViewAgendamento
                                                                   ?.status ==
                                                               'CONCILIADO') &&
@@ -3885,9 +3873,9 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                     },
                                                   );
                                                 } else {
-                                                  if (widget!.pIdAgendamento !=
+                                                  if (widget.pIdAgendamento !=
                                                           null &&
-                                                      widget!.pIdAgendamento !=
+                                                      widget.pIdAgendamento !=
                                                           '') {
                                                     await showDialog(
                                                       context: context,
@@ -4032,8 +4020,8 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                           ),
                                         ),
                                       ),
-                                      if (widget!.pIdAgendamento != null &&
-                                          widget!.pIdAgendamento != '')
+                                      if (widget.pIdAgendamento != null &&
+                                          widget.pIdAgendamento != '')
                                         Expanded(
                                           child: Align(
                                             alignment:
@@ -4087,7 +4075,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                                 )
                                                                 .eqOrNull(
                                                                   'id',
-                                                                  widget!
+                                                                  widget
                                                                       .pIdAgendamento,
                                                                 ),
                                                       );
