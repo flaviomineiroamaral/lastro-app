@@ -51,6 +51,14 @@ jobs:
       - name: Instalar Dependencias
         run: flutter pub get
 
+      - name: Gerar Icones e Splash Screen Nativos
+        run: |
+          echo "Gerando icones do aplicativo personalizados..."
+          dart run flutter_launcher_icons
+          
+          echo "Gerando tela de splash nativa..."
+          dart run flutter_native_splash:create
+
       - name: Compilar APK Android e Renomear
         run: |
           BUILD_MODE="${{ github.event.inputs.build_mode || 'release' }}"
