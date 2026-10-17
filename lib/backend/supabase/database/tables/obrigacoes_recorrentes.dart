@@ -62,4 +62,27 @@ class ObrigacoesRecorrentesRow extends SupabaseDataRow {
 
   DateTime? get criadoEm => getField<DateTime>('criado_em');
   set criadoEm(DateTime? value) => setField<DateTime>('criado_em', value);
+
+  String? get tipoOperacao => getField<String>('tipo_operacao');
+  set tipoOperacao(String? value) => setField<String>('tipo_operacao', value);
+
+  String? get membroId => getField<String>('membro_id');
+  set membroId(String? value) => setField<String>('membro_id', value);
+
+  String? get regraCompetencia => getField<String>('regra_competencia');
+  set regraCompetencia(String? value) =>
+      setField<String>('regra_competencia', value);
+
+  bool? get manterCompetenciaFixa => getField<bool>('manter_competencia_fixa');
+  set manterCompetenciaFixa(bool? value) =>
+      setField<bool>('manter_competencia_fixa', value);
+
+  DateTime? get dataInicio => getField<DateTime>('data_inicio');
+  set dataInicio(DateTime? value) => setField<DateTime>('data_inicio', value);
+
+  DateTime? get dataFim => getField<DateTime>('data_fim');
+  set dataFim(DateTime? value) => setField<DateTime>('data_fim', value);
+
+  int? get janelaMeses => getField<int>('janela_meses');
+  set janelaMeses(int? value) => setField<int>('janela_meses', value);
 }

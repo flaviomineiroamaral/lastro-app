@@ -536,19 +536,19 @@ class _PrevisaoWidgetState extends State<PrevisaoWidget>
                                                                                   alignment: AlignmentDirectional(0.0, 0.0),
                                                                                   child: Stack(
                                                                                     children: [
-                                                                                      if (listaAPagarItem.totalParcelas! > 12)
+                                                                                      if (listaAPagarItem.tipoRecorrencia == 'FIXO' || (listaAPagarItem.tipoRecorrencia == null && (listaAPagarItem.totalParcelas ?? 0) > 12))
                                                                                         Icon(
                                                                                           Icons.event_repeat_outlined,
                                                                                           color: Color(0xFF388BF8),
                                                                                           size: 24.0,
                                                                                         ),
-                                                                                      if ((listaAPagarItem.totalParcelas! <= 12) && (listaAPagarItem.totalParcelas! > 1))
+                                                                                      if (listaAPagarItem.tipoRecorrencia == 'PARCELADO' || (listaAPagarItem.tipoRecorrencia == null && (listaAPagarItem.totalParcelas ?? 0) <= 12 && (listaAPagarItem.totalParcelas ?? 0) > 1))
                                                                                         Icon(
                                                                                           Icons.layers_outlined,
                                                                                           color: FlutterFlowTheme.of(context).primary,
                                                                                           size: 24.0,
                                                                                         ),
-                                                                                      if (listaAPagarItem.totalParcelas! <= 1)
+                                                                                      if (listaAPagarItem.tipoRecorrencia == 'UNICO' || (listaAPagarItem.tipoRecorrencia == null && (listaAPagarItem.totalParcelas ?? 0) <= 1))
                                                                                         Icon(
                                                                                           Icons.flash_on_outlined,
                                                                                           color: Color(0xFF1DB99F),
@@ -958,16 +958,22 @@ class _PrevisaoWidgetState extends State<PrevisaoWidget>
                                                                                 alignment: AlignmentDirectional(0.0, 0.0),
                                                                                 child: Stack(
                                                                                   children: [
-                                                                                    if ((listaAReceberItem.totalParcelas == 1) || (listaAReceberItem.totalParcelas == null))
+                                                                                    if (listaAReceberItem.tipoRecorrencia == 'FIXO' || (listaAReceberItem.tipoRecorrencia == null && (listaAReceberItem.totalParcelas ?? 0) > 12))
                                                                                       Icon(
-                                                                                        Icons.flash_on_outlined,
-                                                                                        color: Color(0xFF1DB9A8),
+                                                                                        Icons.event_repeat_outlined,
+                                                                                        color: Color(0xFF388BF8),
                                                                                         size: 24.0,
                                                                                       ),
-                                                                                    if (listaAReceberItem.totalParcelas! > 1)
+                                                                                    if (listaAReceberItem.tipoRecorrencia == 'PARCELADO' || (listaAReceberItem.tipoRecorrencia == null && (listaAReceberItem.totalParcelas ?? 0) <= 12 && (listaAReceberItem.totalParcelas ?? 0) > 1))
                                                                                       Icon(
                                                                                         Icons.layers_outlined,
                                                                                         color: FlutterFlowTheme.of(context).primary,
+                                                                                        size: 24.0,
+                                                                                      ),
+                                                                                    if (listaAReceberItem.tipoRecorrencia == 'UNICO' || (listaAReceberItem.tipoRecorrencia == null && (listaAReceberItem.totalParcelas ?? 0) <= 1))
+                                                                                      Icon(
+                                                                                        Icons.flash_on_outlined,
+                                                                                        color: Color(0xFF1DB9A8),
                                                                                         size: 24.0,
                                                                                       ),
                                                                                   ],

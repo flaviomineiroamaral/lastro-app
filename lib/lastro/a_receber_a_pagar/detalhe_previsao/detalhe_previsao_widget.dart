@@ -3521,73 +3521,65 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                       }
                                                     }
                                                   } else {
-                                                    await TransacoesTable()
-                                                        .update(
-                                                      data: {
-                                                        'valor': _model
-                                                            .vValorFormulario,
-                                                        'descricao': _model
-                                                                        .inputDescricaoTextController
-                                                                        .text ==
-                                                                    null ||
-                                                                _model.inputDescricaoTextController
-                                                                        .text ==
-                                                                    ''
-                                                            ? _model
-                                                                .vDescricaoCategoria
-                                                            : _model
-                                                                .inputDescricaoTextController
-                                                                .text,
-                                                        'plano_contas_id': _model
-                                                            .ddCategoriaValue,
-                                                        'status':
-                                                            _model.swtStatusValue ==
-                                                                    true
-                                                                ? 'CONCILIADO'
-                                                                : 'PENDENTE',
-                                                        'conta_bancaria_id':
-                                                            _model.swtStatusValue ==
-                                                                    true
-                                                                ? _model
-                                                                    .ddContaOrigemValue
-                                                                : null,
-                                                        'centro_custo_id': _model
-                                                            .ddCentroDeCustoValue,
-                                                        'membro_id': _model
-                                                            .ddMembroValue,
-                                                        'comprovativo_url':
-                                                            _model
-                                                                .vUrlComprovante,
-                                                        'data_vencimento':
-                                                            supaSerialize<
-                                                                    DateTime>(
-                                                                _model
-                                                                    .vDataVencimento),
-                                                        'organization_id':
-                                                            FFAppState()
-                                                                .currentOrganizationId,
-                                                        'data_pagamento': supaSerialize<
-                                                            DateTime>((_model
-                                                                        .swtStatusValue ==
-                                                                    true) &&
-                                                                (_model.vTipoConta !=
-                                                                    'CARTAO')
-                                                            ? _model
-                                                                .vDataPagamento
-                                                            : null),
-                                                      },
-                                                      matchingRows: (rows) =>
-                                                          rows
-                                                              .eqOrNull(
-                                                                'id',
-                                                                widget!
-                                                                    .pIdAgendamento,
-                                                              )
-                                                              .eqOrNull(
-                                                                'organization_id',
-                                                                FFAppState()
-                                                                    .currentOrganizationId,
+                                                    final bool isRecorrenteEdit = (widget!.pViewAgendamento?.recorrenciaId != null && widget!.pViewAgendamento?.recorrenciaId != '') ||
+                                                        (widget!.pViewAgendamento?.grupoRecorrenciaId != null && widget!.pViewAgendamento?.grupoRecorrenciaId != '') ||
+                                                        widget!.pViewAgendamento?.tipoRecorrencia == 'FIXO' ||
+                                                        widget!.pViewAgendamento?.tipoRecorrencia == 'PARCELADO';
+                                                    String escopoEdicao = 'APENAS_ESTE';
+                                                    if (isRecorrenteEdit && _model.swtStatusValue != true) {
+                                                      final escolhaEscopo = await showDialog<String>(
+                                                        context: context,
+                                                        builder: (alertDialogContext) {
+                                                          return AlertDialog(
+                                                            title: Text('Lançamento Recorrente'),
+                                                            content: Text('Deseja aplicar estas alterações apenas a este lançamento ou também aos próximos pendentes?'),
+                                                            actions: [
+                                                              TextButton(
+                                                                onPressed: () => Navigator.pop(alertDialogContext, 'CANCELAR'),
+                                                                child: Text('Cancelar'),
                                                               ),
+                                                              TextButton(
+                                                                onPressed: () => Navigator.pop(alertDialogContext, 'APENAS_ESTE'),
+                                                                child: Text('Apenas este'),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () => Navigator.pop(alertDialogContext, 'ESTE_E_PROXIMOS'),
+                                                                child: Text('Este e os próximos'),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+                                                      if (escolhaEscopo == null || escolhaEscopo == 'CANCELAR') {
+                                                        return;
+                                                      }
+                                                      escopoEdicao = escolhaEscopo;
+                                                    }
+
+                                                    await SupaFlow.client.rpc(
+                                                      'fn_atualizar_agendamento_recorrente',
+                                                      params: {
+                                                        'p_org_id': FFAppState().currentOrganizationId,
+                                                        'p_transacao_id': widget!.pIdAgendamento,
+                                                        'p_escopo': escopoEdicao,
+                                                        'p_valor': _model.vValorFormulario,
+                                                        'p_descricao': _model.inputDescricaoTextController.text == null ||
+                                                                _model.inputDescricaoTextController.text == ''
+                                                            ? _model.vDescricaoCategoria
+                                                            : _model.inputDescricaoTextController.text,
+                                                        'p_categoria_id': _model.ddCategoriaValue,
+                                                        'p_centro_custo_id': _model.ddCentroDeCustoValue,
+                                                        'p_membro_id': _model.ddMembroValue,
+                                                        'p_data_vencimento': supaSerialize<DateTime>(_model.vDataVencimento),
+                                                        'p_status': _model.swtStatusValue == true ? 'CONCILIADO' : 'PENDENTE',
+                                                        'p_conta_bancaria_id': _model.swtStatusValue == true ? _model.ddContaOrigemValue : null,
+                                                        'p_data_pagamento': supaSerialize<DateTime>(
+                                                          (_model.swtStatusValue == true) && (_model.vTipoConta != 'CARTAO')
+                                                              ? _model.vDataPagamento
+                                                              : null,
+                                                        ),
+                                                        'p_comprovativo_url': _model.vUrlComprovante,
+                                                      },
                                                     );
                                                     _shouldSetState = true;
                                                     if ((_model.rowUpdateRegistro !=
@@ -4045,51 +4037,68 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                         8.0, 0.0, 0.0, 0.0),
                                                 child: FFButtonWidget(
                                                   onPressed: () async {
-                                                    var confirmDialogResponse =
-                                                        await showDialog<bool>(
-                                                              context: context,
-                                                              builder:
-                                                                  (alertDialogContext) {
-                                                                return AlertDialog(
-                                                                  title: Text(
-                                                                      'Atenção'),
-                                                                  content: Text(
-                                                                      'Confirma a exclusão deste lançamento?'),
-                                                                  actions: [
-                                                                    TextButton(
-                                                                      onPressed: () => Navigator.pop(
-                                                                          alertDialogContext,
-                                                                          false),
-                                                                      child: Text(
-                                                                          'Cancelar'),
-                                                                    ),
-                                                                    TextButton(
-                                                                      onPressed: () => Navigator.pop(
-                                                                          alertDialogContext,
-                                                                          true),
-                                                                      child: Text(
-                                                                          'Confirmar'),
-                                                                    ),
-                                                                  ],
-                                                                );
-                                                              },
-                                                            ) ??
-                                                            false;
-                                                    if (confirmDialogResponse) {
-                                                      await TransacoesTable()
-                                                          .delete(
-                                                        matchingRows: (rows) =>
-                                                            rows
-                                                                .eqOrNull(
-                                                                  'organization_id',
-                                                                  FFAppState()
-                                                                      .currentOrganizationId,
-                                                                )
-                                                                .eqOrNull(
-                                                                  'id',
-                                                                  widget!
-                                                                      .pIdAgendamento,
-                                                                ),
+                                                    final bool isRecorrenteDelete = (widget!.pViewAgendamento?.recorrenciaId != null && widget!.pViewAgendamento?.recorrenciaId != '') ||
+                                                        (widget!.pViewAgendamento?.grupoRecorrenciaId != null && widget!.pViewAgendamento?.grupoRecorrenciaId != '') ||
+                                                        widget!.pViewAgendamento?.tipoRecorrencia == 'FIXO' ||
+                                                        widget!.pViewAgendamento?.tipoRecorrencia == 'PARCELADO';
+
+                                                    String? escopoExclusao;
+                                                    if (isRecorrenteDelete) {
+                                                      escopoExclusao = await showDialog<String>(
+                                                        context: context,
+                                                        builder: (alertDialogContext) {
+                                                          return AlertDialog(
+                                                            title: Text('Excluir Lançamento Recorrente'),
+                                                            content: Text('Deseja excluir apenas este lançamento ou encerrar este e todos os próximos pendentes?'),
+                                                            actions: [
+                                                              TextButton(
+                                                                onPressed: () => Navigator.pop(alertDialogContext, 'CANCELAR'),
+                                                                child: Text('Cancelar'),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () => Navigator.pop(alertDialogContext, 'APENAS_ESTE'),
+                                                                child: Text('Apenas este'),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () => Navigator.pop(alertDialogContext, 'ESTE_E_PROXIMOS'),
+                                                                child: Text('Este e os próximos'),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+                                                    } else {
+                                                      var confirmDialogResponse = await showDialog<bool>(
+                                                            context: context,
+                                                            builder: (alertDialogContext) {
+                                                              return AlertDialog(
+                                                                title: Text('Atenção'),
+                                                                content: Text('Confirma a exclusão deste lançamento?'),
+                                                                actions: [
+                                                                  TextButton(
+                                                                    onPressed: () => Navigator.pop(alertDialogContext, false),
+                                                                    child: Text('Cancelar'),
+                                                                  ),
+                                                                  TextButton(
+                                                                    onPressed: () => Navigator.pop(alertDialogContext, true),
+                                                                    child: Text('Confirmar'),
+                                                                  ),
+                                                                ],
+                                                              );
+                                                            },
+                                                          ) ??
+                                                          false;
+                                                      escopoExclusao = confirmDialogResponse ? 'APENAS_ESTE' : 'CANCELAR';
+                                                    }
+
+                                                    if (escopoExclusao != null && escopoExclusao != 'CANCELAR') {
+                                                      await SupaFlow.client.rpc(
+                                                        'fn_excluir_agendamento_recorrente',
+                                                        params: {
+                                                          'p_org_id': FFAppState().currentOrganizationId,
+                                                          'p_transacao_id': widget!.pIdAgendamento,
+                                                          'p_escopo': escopoExclusao,
+                                                        },
                                                       );
                                                     } else {
                                                       return;

@@ -111,4 +111,15 @@ class VwAgendamentosRow extends SupabaseDataRow {
   double? get acumuladoDiario => getField<double>('acumulado_diario');
   set acumuladoDiario(double? value) =>
       setField<double>('acumulado_diario', value);
+
+  String? get grupoRecorrenciaId => getField<String>('grupo_recorrencia_id');
+  set grupoRecorrenciaId(String? value) =>
+      setField<String>('grupo_recorrencia_id', value);
+
+  String? get recorrenciaId => getField<String>('recorrencia_id');
+  set recorrenciaId(String? value) => setField<String>('recorrencia_id', value);
+
+  String? get tipoRecorrencia => getField<String>('tipo_recorrencia');
+  set tipoRecorrencia(String? value) =>
+      setField<String>('tipo_recorrencia', value);
 }
