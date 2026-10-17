@@ -69,6 +69,7 @@ BEGIN
 END $$;
 
 -- 2. VIEWS OTIMIZADAS
+DROP VIEW IF EXISTS "public"."view_membros_equipe";
 CREATE OR REPLACE VIEW "public"."view_membros_equipe" WITH ("security_invoker"='true') AS
  SELECT "om"."id" AS "vinculo_id",
     "om"."organization_id",
@@ -157,7 +158,7 @@ CREATE OR REPLACE VIEW "public"."view_membros_equipe" WITH ("security_invoker"='
                     ELSE 4
                 END, "ac_sub"."created_at" DESC
          LIMIT 1) "ac" ON (true))
-     LEFT JOIN "public"."planos_comerciais" "pc" ON (("pc"."id" = COALESCE("o"."plano_id", "ab"."plano_id", "ac"."plano_id"))));;
+     LEFT JOIN "public"."planos_comerciais" "pc" ON (("pc"."id" = COALESCE("o"."plano_id", "ab"."plano_id", "ac"."plano_id"))));
 
 -- 3. FUNÇÕES E REGRAS DE NEGÓCIO ATUALIZADAS
 CREATE OR REPLACE FUNCTION "public"."create_my_organization"("org_name" "text", "org_type" "text", "p_user_id" "uuid") RETURNS json
@@ -185,6 +186,7 @@ BEGIN
   );
 END;$$;
 
+DROP FUNCTION IF EXISTS public.validar_serial(uuid);
 CREATE OR REPLACE FUNCTION "public"."validar_serial"("p_serial_ativacao" "text") RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$DECLARE
@@ -1114,6 +1116,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.obter_saldo_total_org(uuid);
 CREATE OR REPLACE FUNCTION "public"."obter_saldo_total_org"("p_org_id" "uuid") RETURNS TABLE("total_saldo_inicial" numeric, "total_entradas_geral" numeric, "total_saidas_geral" numeric, "saldo_liquido_geral" numeric, "saldo_disponivel_real" numeric, "total_faturas_cartao" numeric, "total_a_receber" numeric, "total_a_pagar" numeric, "resumo_ativo_passivo" numeric, "total_ativos" numeric, "total_passivos" numeric, "saldo_bloqueado" numeric)
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$
@@ -1175,6 +1178,7 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.fn_resumo_saude_cr(uuid, date, date);
 CREATE OR REPLACE FUNCTION "public"."fn_resumo_saude_cr"("p_org_id" "uuid", "p_data_inicio" "date", "p_data_fim" "date") RETURNS TABLE("qtd_verde" integer, "qtd_amarelo" integer, "qtd_vermelho" integer, "top_ofensores" "jsonb")
     LANGUAGE "plpgsql"
     AS $$
