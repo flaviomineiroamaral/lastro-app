@@ -61,6 +61,11 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
         _model.vDiaAntecedencia =
             widget!.pItemDadosObrigacoes!.diasAntecedencia;
         _model.vAtivo = widget!.pItemDadosObrigacoes!.ativo;
+        _model.vTipoOperacao =
+            valueOrDefault<String>(
+              widget!.pItemDadosObrigacoes?.tipoOperacao,
+              'DEBITO',
+            );
         safeSetState(() {});
         safeSetState(() {
           _model.inputDescricaoTextController?.text =
@@ -529,7 +534,11 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                         .cachePlanoContas
                                         .where((e) =>
                                             (e.permiteLancamento == true) &&
-                                            (e.naturezaFluxo == 'SAIDA'))
+                                            (e.naturezaFluxo ==
+                                                (_model.vTipoOperacao ==
+                                                        'CREDITO'
+                                                    ? 'ENTRADA'
+                                                    : 'SAIDA')))
                                         .toList()
                                         .map((e) => e.id)
                                         .toList()),
@@ -538,7 +547,11 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                             .cachePlanoContas
                                             .where((e) =>
                                                 (e.permiteLancamento == true) &&
-                                                (e.naturezaFluxo == 'SAIDA'))
+                                                (e.naturezaFluxo ==
+                                                    (_model.vTipoOperacao ==
+                                                            'CREDITO'
+                                                        ? 'ENTRADA'
+                                                        : 'SAIDA')))
                                             .toList()),
                                     onChanged: (val) async {
                                       safeSetState(
@@ -1611,6 +1624,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                               'ativo': _model.vAtivo,
                                               'valor_estimado':
                                                   _model.vValorEstimado,
+                                              'tipo_operacao':
+                                                  _model.vTipoOperacao,
                                             });
                                             _shouldSetState = true;
                                             _model.retStatusInsert = await actions
@@ -1719,6 +1734,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                   'ativo': _model.vAtivo,
                                                   'valor_estimado':
                                                       _model.vValorEstimado,
+                                                  'tipo_operacao':
+                                                      _model.vTipoOperacao,
                                                   'ultima_competencia_gerada':
                                                       supaSerialize<DateTime>(
                                                           null),
@@ -1777,6 +1794,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                   'ativo': _model.vAtivo,
                                                   'valor_estimado':
                                                       _model.vValorEstimado,
+                                                  'tipo_operacao':
+                                                      _model.vTipoOperacao,
                                                 },
                                                 matchingRows: (rows) => rows
                                                     .eqOrNull(

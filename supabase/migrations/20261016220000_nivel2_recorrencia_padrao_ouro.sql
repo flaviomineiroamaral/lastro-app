@@ -649,6 +649,7 @@ BEGIN
 
         -- Atualiza também a regra-mãe em obrigacoes_recorrentes para que futuros meses sigam o novo padrão
         IF v_atual.recorrencia_id IS NOT NULL THEN
+            PERFORM set_config('lastro.skip_obrigacao_sync', 'true', true);
             UPDATE public.obrigacoes_recorrentes
             SET valor_estimado = ABS(p_valor),
                 descricao = p_descricao,
@@ -721,6 +722,7 @@ BEGIN
 
         -- 2. Encerra a regra-mãe para que a janela deslizante não gere novos meses
         IF v_atual.recorrencia_id IS NOT NULL THEN
+            PERFORM set_config('lastro.skip_obrigacao_sync', 'true', true);
             UPDATE public.obrigacoes_recorrentes
             SET ativo = FALSE,
                 data_fim = (v_atual.data_vencimento - interval '1 day')::date
@@ -745,8 +747,10 @@ $function$;
 
 
 -- ============================================================================
--- 8. ATUALIZAÇÃO DE fn_listar_obrigacoes_recorrentes
+-- 8. ATUALIZAÇÃO DE fn_listar_obrigacoes_recorrentes (INCLUINDO tipo_operacao)
 -- ============================================================================
+
+DROP FUNCTION IF EXISTS public.fn_listar_obrigacoes_recorrentes(uuid, boolean);
 
 CREATE OR REPLACE FUNCTION public.fn_listar_obrigacoes_recorrentes(
     p_org_id uuid,
@@ -768,7 +772,8 @@ RETURNS TABLE(
     dias_antecedencia integer,
     valor_estimado numeric,
     ativo boolean,
-    ultima_competencia_gerada date
+    ultima_competencia_gerada date,
+    tipo_operacao text
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -791,7 +796,8 @@ BEGIN
         o.dias_antecedencia,
         o.valor_estimado,
         o.ativo,
-        o.ultima_competencia_gerada
+        o.ultima_competencia_gerada,
+        COALESCE(o.tipo_operacao, 'DEBITO')::TEXT AS tipo_operacao
     FROM public.obrigacoes_recorrentes o
     LEFT JOIN public.plano_contas c ON c.id = o.categoria_id 
     LEFT JOIN public.centros_custo cc ON cc.id = o.centro_custo_id 
@@ -801,6 +807,149 @@ BEGIN
     ORDER BY o.periodicidade DESC, o.dia_vencimento ASC;
 END;
 $function$;
+
+
+-- ============================================================================
+-- 8.1 TRIGGERS DE SINCRONIZAÇÃO EM public.obrigacoes_recorrentes
+-- Garante que:
+-- 1) tipo_operacao ('CREDITO' / 'DEBITO') seja inferido automaticamente
+--    pela natureza_fluxo ('ENTRADA' / 'SAIDA') da categoria em plano_contas.
+-- 2) Exclusão ou inativação em obrigacoes_recorrentes (ex: via BsObrigacoes)
+--    remova automaticamente os lançamentos PENDENTES futuros em transacoes.
+-- 3) Edição direta em obrigacoes_recorrentes reflita nos lançamentos PENDENTES.
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION public.fn_trg_obrigacoes_recorrentes_before()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $function$
+DECLARE
+    v_natureza text;
+BEGIN
+    IF TG_OP = 'DELETE' THEN
+        -- Antes de deletar a obrigação (que acionaria ON DELETE SET NULL em transacoes),
+        -- removemos as parcelas futuras ainda PENDENTES vinculadas a ela, preservando as PAGAS.
+        DELETE FROM public.transacoes
+        WHERE recorrencia_id = OLD.id
+          AND organization_id = OLD.organization_id
+          AND status = 'PENDENTE';
+        RETURN OLD;
+    END IF;
+
+    -- Em INSERT ou UPDATE: sincroniza tipo_operacao com a natureza_fluxo da categoria
+    IF NEW.categoria_id IS NOT NULL THEN
+        SELECT UPPER(TRIM(natureza_fluxo)) INTO v_natureza
+        FROM public.plano_contas
+        WHERE id = NEW.categoria_id;
+
+        IF v_natureza = 'ENTRADA' THEN
+            NEW.tipo_operacao := 'CREDITO';
+        ELSIF v_natureza = 'SAIDA' THEN
+            NEW.tipo_operacao := 'DEBITO';
+        END IF;
+    END IF;
+
+    NEW.tipo_operacao := COALESCE(UPPER(TRIM(NEW.tipo_operacao)), 'DEBITO');
+    RETURN NEW;
+END;
+$function$;
+
+DROP TRIGGER IF EXISTS trg_obrigacoes_recorrentes_before ON public.obrigacoes_recorrentes;
+CREATE TRIGGER trg_obrigacoes_recorrentes_before
+BEFORE INSERT OR UPDATE OR DELETE ON public.obrigacoes_recorrentes
+FOR EACH ROW
+EXECUTE FUNCTION public.fn_trg_obrigacoes_recorrentes_before();
+
+
+CREATE OR REPLACE FUNCTION public.fn_trg_obrigacoes_recorrentes_after_update()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $function$
+BEGIN
+    -- Se a atualização veio das RPCs fn_atualizar_agendamento_recorrente ou fn_excluir_agendamento_recorrente,
+    -- elas já trataram o escopo exato ('APENAS_ESTE' vs 'ESTE_E_PROXIMOS').
+    IF current_setting('lastro.skip_obrigacao_sync', true) = 'true' THEN
+        RETURN NEW;
+    END IF;
+
+    -- Se apenas ultima_competencia_gerada avançou (durante fn_gerar_transacoes_recorrentes), não faz nada
+    IF NEW.ultima_competencia_gerada IS NOT NULL
+       AND NEW.ultima_competencia_gerada IS DISTINCT FROM OLD.ultima_competencia_gerada
+       AND NEW.ativo IS NOT DISTINCT FROM OLD.ativo
+       AND NEW.valor_estimado IS NOT DISTINCT FROM OLD.valor_estimado
+       AND NEW.descricao IS NOT DISTINCT FROM OLD.descricao
+       AND NEW.categoria_id IS NOT DISTINCT FROM OLD.categoria_id
+       AND NEW.centro_custo_id IS NOT DISTINCT FROM OLD.centro_custo_id
+       AND NEW.conta_bancaria_id IS NOT DISTINCT FROM OLD.conta_bancaria_id
+       AND NEW.dia_vencimento IS NOT DISTINCT FROM OLD.dia_vencimento
+       AND NEW.tipo_operacao IS NOT DISTINCT FROM OLD.tipo_operacao THEN
+        RETURN NEW;
+    END IF;
+
+    -- Caso 1: Regra foi inativada (ativo = false) -> remove lançamentos PENDENTES em aberto
+    IF COALESCE(NEW.ativo, false) = false AND COALESCE(OLD.ativo, true) = true THEN
+        DELETE FROM public.transacoes
+        WHERE recorrencia_id = NEW.id
+          AND organization_id = NEW.organization_id
+          AND status = 'PENDENTE';
+        RETURN NEW;
+    END IF;
+
+    -- Caso 2: Usuário escolheu "Reiniciar lançamentos = Sim" no BsObrigacoes (ultima_competencia_gerada foi zerada para NULL)
+    IF NEW.ultima_competencia_gerada IS NULL AND OLD.ultima_competencia_gerada IS NOT NULL THEN
+        DELETE FROM public.transacoes
+        WHERE recorrencia_id = NEW.id
+          AND organization_id = NEW.organization_id
+          AND status = 'PENDENTE';
+        RETURN NEW;
+    END IF;
+
+    -- Caso 3: Usuário editou a obrigação no BsObrigacoes mantendo os lançamentos ("Reiniciar = Não")
+    UPDATE public.transacoes t
+    SET descricao = NEW.descricao,
+        valor = ABS(COALESCE(NEW.valor_estimado, t.valor)),
+        plano_contas_id = NEW.categoria_id,
+        centro_custo_id = NEW.centro_custo_id,
+        membro_id = COALESCE(NEW.membro_id, t.membro_id),
+        tipo_operacao = COALESCE(NEW.tipo_operacao, t.tipo_operacao),
+        data_vencimento = (
+            date_trunc('month', t.data_vencimento)::date +
+            (LEAST(
+                NEW.dia_vencimento,
+                EXTRACT(DAY FROM (date_trunc('month', t.data_vencimento) + interval '1 month' - interval '1 day'))::int
+            ) - 1)
+        )
+    WHERE t.recorrencia_id = NEW.id
+      AND t.organization_id = NEW.organization_id
+      AND t.status = 'PENDENTE';
+
+    RETURN NEW;
+END;
+$function$;
+
+DROP TRIGGER IF EXISTS trg_obrigacoes_recorrentes_after_update ON public.obrigacoes_recorrentes;
+CREATE TRIGGER trg_obrigacoes_recorrentes_after_update
+AFTER UPDATE ON public.obrigacoes_recorrentes
+FOR EACH ROW
+EXECUTE FUNCTION public.fn_trg_obrigacoes_recorrentes_after_update();
+
+-- Sincroniza registros já existentes em obrigacoes_recorrentes com base na natureza_fluxo da categoria
+DO $$
+BEGIN
+    PERFORM set_config('lastro.skip_obrigacao_sync', 'true', true);
+    UPDATE public.obrigacoes_recorrentes o
+    SET tipo_operacao = CASE
+        WHEN UPPER(TRIM(c.natureza_fluxo)) = 'ENTRADA' THEN 'CREDITO'
+        ELSE 'DEBITO'
+    END
+    FROM public.plano_contas c
+    WHERE c.id = o.categoria_id
+      AND o.tipo_operacao IS DISTINCT FROM (
+          CASE WHEN UPPER(TRIM(c.natureza_fluxo)) = 'ENTRADA' THEN 'CREDITO' ELSE 'DEBITO' END
+      );
+END $$;
 
 
 -- ============================================================================

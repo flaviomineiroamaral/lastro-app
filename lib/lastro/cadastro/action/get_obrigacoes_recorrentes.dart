@@ -91,6 +91,9 @@ Future<List<DTObrigacaoRecorrenteStruct>> getObrigacoesRecorrentes(
             ativoSeguro = row['ativo'].toString().toLowerCase() == 'true';
           }
 
+          final String tipoOp =
+              row['tipo_operacao']?.toString() ?? 'DEBITO';
+
           debugPrint(
               '🔍 [Item $i] Parse OK. Instanciando a Struct do FlutterFlow...');
 
@@ -112,6 +115,7 @@ Future<List<DTObrigacaoRecorrenteStruct>> getObrigacoesRecorrentes(
             diasAntecedencia: diasAnte,
             valorEstimado: valorEst,
             ativo: ativoSeguro,
+            tipoOperacao: tipoOp,
           ));
 
           debugPrint('✅ [Item $i] Struct montada com sucesso!');
