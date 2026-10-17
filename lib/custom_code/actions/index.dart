@@ -11,6 +11,10 @@ export '/lastro/importacao/action/pdf_para_base64.dart' show pdfParaBase64;
 export '/lastro/importacao/action/processar_c_s_v.dart' show processarCSV;
 export '/lastro/a_receber_a_pagar/action/gerar_lancamentos_recorrentes.dart'
     show gerarLancamentosRecorrentes;
+export '/lastro/a_receber_a_pagar/action/atualizar_agendamento_recorrente.dart'
+    show atualizarAgendamentoRecorrente;
+export '/lastro/a_receber_a_pagar/action/excluir_agendamento_recorrente.dart'
+    show excluirAgendamentoRecorrente;
 export '/lastro/cadastro/action/validar_codigo_contabil.dart'
     show validarCodigoContabil;
 export '/lastro/cadastro/action/chamar_rpc_verificar_pai.dart'
