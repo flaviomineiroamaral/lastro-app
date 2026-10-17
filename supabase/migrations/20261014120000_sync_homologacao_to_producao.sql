@@ -4,10 +4,51 @@
 -- Objetivo: Sincronizar com total segurança (zero perda de dados e retrocompatibilidade)
 -- ==============================================================================
 
--- 1. ESTRUTURA DE TABELAS (COLUNAS ADICIONAIS SEGURAS)
+-- 1. ESTRUTURA DE TABELAS (COLUNAS E TABELAS ADICIONAIS SEGURAS)
+CREATE TABLE IF NOT EXISTS public.assinaturas_b2b (
+    id uuid NOT NULL DEFAULT public.uuid_generate_v7(),
+    created_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+    organization_id uuid,
+    plano_id integer,
+    valor_mensal numeric NOT NULL,
+    ciclo_cobranca text NOT NULL DEFAULT 'mensal'::text,
+    metodo_pagamento text NOT NULL DEFAULT 'UNDEFINED'::text,
+    status_assinatura text NOT NULL DEFAULT 'pendente'::text,
+    gateway_customer_id text,
+    gateway_subscription_id text,
+    link_pagamento text,
+    ultima_cobranca timestamp with time zone,
+    proxima_cobranca date,
+    contrato_id uuid,
+    CONSTRAINT assinaturas_b2b_pkey PRIMARY KEY (id),
+    CONSTRAINT assinaturas_b2b_ciclo_check CHECK ((ciclo_cobranca = ANY (ARRAY['mensal'::text, 'anual'::text]))),
+    CONSTRAINT assinaturas_b2b_metodo_check CHECK ((metodo_pagamento = ANY (ARRAY['BOLETO'::text, 'CREDIT_CARD'::text, 'PIX'::text, 'UNDEFINED'::text]))),
+    CONSTRAINT assinaturas_b2b_status_check CHECK ((status_assinatura = ANY (ARRAY['pendente'::text, 'ativa'::text, 'atrasada'::text, 'cancelada'::text])))
+);
+
+ALTER TABLE public.assinaturas_b2b ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'assinaturas_b2b_contrato_id_fkey') THEN
+        ALTER TABLE ONLY public.assinaturas_b2b
+            ADD CONSTRAINT assinaturas_b2b_contrato_id_fkey FOREIGN KEY (contrato_id) REFERENCES public.contratos_b2b(id) ON DELETE CASCADE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'assinaturas_b2b_organization_id_fkey') THEN
+        ALTER TABLE ONLY public.assinaturas_b2b
+            ADD CONSTRAINT assinaturas_b2b_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organizations(id) ON DELETE RESTRICT;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'assinaturas_b2b_plano_id_fkey') THEN
+        ALTER TABLE ONLY public.assinaturas_b2b
+            ADD CONSTRAINT assinaturas_b2b_plano_id_fkey FOREIGN KEY (plano_id) REFERENCES public.planos_comerciais(id) ON DELETE RESTRICT;
+    END IF;
+END $$;
+
+ALTER TABLE public.assinaturas_b2c ADD COLUMN IF NOT EXISTS link_pagamento text;
 ALTER TABLE public.assinaturas_b2c ADD COLUMN IF NOT EXISTS codigo_parceria text;
 ALTER TABLE public.assinaturas_b2c ADD COLUMN IF NOT EXISTS codigo_parceria_status text;
 ALTER TABLE public.assinaturas_b2c ADD COLUMN IF NOT EXISTS organization_id uuid;
+ALTER TABLE public.leads_comercial ADD COLUMN IF NOT EXISTS documento_identificacao text;
 
 DO $$
 BEGIN
