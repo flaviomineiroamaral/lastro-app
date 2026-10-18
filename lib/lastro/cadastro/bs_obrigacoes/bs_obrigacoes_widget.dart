@@ -115,11 +115,15 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
         return;
       } else {
         _model.vDiaVencimento = 1;
-        _model.vDiaAntecedencia = 20;
+        _model.vDiaAntecedencia = 12;
         safeSetState(() {});
         safeSetState(() {
           _model.ddDiaValueController?.value = 1;
           _model.ddDiaValue = 1;
+        });
+        safeSetState(() {
+          _model.ddAntecedenciaValueController?.value = 12;
+          _model.ddAntecedenciaValue = 12;
         });
         return;
       }
@@ -1311,7 +1315,7 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                     padding: EdgeInsetsDirectional.fromSTEB(
                                         4.0, 0.0, 0.0, 6.0),
                                     child: Text(
-                                      'Gerar pendência quantos dias antes?',
+                                      'Janela de projeção (meses)',
                                       style: FlutterFlowTheme.of(context)
                                           .labelMedium
                                           .override(

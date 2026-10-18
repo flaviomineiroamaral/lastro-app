@@ -37,7 +37,7 @@ class BsObrigacoesModel extends FlutterFlowModel<BsObrigacoesWidget> {
 
   int? vMesVencimento;
 
-  int vDiaAntecedencia = 20;
+  int vDiaAntecedencia = 12;
 
   bool vAtivo = true;
 

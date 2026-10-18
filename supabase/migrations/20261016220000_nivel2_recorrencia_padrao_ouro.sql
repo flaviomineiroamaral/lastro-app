@@ -793,7 +793,7 @@ BEGIN
         o.periodicidade,
         o.dia_vencimento,
         o.mes_vencimento,
-        o.dias_antecedencia,
+        COALESCE(o.janela_meses, 12)::integer AS dias_antecedencia,
         o.valor_estimado,
         o.ativo,
         o.ultima_competencia_gerada,
@@ -814,9 +814,11 @@ $function$;
 -- Garante que:
 -- 1) tipo_operacao ('CREDITO' / 'DEBITO') seja inferido automaticamente
 --    pela natureza_fluxo ('ENTRADA' / 'SAIDA') da categoria em plano_contas.
--- 2) Exclusão ou inativação em obrigacoes_recorrentes (ex: via BsObrigacoes)
+-- 2) dias_antecedencia (usado pelo dropdown do BsObrigacoes) e janela_meses
+--    fiquem sincronizados automaticamente.
+-- 3) Exclusão ou inativação em obrigacoes_recorrentes (ex: via BsObrigacoes)
 --    remova automaticamente os lançamentos PENDENTES futuros em transacoes.
--- 3) Edição direta em obrigacoes_recorrentes reflita nos lançamentos PENDENTES.
+-- 4) Edição direta em obrigacoes_recorrentes reflita nos lançamentos PENDENTES.
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION public.fn_trg_obrigacoes_recorrentes_before()
@@ -835,6 +837,27 @@ BEGIN
           AND organization_id = OLD.organization_id
           AND status = 'PENDENTE';
         RETURN OLD;
+    END IF;
+
+    -- Sincroniza janela_meses <-> dias_antecedencia (para que o dropdown do BsObrigacoes controle a janela de meses)
+    IF TG_OP = 'INSERT' THEN
+        IF COALESCE(NEW.dias_antecedencia, 0) > 0 THEN
+            NEW.janela_meses := NEW.dias_antecedencia;
+        ELSE
+            NEW.janela_meses := COALESCE(NEW.janela_meses, 12);
+            NEW.dias_antecedencia := NEW.janela_meses;
+        END IF;
+    ELSIF TG_OP = 'UPDATE' THEN
+        IF NEW.dias_antecedencia IS DISTINCT FROM OLD.dias_antecedencia AND COALESCE(NEW.dias_antecedencia, 0) > 0 THEN
+            NEW.janela_meses := NEW.dias_antecedencia;
+        ELSIF NEW.janela_meses IS DISTINCT FROM OLD.janela_meses AND COALESCE(NEW.janela_meses, 0) > 0 THEN
+            NEW.dias_antecedencia := NEW.janela_meses;
+        END IF;
+
+        -- Se a janela de meses diminuiu, reinicia ultima_competencia_gerada para recalcular apenas a nova janela
+        IF COALESCE(NEW.janela_meses, 12) < COALESCE(OLD.janela_meses, 12) THEN
+            NEW.ultima_competencia_gerada := NULL;
+        END IF;
     END IF;
 
     -- Em INSERT ou UPDATE: sincroniza tipo_operacao com a natureza_fluxo da categoria
@@ -884,7 +907,8 @@ BEGIN
        AND NEW.centro_custo_id IS NOT DISTINCT FROM OLD.centro_custo_id
        AND NEW.conta_bancaria_id IS NOT DISTINCT FROM OLD.conta_bancaria_id
        AND NEW.dia_vencimento IS NOT DISTINCT FROM OLD.dia_vencimento
-       AND NEW.tipo_operacao IS NOT DISTINCT FROM OLD.tipo_operacao THEN
+       AND NEW.tipo_operacao IS NOT DISTINCT FROM OLD.tipo_operacao
+       AND NEW.janela_meses IS NOT DISTINCT FROM OLD.janela_meses THEN
         RETURN NEW;
     END IF;
 
@@ -897,7 +921,7 @@ BEGIN
         RETURN NEW;
     END IF;
 
-    -- Caso 2: Usuário escolheu "Reiniciar lançamentos = Sim" no BsObrigacoes (ultima_competencia_gerada foi zerada para NULL)
+    -- Caso 2: Usuário escolheu "Reiniciar lançamentos = Sim" no BsObrigacoes ou reduziu a janela_meses (ultima_competencia_gerada foi zerada para NULL)
     IF NEW.ultima_competencia_gerada IS NULL AND OLD.ultima_competencia_gerada IS NOT NULL THEN
         DELETE FROM public.transacoes
         WHERE recorrencia_id = NEW.id
@@ -935,19 +959,23 @@ AFTER UPDATE ON public.obrigacoes_recorrentes
 FOR EACH ROW
 EXECUTE FUNCTION public.fn_trg_obrigacoes_recorrentes_after_update();
 
--- Sincroniza registros já existentes em obrigacoes_recorrentes com base na natureza_fluxo da categoria
+-- Sincroniza registros já existentes em obrigacoes_recorrentes com base na natureza_fluxo da categoria e janela_meses
 DO $$
 BEGIN
     PERFORM set_config('lastro.skip_obrigacao_sync', 'true', true);
     UPDATE public.obrigacoes_recorrentes o
     SET tipo_operacao = CASE
-        WHEN UPPER(TRIM(c.natureza_fluxo)) = 'ENTRADA' THEN 'CREDITO'
-        ELSE 'DEBITO'
-    END
+            WHEN UPPER(TRIM(c.natureza_fluxo)) = 'ENTRADA' THEN 'CREDITO'
+            ELSE 'DEBITO'
+        END,
+        dias_antecedencia = COALESCE(o.janela_meses, 12)
     FROM public.plano_contas c
     WHERE c.id = o.categoria_id
-      AND o.tipo_operacao IS DISTINCT FROM (
-          CASE WHEN UPPER(TRIM(c.natureza_fluxo)) = 'ENTRADA' THEN 'CREDITO' ELSE 'DEBITO' END
+      AND (
+          o.tipo_operacao IS DISTINCT FROM (
+              CASE WHEN UPPER(TRIM(c.natureza_fluxo)) = 'ENTRADA' THEN 'CREDITO' ELSE 'DEBITO' END
+          )
+          OR o.dias_antecedencia IS DISTINCT FROM COALESCE(o.janela_meses, 12)
       );
 END $$;
 
