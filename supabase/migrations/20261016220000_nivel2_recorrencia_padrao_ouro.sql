@@ -745,7 +745,7 @@ $function$;
 
 
 -- ============================================================================
--- 8. ATUALIZAÇÃO DE fn_listar_obrigacoes_recorrentes (INCLUINDO tipo_operacao E janela_meses)
+-- 8. ATUALIZAÇÃO DE fn_listar_obrigacoes_recorrentes (INCLUINDO tipo_operacao, janela_meses, membro_id, membro_nome)
 -- ============================================================================
 
 DROP FUNCTION IF EXISTS public.fn_listar_obrigacoes_recorrentes(uuid, boolean);
@@ -772,7 +772,9 @@ RETURNS TABLE(
     ativo boolean,
     ultima_competencia_gerada date,
     tipo_operacao text,
-    janela_meses integer
+    janela_meses integer,
+    membro_id uuid,
+    membro_nome text
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -797,11 +799,14 @@ BEGIN
         o.ativo,
         o.ultima_competencia_gerada,
         COALESCE(o.tipo_operacao, 'DEBITO')::TEXT AS tipo_operacao,
-        COALESCE(o.janela_meses, 12)::integer AS janela_meses
+        COALESCE(o.janela_meses, 12)::integer AS janela_meses,
+        o.membro_id,
+        COALESCE(m.nome_completo, 'Sem Membro')::TEXT AS membro_nome
     FROM public.obrigacoes_recorrentes o
     LEFT JOIN public.plano_contas c ON c.id = o.categoria_id 
     LEFT JOIN public.centros_custo cc ON cc.id = o.centro_custo_id 
     LEFT JOIN public.contas_bancarias cb ON cb.id = o.conta_bancaria_id
+    LEFT JOIN public.membros m ON m.id = o.membro_id
     WHERE o.organization_id = p_org_id
       AND (NOT p_apenas_ativas OR o.ativo = TRUE)
     ORDER BY o.periodicidade DESC, o.dia_vencimento ASC;
