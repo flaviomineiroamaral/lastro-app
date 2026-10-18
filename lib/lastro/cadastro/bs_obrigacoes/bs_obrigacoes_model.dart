@@ -29,6 +29,8 @@ class BsObrigacoesModel extends FlutterFlowModel<BsObrigacoesWidget> {
 
   String? vCentroResultadoId;
 
+  String? vMembroId;
+
   String? vContaId;
 
   String? vPeriodicidade = 'MENSAL';
@@ -56,6 +58,9 @@ class BsObrigacoesModel extends FlutterFlowModel<BsObrigacoesWidget> {
   // State field(s) for ddCentroDeCusto widget.
   String? ddCentroDeCustoValue;
   FormFieldController<String>? ddCentroDeCustoValueController;
+  // State field(s) for ddMembro widget.
+  String? ddMembroValue;
+  FormFieldController<String>? ddMembroValueController;
   // State field(s) for ddContaOrigem widget.
   String? ddContaOrigemValue;
   FormFieldController<String>? ddContaOrigemValueController;

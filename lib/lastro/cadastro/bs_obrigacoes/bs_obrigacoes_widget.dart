@@ -54,6 +54,7 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
         _model.vValorEstimado = widget!.pItemDadosObrigacoes?.valorEstimado;
         _model.vCategoriaId = widget!.pItemDadosObrigacoes?.categoriaId;
         _model.vCentroResultadoId = widget!.pItemDadosObrigacoes?.centroCustoId;
+        _model.vMembroId = widget!.pItemDadosObrigacoes?.membroId;
         _model.vContaId = widget!.pItemDadosObrigacoes?.contaBancariaId;
         _model.vPeriodicidade = widget!.pItemDadosObrigacoes?.periodicidade;
         _model.vDiaVencimento = widget!.pItemDadosObrigacoes?.diaVencimento;
@@ -81,6 +82,12 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
               widget!.pItemDadosObrigacoes!.centroCustoId;
           _model.ddCentroDeCustoValue =
               widget!.pItemDadosObrigacoes!.centroCustoId;
+        });
+        safeSetState(() {
+          _model.ddMembroValueController?.value =
+              widget!.pItemDadosObrigacoes?.membroId;
+          _model.ddMembroValue =
+              widget!.pItemDadosObrigacoes?.membroId;
         });
         safeSetState(() {
           _model.ddContaOrigemValueController?.value =
@@ -479,7 +486,7 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                   padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
                   child: Container(
                     width: double.infinity,
-                    height: 210.0,
+                    height: 290.0,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondaryBackground,
                       borderRadius: BorderRadius.circular(16.0),
@@ -710,6 +717,123 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                   .fontStyle,
                                         ),
                                     hintText: 'Selecione o centro de custo...',
+                                    icon: Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      size: 24.0,
+                                    ),
+                                    fillColor: FlutterFlowTheme.of(context)
+                                        .primaryBackground,
+                                    elevation: 2.0,
+                                    borderColor: Colors.transparent,
+                                    borderWidth: 0.0,
+                                    borderRadius: 8.0,
+                                    margin: EdgeInsetsDirectional.fromSTEB(
+                                        12.0, 0.0, 12.0, 0.0),
+                                    hidesUnderline: true,
+                                    isOverButton: false,
+                                    isSearchable: false,
+                                    isMultiSelect: false,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                4.0, 0.0, 0.0, 6.0),
+                            child: Text(
+                              'Membro / Responsável',
+                              style: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .override(
+                                    font: GoogleFonts.inter(
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .labelMedium
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .labelMedium
+                                          .fontStyle,
+                                    ),
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryText,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FlutterFlowTheme.of(context)
+                                        .labelMedium
+                                        .fontWeight,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .labelMedium
+                                        .fontStyle,
+                                  ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 0.0, 0.0, 6.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: FlutterFlowDropDown<String>(
+                                    controller:
+                                        _model.ddMembroValueController ??=
+                                            FormFieldController<String>(
+                                      _model.ddMembroValue ??=
+                                          _model.vMembroId,
+                                    ),
+                                    options: List<String>.from(FFAppState()
+                                        .cacheMembros
+                                        .where((e) => e.ativo == true)
+                                        .toList()
+                                        .map((e) => e.id)
+                                        .toList()),
+                                    optionLabels: FFAppState()
+                                        .cacheMembros
+                                        .where((e) => e.ativo == true)
+                                        .toList()
+                                        .map((e) => e.nomeCompleto)
+                                        .toList(),
+                                    onChanged: (val) async {
+                                      safeSetState(
+                                          () => _model.ddMembroValue = val);
+                                      _model.vMembroId =
+                                          _model.ddMembroValue == null ||
+                                                  _model.ddMembroValue == ''
+                                              ? null
+                                              : _model.ddMembroValue;
+                                      safeSetState(() {});
+                                    },
+                                    width: 200.0,
+                                    height: 35.0,
+                                    textStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontStyle,
+                                          ),
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
+                                          letterSpacing: 0.0,
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                        ),
+                                    hintText: 'Selecione o membro responsável...',
                                     icon: Icon(
                                       Icons.keyboard_arrow_down_rounded,
                                       color: FlutterFlowTheme.of(context)
@@ -1632,6 +1756,11 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                   _model.vValorEstimado,
                                               'tipo_operacao':
                                                   _model.vTipoOperacao,
+                                              'membro_id': _model.vMembroId ==
+                                                          null ||
+                                                      _model.vMembroId == ''
+                                                  ? null
+                                                  : _model.vMembroId,
                                             });
                                             _shouldSetState = true;
                                             _model.retStatusInsert = await actions
@@ -1744,6 +1873,11 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                       _model.vValorEstimado,
                                                   'tipo_operacao':
                                                       _model.vTipoOperacao,
+                                                  'membro_id': _model.vMembroId ==
+                                                              null ||
+                                                          _model.vMembroId == ''
+                                                      ? null
+                                                      : _model.vMembroId,
                                                   'ultima_competencia_gerada':
                                                       supaSerialize<DateTime>(
                                                           null),
@@ -1806,6 +1940,11 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                       _model.vValorEstimado,
                                                   'tipo_operacao':
                                                       _model.vTipoOperacao,
+                                                  'membro_id': _model.vMembroId ==
+                                                              null ||
+                                                          _model.vMembroId == ''
+                                                      ? null
+                                                      : _model.vMembroId,
                                                 },
                                                 matchingRows: (rows) => rows
                                                     .eqOrNull(
