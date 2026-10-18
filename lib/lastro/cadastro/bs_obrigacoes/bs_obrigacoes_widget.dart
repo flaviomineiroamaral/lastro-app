@@ -1625,6 +1625,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                   _model.vMesVencimento,
                                               'dias_antecedencia':
                                                   _model.vDiaAntecedencia,
+                                              'janela_meses':
+                                                  _model.vDiaAntecedencia,
                                               'ativo': _model.vAtivo,
                                               'valor_estimado':
                                                   _model.vValorEstimado,
@@ -1735,6 +1737,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                           : null,
                                                   'dias_antecedencia':
                                                       _model.vDiaAntecedencia,
+                                                  'janela_meses':
+                                                      _model.vDiaAntecedencia,
                                                   'ativo': _model.vAtivo,
                                                   'valor_estimado':
                                                       _model.vValorEstimado,
@@ -1794,6 +1798,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                               .vMesVencimento
                                                           : null,
                                                   'dias_antecedencia':
+                                                      _model.vDiaAntecedencia,
+                                                  'janela_meses':
                                                       _model.vDiaAntecedencia,
                                                   'ativo': _model.vAtivo,
                                                   'valor_estimado':

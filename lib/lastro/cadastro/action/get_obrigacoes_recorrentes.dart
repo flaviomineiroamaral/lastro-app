@@ -81,7 +81,9 @@ Future<List<DTObrigacaoRecorrenteStruct>> getObrigacoesRecorrentes(
           }
 
           final int diasAnte =
-              int.tryParse(row['dias_antecedencia']?.toString() ?? '15') ?? 15;
+              int.tryParse(row['dias_antecedencia']?.toString() ?? '12') ?? 12;
+          final int janelaMeses =
+              int.tryParse(row['janela_meses']?.toString() ?? '12') ?? 12;
           final double valorEst =
               double.tryParse(row['valor_estimado']?.toString() ?? '0.0') ??
                   0.0;
@@ -116,6 +118,7 @@ Future<List<DTObrigacaoRecorrenteStruct>> getObrigacoesRecorrentes(
             valorEstimado: valorEst,
             ativo: ativoSeguro,
             tipoOperacao: tipoOp,
+            janelaMeses: janelaMeses,
           ));
 
           debugPrint('✅ [Item $i] Struct montada com sucesso!');

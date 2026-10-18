@@ -22,6 +22,7 @@ class DTObrigacaoRecorrenteStruct extends BaseStruct {
     double? valorEstimado,
     bool? ativo,
     String? tipoOperacao,
+    int? janelaMeses,
   })  : _id = id,
         _descricao = descricao,
         _categoriaId = categoriaId,
@@ -36,7 +37,8 @@ class DTObrigacaoRecorrenteStruct extends BaseStruct {
         _diasAntecedencia = diasAntecedencia,
         _valorEstimado = valorEstimado,
         _ativo = ativo,
-        _tipoOperacao = tipoOperacao;
+        _tipoOperacao = tipoOperacao,
+        _janelaMeses = janelaMeses;
 
   // "id" field.
   String? _id;
@@ -123,7 +125,7 @@ class DTObrigacaoRecorrenteStruct extends BaseStruct {
 
   // "diasAntecedencia" field.
   int? _diasAntecedencia;
-  int get diasAntecedencia => _diasAntecedencia ?? 20;
+  int get diasAntecedencia => _diasAntecedencia ?? 12;
   set diasAntecedencia(int? val) => _diasAntecedencia = val;
 
   void incrementDiasAntecedencia(int amount) =>
@@ -155,6 +157,15 @@ class DTObrigacaoRecorrenteStruct extends BaseStruct {
 
   bool hasTipoOperacao() => _tipoOperacao != null;
 
+  // "janelaMeses" field.
+  int? _janelaMeses;
+  int get janelaMeses => _janelaMeses ?? 12;
+  set janelaMeses(int? val) => _janelaMeses = val;
+
+  void incrementJanelaMeses(int amount) => janelaMeses = janelaMeses + amount;
+
+  bool hasJanelaMeses() => _janelaMeses != null;
+
   static DTObrigacaoRecorrenteStruct fromMap(Map<String, dynamic> data) =>
       DTObrigacaoRecorrenteStruct(
         id: data['id'] as String?,
@@ -172,6 +183,7 @@ class DTObrigacaoRecorrenteStruct extends BaseStruct {
         valorEstimado: castToType<double>(data['valorEstimado']),
         ativo: data['ativo'] as bool?,
         tipoOperacao: data['tipoOperacao'] as String?,
+        janelaMeses: castToType<int>(data['janelaMeses']),
       );
 
   static DTObrigacaoRecorrenteStruct? maybeFromMap(dynamic data) => data is Map
@@ -194,6 +206,7 @@ class DTObrigacaoRecorrenteStruct extends BaseStruct {
         'valorEstimado': _valorEstimado,
         'ativo': _ativo,
         'tipoOperacao': _tipoOperacao,
+        'janelaMeses': _janelaMeses,
       }.withoutNulls;
 
   @override
@@ -257,6 +270,10 @@ class DTObrigacaoRecorrenteStruct extends BaseStruct {
         'tipoOperacao': serializeParam(
           _tipoOperacao,
           ParamType.String,
+        ),
+        'janelaMeses': serializeParam(
+          _janelaMeses,
+          ParamType.int,
         ),
       }.withoutNulls;
 
@@ -338,6 +355,11 @@ class DTObrigacaoRecorrenteStruct extends BaseStruct {
           ParamType.String,
           false,
         ),
+        janelaMeses: deserializeParam(
+          data['janelaMeses'],
+          ParamType.int,
+          false,
+        ),
       );
 
   @override
@@ -360,7 +382,8 @@ class DTObrigacaoRecorrenteStruct extends BaseStruct {
         diasAntecedencia == other.diasAntecedencia &&
         valorEstimado == other.valorEstimado &&
         ativo == other.ativo &&
-        tipoOperacao == other.tipoOperacao;
+        tipoOperacao == other.tipoOperacao &&
+        janelaMeses == other.janelaMeses;
   }
 
   @override
@@ -379,7 +402,8 @@ class DTObrigacaoRecorrenteStruct extends BaseStruct {
         diasAntecedencia,
         valorEstimado,
         ativo,
-        tipoOperacao
+        tipoOperacao,
+        janelaMeses
       ]);
 }
 
@@ -399,6 +423,7 @@ DTObrigacaoRecorrenteStruct createDTObrigacaoRecorrenteStruct({
   double? valorEstimado,
   bool? ativo,
   String? tipoOperacao,
+  int? janelaMeses,
 }) =>
     DTObrigacaoRecorrenteStruct(
       id: id,
@@ -416,4 +441,5 @@ DTObrigacaoRecorrenteStruct createDTObrigacaoRecorrenteStruct({
       valorEstimado: valorEstimado,
       ativo: ativo,
       tipoOperacao: tipoOperacao,
+      janelaMeses: janelaMeses,
     );
