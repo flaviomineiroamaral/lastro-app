@@ -100,3 +100,7 @@ export '/lastro/dashboard/action/gerar_pdf_dashboard_geral_new.dart'
     show gerarPdfDashboardGeralNew;
 export '/custom_code/actions/ativar_serial_custom_action.dart'
     show ativarSerialCustomAction;
+export '/lastro/a_receber_a_pagar/action/atualizar_agendamento_recorrente.dart'
+    show atualizarAgendamentoRecorrente;
+export '/lastro/a_receber_a_pagar/action/excluir_agendamento_recorrente.dart'
+    show excluirAgendamentoRecorrente;

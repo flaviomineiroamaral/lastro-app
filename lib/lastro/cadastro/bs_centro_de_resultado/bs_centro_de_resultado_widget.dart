@@ -761,6 +761,13 @@ class _BsCentroDeResultadoWidgetState extends State<BsCentroDeResultadoWidget> {
                                   },
                                 );
 
+                                await actions.syncMasterCache(
+                                  FFAppState().currentOrganizationId,
+                                  false,
+                                  false,
+                                  true,
+                                  false,
+                                );
                                 Navigator.pop(context);
                                 if (_shouldSetState) safeSetState(() {});
                                 return;

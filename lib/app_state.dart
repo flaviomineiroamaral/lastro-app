@@ -276,6 +276,18 @@ class FFAppState extends ChangeNotifier {
   set limitecrsatual(int value) {
     _limitecrsatual = value;
   }
+
+  String _currentOrganizationDoc = '';
+  String get currentOrganizationDoc => _currentOrganizationDoc;
+  set currentOrganizationDoc(String value) {
+    _currentOrganizationDoc = value;
+  }
+
+  String _currentOrganizationFone = '';
+  String get currentOrganizationFone => _currentOrganizationFone;
+  set currentOrganizationFone(String value) {
+    _currentOrganizationFone = value;
+  }
 }
 
 void _safeInit(Function() initializeField) {

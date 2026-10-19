@@ -1637,7 +1637,7 @@ class _BsDetalheTransacaoWidgetState extends State<BsDetalheTransacaoWidget> {
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     4.0, 0.0, 0.0, 6.0),
                                 child: Text(
-                                  'Centro de Custo',
+                                  'Centro de Resultado',
                                   style: FlutterFlowTheme.of(context)
                                       .labelMedium
                                       .override(

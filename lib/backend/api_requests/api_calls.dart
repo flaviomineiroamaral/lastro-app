@@ -101,6 +101,70 @@ class LerFaturaGeminiVisualCall {
       );
 }
 
+class CriarInstanciaPareamentoCall {
+  static Future<ApiCallResponse> call({
+    String? cnpj = '',
+    String? telefone = '',
+  }) async {
+    final ffApiRequestBody = '''
+{
+  "documento_cnpj": ${cnpj == null ? 'null' : '"${escapeStringForJson(cnpj)}"'},
+  "telefone": ${telefone == null ? 'null' : '"${escapeStringForJson(telefone)}"'}
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'CriarInstanciaPareamento',
+      apiUrl:
+          'https://n8n-aciv.srv1965950.hstgr.cloud/webhook/criar-instancia-pareamento',
+      callType: ApiCallType.POST,
+      headers: {},
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class DispararCobrancaWhatsAppCall {
+  static Future<ApiCallResponse> call({
+    String? cnpjEmpresa = '',
+    String? nomeCliente = '',
+    String? valorCobranca = '',
+    String? dataVencimento = '',
+    String? telefoneCliente = '',
+  }) async {
+    final ffApiRequestBody = '''
+{
+  "cnpj_empresa": ${cnpjEmpresa == null ? 'null' : '"${escapeStringForJson(cnpjEmpresa)}"'},
+  "telefone_cliente": ${telefoneCliente == null ? 'null' : '"${escapeStringForJson(telefoneCliente)}"'},
+  "nome_cliente": ${nomeCliente == null ? 'null' : '"${escapeStringForJson(nomeCliente)}"'},
+  "valor": ${valorCobranca == null ? 'null' : '"${escapeStringForJson(valorCobranca)}"'},
+  "data_vencimento": ${dataVencimento == null ? 'null' : '"${escapeStringForJson(dataVencimento)}"'}
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'DispararCobrancaWhatsApp',
+      apiUrl:
+          'https://n8n-aciv.srv1965950.hstgr.cloud/webhook/enviar-cobranca-manual',
+      callType: ApiCallType.POST,
+      headers: {},
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
 class ApiPagingParams {
   int nextPageNumber = 0;
   int numItems = 0;
@@ -143,4 +207,12 @@ String _serializeJson(dynamic jsonVar, [bool isList = false]) {
     }
     return isList ? '[]' : '{}';
   }
+}
+
+String? escapeStringForJson(String? input) {
+  if (input == null) {
+    return null;
+  }
+  final encoded = jsonEncode(input);
+  return encoded.substring(1, encoded.length - 1);
 }

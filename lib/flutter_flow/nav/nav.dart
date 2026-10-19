@@ -200,6 +200,10 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               'pViewAgendamento',
               ParamType.SupabaseRow,
             ),
+            pAbaPadrao: params.getParam(
+              'pAbaPadrao',
+              ParamType.String,
+            ),
           ),
         ),
         FFRoute(
@@ -240,6 +244,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: BloqueioFinanceiroWidget.routePath,
           requireAuth: true,
           builder: (context, params) => BloqueioFinanceiroWidget(),
+        ),
+        FFRoute(
+          name: AtivarWhatsappWidget.routeName,
+          path: AtivarWhatsappWidget.routePath,
+          builder: (context, params) => AtivarWhatsappWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );

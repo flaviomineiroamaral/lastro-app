@@ -93,8 +93,8 @@ class DetalhePrevisaoModel extends FlutterFlowModel<DetalhePrevisaoWidget> {
   bool? bolGerarLancRecorrente;
   // Stores action output result for [Backend Call - Insert Row] action in btnSalvar widget.
   TransacoesRow? rowNovoRegistro;
-  // Stores action output result for [Backend Call - Update Row(s)] action in btnSalvar widget.
-  List<TransacoesRow>? rowUpdateRegistro;
+  // Stores action output result for [Custom Action - atualizarAgendamentoRecorrente] action in btnSalvar widget.
+  bool? retAtualizarAgendamentoRecorrente;
 
   @override
   void initState(BuildContext context) {}

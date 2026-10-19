@@ -25,10 +25,12 @@ class DetalhePrevisaoWidget extends StatefulWidget {
     super.key,
     required this.pIdAgendamento,
     this.pViewAgendamento,
+    this.pAbaPadrao,
   });
 
   final String? pIdAgendamento;
   final VwAgendamentosRow? pViewAgendamento;
+  final String? pAbaPadrao;
 
   static String routeName = 'DetalhePrevisao';
   static String routePath = '/DetalhePrevisao';
@@ -62,13 +64,14 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
         _model.vIdMembro = null;
         _model.vDescricao = null;
         _model.vValorFormulario = 0.0;
-        _model.vTipoOperacao = 'A Pagar';
         _model.vStatus = false;
         _model.vIdTransacao = null;
+        _model.vTipoOperacao = widget.pAbaPadrao!;
         safeSetState(() {});
         safeSetState(() {
-          _model.choTipoValueController?.value = [_model.vTipoOperacao];
+          _model.choTipoValueController?.value = [widget.pAbaPadrao!];
         });
+        return;
       } else {
         _model.vUrlComprovante = widget.pViewAgendamento?.comprovativoUrl;
         _model.vDataPagamento = widget.pViewAgendamento?.dataPagamento;
@@ -89,9 +92,9 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
         _model.mostrarAvancadas = false;
         _model.vDescricaoCategoria = null;
         safeSetState(() {});
+        _model.choTipoValueController?.value = [_model.vTipoOperacao];
         _model.inputDescricaoTextController?.text = _model.vDescricao!;
 
-        _model.choTipoValueController?.value = [_model.vTipoOperacao];
         _model.ddCategoriaValueController?.value = _model.vIdCategoria!;
         _model.ddCategoriaValue = _model.vIdCategoria!;
         _model.ddContaOrigemValueController?.value =
@@ -106,6 +109,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
         _model.ddCentroDeCustoValue = _model.vIdCentroCusto!;
         _model.ddMembroValueController?.value = _model.vIdMembro!;
         _model.ddMembroValue = _model.vIdMembro!;
+        return;
       }
     });
 
@@ -217,8 +221,13 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                               onChanged: (widget.pIdAgendamento != null &&
                                       widget.pIdAgendamento != '')
                                   ? null
-                                  : (val) => safeSetState(() =>
-                                      _model.choTipoValue = val?.firstOrNull),
+                                  : (val) async {
+                                      safeSetState(() => _model.choTipoValue =
+                                          val?.firstOrNull);
+                                      _model.vTipoOperacao =
+                                          _model.choTipoValue!;
+                                      safeSetState(() {});
+                                    },
                               selectedChipStyle: ChipStyle(
                                 backgroundColor:
                                     FlutterFlowTheme.of(context).primary,
@@ -285,7 +294,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                               alignment: WrapAlignment.start,
                               controller: _model.choTipoValueController ??=
                                   FormFieldController<List<String>>(
-                                [_model.vTipoOperacao],
+                                [widget.pAbaPadrao!],
                               ),
                               wrapped: false,
                             ),
@@ -695,7 +704,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                   child: Text(
                                     _model.choTipoValue == 'TRANSFERENCIA'
                                         ? 'Data Transferência'
-                                        : (_model.choTipoValue == 'RECEITA'
+                                        : (_model.choTipoValue == 'A Receber'
                                             ? 'Data Movimento'
                                             : 'Data Vencimento'),
                                     style: FlutterFlowTheme.of(context)
@@ -1609,7 +1618,8 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                               padding: EdgeInsetsDirectional
                                                   .fromSTEB(4.0, 0.0, 8.0, 6.0),
                                               child: Text(
-                                                _model.choTipoValue == 'RECEITA'
+                                                _model.choTipoValue ==
+                                                        'A Receber'
                                                     ? 'Esta conta já foi recebida?'
                                                     : 'Esta conta já foi paga?',
                                                 style: FlutterFlowTheme.of(
@@ -2544,7 +2554,7 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                 EdgeInsetsDirectional.fromSTEB(
                                                     4.0, 0.0, 0.0, 6.0),
                                             child: Text(
-                                              _model.choTipoValue == 'RECEITA'
+                                              _model.choTipoValue == 'A Receber'
                                                   ? 'Pessoa'
                                                   : 'Fornecedor',
                                               style:
@@ -3513,76 +3523,34 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                       }
                                                     }
                                                   } else {
-                                                    await TransacoesTable()
-                                                        .update(
-                                                      data: {
-                                                        'valor': _model
-                                                            .vValorFormulario,
-                                                        'descricao': _model.inputDescricaoTextController
-                                                                        .text ==
-                                                                    ''
-                                                            ? _model
-                                                                .vDescricaoCategoria
-                                                            : _model
-                                                                .inputDescricaoTextController
-                                                                .text,
-                                                        'plano_contas_id': _model
-                                                            .ddCategoriaValue,
-                                                        'status':
-                                                            _model.swtStatusValue ==
-                                                                    true
-                                                                ? 'CONCILIADO'
-                                                                : 'PENDENTE',
-                                                        'conta_bancaria_id':
-                                                            _model.swtStatusValue ==
-                                                                    true
-                                                                ? _model
-                                                                    .ddContaOrigemValue
-                                                                : null,
-                                                        'centro_custo_id': _model
-                                                            .ddCentroDeCustoValue,
-                                                        'membro_id': _model
-                                                            .ddMembroValue,
-                                                        'comprovativo_url':
-                                                            _model
-                                                                .vUrlComprovante,
-                                                        'data_vencimento':
-                                                            supaSerialize<
-                                                                    DateTime>(
-                                                                _model
-                                                                    .vDataVencimento),
-                                                        'organization_id':
-                                                            FFAppState()
-                                                                .currentOrganizationId,
-                                                        'data_pagamento': supaSerialize<
-                                                            DateTime>((_model
-                                                                        .swtStatusValue ==
-                                                                    true) &&
-                                                                (_model.vTipoConta !=
-                                                                    'CARTAO')
-                                                            ? _model
-                                                                .vDataPagamento
-                                                            : null),
-                                                      },
-                                                      matchingRows: (rows) =>
-                                                          rows
-                                                              .eqOrNull(
-                                                                'id',
-                                                                widget
-                                                                    .pIdAgendamento,
-                                                              )
-                                                              .eqOrNull(
-                                                                'organization_id',
-                                                                FFAppState()
-                                                                    .currentOrganizationId,
-                                                              ),
+                                                    _model.retAtualizarAgendamentoRecorrente =
+                                                        await actions
+                                                            .atualizarAgendamentoRecorrente(
+                                                      context,
+                                                      FFAppState()
+                                                          .currentOrganizationId,
+                                                      widget.pIdAgendamento!,
+                                                      _model.vValorFormulario,
+                                                      _model
+                                                          .inputDescricaoTextController
+                                                          .text,
+                                                      _model
+                                                          .vDescricaoCategoria,
+                                                      _model.ddCategoriaValue,
+                                                      _model
+                                                          .ddCentroDeCustoValue,
+                                                      _model.ddMembroValue,
+                                                      _model.vDataVencimento,
+                                                      _model.swtStatusValue,
+                                                      _model.ddContaOrigemValue,
+                                                      _model.vTipoConta,
+                                                      _model.vDataPagamento,
+                                                      _model.vUrlComprovante,
                                                     );
                                                     _shouldSetState = true;
-                                                    if ((_model.rowUpdateRegistro !=
-                                                                null &&
-                                                            (_model.rowUpdateRegistro)!
-                                                                .isNotEmpty) ==
-                                                        false) {
+                                                    if (_model
+                                                            .retAtualizarAgendamentoRecorrente ==
+                                                        true) {
                                                       if ((widget.pViewAgendamento
                                                                   ?.status ==
                                                               'PENDENTE') &&
@@ -4064,20 +4032,12 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                                                             ) ??
                                                             false;
                                                     if (confirmDialogResponse) {
-                                                      await TransacoesTable()
-                                                          .delete(
-                                                        matchingRows: (rows) =>
-                                                            rows
-                                                                .eqOrNull(
-                                                                  'organization_id',
-                                                                  FFAppState()
-                                                                      .currentOrganizationId,
-                                                                )
-                                                                .eqOrNull(
-                                                                  'id',
-                                                                  widget
-                                                                      .pIdAgendamento,
-                                                                ),
+                                                      await actions
+                                                          .excluirAgendamentoRecorrente(
+                                                        context,
+                                                        FFAppState()
+                                                            .currentOrganizationId,
+                                                        widget.pIdAgendamento!,
                                                       );
                                                     } else {
                                                       return;

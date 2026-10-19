@@ -739,6 +739,18 @@ class _AuthPageWidgetState extends State<AuthPageWidget>
                                                           .minhaOrganizacao!
                                                           .firstOrNull!
                                                           .limiteCrsAtual!;
+                                                  FFAppState()
+                                                          .currentOrganizationDoc =
+                                                      _model
+                                                          .minhaOrganizacao!
+                                                          .firstOrNull!
+                                                          .documentoCnpj!;
+                                                  FFAppState()
+                                                          .currentOrganizationFone =
+                                                      _model
+                                                          .minhaOrganizacao!
+                                                          .firstOrNull!
+                                                          .whatsapp!;
                                                   safeSetState(() {});
                                                   FFAppState()
                                                       .dataFimGlob = FFAppState()

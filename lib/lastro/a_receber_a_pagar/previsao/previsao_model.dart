@@ -1,3 +1,4 @@
+import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
 import 'previsao_widget.dart' show PrevisaoWidget;
@@ -16,6 +17,11 @@ class PrevisaoModel extends FlutterFlowModel<PrevisaoWidget> {
       tabBarController != null ? tabBarController!.index : 0;
   int get tabBarPreviousIndex =>
       tabBarController != null ? tabBarController!.previousIndex : 0;
+
+  // Stores action output result for [Backend Call - API (DispararCobrancaWhatsApp)] action in Icon widget.
+  ApiCallResponse? apiCobrancaSendApagar;
+  // Stores action output result for [Backend Call - API (DispararCobrancaWhatsApp)] action in Icon widget.
+  ApiCallResponse? apiCobrancaSendAreceber;
 
   @override
   void initState(BuildContext context) {}

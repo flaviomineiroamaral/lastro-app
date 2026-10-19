@@ -63,6 +63,16 @@ class VwAgendamentosRow extends SupabaseDataRow {
   String? get membroId => getField<String>('membro_id');
   set membroId(String? value) => setField<String>('membro_id', value);
 
+  String? get membroNome => getField<String>('membro_nome');
+  set membroNome(String? value) => setField<String>('membro_nome', value);
+
+  String? get membroTelefone => getField<String>('membro_telefone');
+  set membroTelefone(String? value) =>
+      setField<String>('membro_telefone', value);
+
+  String? get membroEmail => getField<String>('membro_email');
+  set membroEmail(String? value) => setField<String>('membro_email', value);
+
   String? get observacoes => getField<String>('observacoes');
   set observacoes(String? value) => setField<String>('observacoes', value);
 
@@ -111,4 +121,28 @@ class VwAgendamentosRow extends SupabaseDataRow {
   double? get acumuladoDiario => getField<double>('acumulado_diario');
   set acumuladoDiario(double? value) =>
       setField<double>('acumulado_diario', value);
+
+  String? get grupoRecorrenciaId => getField<String>('grupo_recorrencia_id');
+  set grupoRecorrenciaId(String? value) =>
+      setField<String>('grupo_recorrencia_id', value);
+
+  String? get recorrenciaId => getField<String>('recorrencia_id');
+  set recorrenciaId(String? value) => setField<String>('recorrencia_id', value);
+
+  String? get tipoRecorrencia => getField<String>('tipo_recorrencia');
+  set tipoRecorrencia(String? value) =>
+      setField<String>('tipo_recorrencia', value);
+
+  bool? get temTelefone => getField<bool>('tem_telefone');
+  set temTelefone(bool? value) => setField<bool>('tem_telefone', value);
+
+  bool? get podeCobrar => getField<bool>('pode_cobrar');
+  set podeCobrar(bool? value) => setField<bool>('pode_cobrar', value);
+
+  String? get statusCobranca => getField<String>('status_cobranca');
+  set statusCobranca(String? value) =>
+      setField<String>('status_cobranca', value);
+
+  String? get textoCobranca => getField<String>('texto_cobranca');
+  set textoCobranca(String? value) => setField<String>('texto_cobranca', value);
 }

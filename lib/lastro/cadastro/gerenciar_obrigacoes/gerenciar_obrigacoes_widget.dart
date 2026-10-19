@@ -257,6 +257,24 @@ class _GerenciarObrigacoesWidgetState extends State<GerenciarObrigacoesWidget> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
+                                              Padding(
+                                                padding: EdgeInsetsDirectional
+                                                    .fromSTEB(
+                                                        0.0, 0.0, 10.0, 0.0),
+                                                child: Icon(
+                                                  Icons.brightness_1,
+                                                  color: listaObrigacoesItem
+                                                              .tipoOperacao ==
+                                                          'CREDITO'
+                                                      ? FlutterFlowTheme.of(
+                                                              context)
+                                                          .secondary
+                                                      : FlutterFlowTheme.of(
+                                                              context)
+                                                          .error,
+                                                  size: 24.0,
+                                                ),
+                                              ),
                                               Expanded(
                                                 child: Padding(
                                                   padding: EdgeInsetsDirectional
@@ -304,8 +322,7 @@ class _GerenciarObrigacoesWidgetState extends State<GerenciarObrigacoesWidget> {
                                                       ),
                                                       Expanded(
                                                         child: Text(
-                                                          listaObrigacoesItem
-                                                              .categoriaNome,
+                                                          '${listaObrigacoesItem.categoriaNome} | ${listaObrigacoesItem.membroNome}',
                                                           style: FlutterFlowTheme
                                                                   .of(context)
                                                               .bodyMedium

@@ -1,4 +1,6 @@
+import '/backend/api_requests/api_calls.dart';
 import '/backend/supabase/supabase.dart';
+import '/flutter_flow/ff_builtin_enums.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/lastro/geral/bs_top_notificacoes/bs_top_notificacoes_widget.dart';
@@ -112,6 +114,12 @@ class _PrevisaoWidgetState extends State<PrevisaoWidget>
                           queryParameters: {
                             'pIdAgendamento': serializeParam(
                               null,
+                              ParamType.String,
+                            ),
+                            'pAbaPadrao': serializeParam(
+                              _model.tabBarCurrentIndex == 0
+                                  ? 'A Pagar'
+                                  : 'A Receber',
                               ParamType.String,
                             ),
                           }.withoutNulls,
@@ -590,10 +598,7 @@ class _PrevisaoWidgetState extends State<PrevisaoWidget>
                                                                                     Opacity(
                                                                                       opacity: 0.6,
                                                                                       child: Text(
-                                                                                        valueOrDefault<String>(
-                                                                                          listaAPagarItem.categoriaNome,
-                                                                                          'Sem categoria',
-                                                                                        ),
+                                                                                        '${listaAPagarItem.categoriaNome}${listaAPagarItem.membroNome != null && listaAPagarItem.membroNome != '' ? ' | ${listaAPagarItem.membroNome}' : ''}',
                                                                                         textAlign: TextAlign.start,
                                                                                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                               font: GoogleFonts.inter(
@@ -608,6 +613,30 @@ class _PrevisaoWidgetState extends State<PrevisaoWidget>
                                                                                             ),
                                                                                         overflow: TextOverflow.visible,
                                                                                       ),
+                                                                                    ),
+                                                                                    Text(
+                                                                                      'Status: ${listaAPagarItem.statusCobranca}',
+                                                                                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                            font: GoogleFonts.inter(
+                                                                                              fontWeight: FontWeight.bold,
+                                                                                              fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                                            ),
+                                                                                            color: () {
+                                                                                              if (listaAPagarItem.statusCobranca == 'VENCIDO') {
+                                                                                                return FlutterFlowTheme.of(context).error;
+                                                                                              } else if (listaAPagarItem.statusCobranca == 'HOJE') {
+                                                                                                return FlutterFlowTheme.of(context).primary;
+                                                                                              } else if (listaAPagarItem.statusCobranca == 'A VENCER') {
+                                                                                                return FlutterFlowTheme.of(context).success;
+                                                                                              } else {
+                                                                                                return FlutterFlowTheme.of(context).secondaryText;
+                                                                                              }
+                                                                                            }(),
+                                                                                            fontSize: 12.0,
+                                                                                            letterSpacing: 0.0,
+                                                                                            fontWeight: FontWeight.bold,
+                                                                                            fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                                          ),
                                                                                     ),
                                                                                   ],
                                                                                 ),
@@ -641,13 +670,167 @@ class _PrevisaoWidgetState extends State<PrevisaoWidget>
                                                                                 ),
                                                                               ],
                                                                             ),
-                                                                            Padding(
-                                                                              padding: EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
-                                                                              child: Icon(
-                                                                                Icons.arrow_forward_ios,
-                                                                                color: FlutterFlowTheme.of(context).secondaryText,
-                                                                                size: 16.0,
-                                                                              ),
+                                                                            Column(
+                                                                              mainAxisSize: MainAxisSize.max,
+                                                                              mainAxisAlignment: (FFMainAxisAlignment.spaceAround).flutterValue,
+                                                                              children: [
+                                                                                Builder(
+                                                                                  builder: (context) => Padding(
+                                                                                    padding: EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
+                                                                                    child: InkWell(
+                                                                                      splashColor: Colors.transparent,
+                                                                                      focusColor: Colors.transparent,
+                                                                                      hoverColor: Colors.transparent,
+                                                                                      highlightColor: Colors.transparent,
+                                                                                      onTap: () async {
+                                                                                        if ((FFAppState().currentFunction == 'Leitor') || (FFAppState().currentFunction == '')) {
+                                                                                          await showDialog(
+                                                                                            context: context,
+                                                                                            builder: (dialogContext) {
+                                                                                              return Dialog(
+                                                                                                elevation: 0,
+                                                                                                insetPadding: EdgeInsets.zero,
+                                                                                                backgroundColor: Colors.transparent,
+                                                                                                alignment: AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
+                                                                                                child: GestureDetector(
+                                                                                                  onTap: () {
+                                                                                                    FocusScope.of(dialogContext).unfocus();
+                                                                                                    FocusManager.instance.primaryFocus?.unfocus();
+                                                                                                  },
+                                                                                                  child: BsTopNotificacoesWidget(
+                                                                                                    pTipo: 'AVISO',
+                                                                                                    pMensagem: 'Atualmente você não tem permissão!',
+                                                                                                  ),
+                                                                                                ),
+                                                                                              );
+                                                                                            },
+                                                                                          );
+
+                                                                                          return;
+                                                                                        } else {
+                                                                                          context.pushNamed(
+                                                                                            DetalhePrevisaoWidget.routeName,
+                                                                                            queryParameters: {
+                                                                                              'pIdAgendamento': serializeParam(
+                                                                                                listaAPagarItem.transacaoId,
+                                                                                                ParamType.String,
+                                                                                              ),
+                                                                                              'pViewAgendamento': serializeParam(
+                                                                                                listaAPagarItem,
+                                                                                                ParamType.SupabaseRow,
+                                                                                              ),
+                                                                                            }.withoutNulls,
+                                                                                          );
+
+                                                                                          return;
+                                                                                        }
+                                                                                      },
+                                                                                      child: Icon(
+                                                                                        Icons.edit,
+                                                                                        color: FlutterFlowTheme.of(context).secondaryText,
+                                                                                        size: 24.0,
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                                Builder(
+                                                                                  builder: (context) => InkWell(
+                                                                                    splashColor: Colors.transparent,
+                                                                                    focusColor: Colors.transparent,
+                                                                                    hoverColor: Colors.transparent,
+                                                                                    highlightColor: Colors.transparent,
+                                                                                    onTap: () async {
+                                                                                      var _shouldSetState = false;
+                                                                                      _model.apiCobrancaSendApagar = await DispararCobrancaWhatsAppCall.call(
+                                                                                        cnpjEmpresa: FFAppState().currentOrganizationDoc,
+                                                                                        nomeCliente: listaAPagarItem.membroNome,
+                                                                                        valorCobranca: formatNumber(
+                                                                                          listaAPagarItem.valor,
+                                                                                          formatType: FormatType.custom,
+                                                                                          format: '\'R\$\' #,##0.00;\'- R\$\' #,##0.00',
+                                                                                          locale: 'pt_br',
+                                                                                        ),
+                                                                                        dataVencimento: dateTimeFormat(
+                                                                                          "d/M/y",
+                                                                                          listaAPagarItem.dataVencimento,
+                                                                                          locale: FFLocalizations.of(context).languageCode,
+                                                                                        ),
+                                                                                        telefoneCliente: FFAppState().currentOrganizationFone,
+                                                                                      );
+
+                                                                                      _shouldSetState = true;
+                                                                                      if ((_model.apiCobrancaSendApagar?.succeeded ?? true)) {
+                                                                                        await showDialog(
+                                                                                          context: context,
+                                                                                          builder: (dialogContext) {
+                                                                                            return Dialog(
+                                                                                              elevation: 0,
+                                                                                              insetPadding: EdgeInsets.zero,
+                                                                                              backgroundColor: Colors.transparent,
+                                                                                              alignment: AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
+                                                                                              child: GestureDetector(
+                                                                                                onTap: () {
+                                                                                                  FocusScope.of(dialogContext).unfocus();
+                                                                                                  FocusManager.instance.primaryFocus?.unfocus();
+                                                                                                },
+                                                                                                child: BsTopNotificacoesWidget(
+                                                                                                  pTipo: 'AVISO',
+                                                                                                  pMensagem: 'Cobrança enviada com sucesso!',
+                                                                                                ),
+                                                                                              ),
+                                                                                            );
+                                                                                          },
+                                                                                        );
+
+                                                                                        if (_shouldSetState) safeSetState(() {});
+                                                                                        return;
+                                                                                      } else {
+                                                                                        await showDialog(
+                                                                                          context: context,
+                                                                                          builder: (dialogContext) {
+                                                                                            return Dialog(
+                                                                                              elevation: 0,
+                                                                                              insetPadding: EdgeInsets.zero,
+                                                                                              backgroundColor: Colors.transparent,
+                                                                                              alignment: AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
+                                                                                              child: GestureDetector(
+                                                                                                onTap: () {
+                                                                                                  FocusScope.of(dialogContext).unfocus();
+                                                                                                  FocusManager.instance.primaryFocus?.unfocus();
+                                                                                                },
+                                                                                                child: BsTopNotificacoesWidget(
+                                                                                                  pTipo: 'ERRO',
+                                                                                                  pMensagem: 'Erro ao enviar. Verifique se o WhatsApp está conectado.',
+                                                                                                ),
+                                                                                              ),
+                                                                                            );
+                                                                                          },
+                                                                                        );
+
+                                                                                        if (_shouldSetState) safeSetState(() {});
+                                                                                        return;
+                                                                                      }
+
+                                                                                      if (_shouldSetState) safeSetState(() {});
+                                                                                    },
+                                                                                    child: Icon(
+                                                                                      Icons.send,
+                                                                                      color: () {
+                                                                                        if (listaAPagarItem.statusCobranca == 'VENCIDO') {
+                                                                                          return FlutterFlowTheme.of(context).error;
+                                                                                        } else if (listaAPagarItem.statusCobranca == 'HOJE') {
+                                                                                          return FlutterFlowTheme.of(context).primary;
+                                                                                        } else if (listaAPagarItem.statusCobranca == 'A VENCER') {
+                                                                                          return FlutterFlowTheme.of(context).success;
+                                                                                        } else {
+                                                                                          return FlutterFlowTheme.of(context).secondaryText;
+                                                                                        }
+                                                                                      }(),
+                                                                                      size: 24.0,
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ],
                                                                             ),
                                                                           ],
                                                                         ),
@@ -955,16 +1138,22 @@ class _PrevisaoWidgetState extends State<PrevisaoWidget>
                                                                                 alignment: AlignmentDirectional(0.0, 0.0),
                                                                                 child: Stack(
                                                                                   children: [
-                                                                                    if ((listaAReceberItem.totalParcelas == 1) || (listaAReceberItem.totalParcelas == null))
+                                                                                    if ((listaAReceberItem.totalParcelas! <= 1) || (listaAReceberItem.totalParcelas == null))
                                                                                       Icon(
                                                                                         Icons.flash_on_outlined,
                                                                                         color: Color(0xFF1DB9A8),
                                                                                         size: 24.0,
                                                                                       ),
-                                                                                    if (listaAReceberItem.totalParcelas! > 1)
+                                                                                    if ((listaAReceberItem.totalParcelas! <= 12) && (listaAReceberItem.totalParcelas! > 1))
                                                                                       Icon(
                                                                                         Icons.layers_outlined,
                                                                                         color: FlutterFlowTheme.of(context).primary,
+                                                                                        size: 24.0,
+                                                                                      ),
+                                                                                    if (listaAReceberItem.totalParcelas! > 12)
+                                                                                      Icon(
+                                                                                        Icons.event_repeat_outlined,
+                                                                                        color: Color(0xFF388BF8),
                                                                                         size: 24.0,
                                                                                       ),
                                                                                   ],
@@ -1006,10 +1195,10 @@ class _PrevisaoWidgetState extends State<PrevisaoWidget>
                                                                                   Opacity(
                                                                                     opacity: 0.6,
                                                                                     child: Text(
-                                                                                      valueOrDefault<String>(
+                                                                                      '${valueOrDefault<String>(
                                                                                         listaAReceberItem.categoriaNome,
                                                                                         'Sem categoria',
-                                                                                      ),
+                                                                                      )}${listaAReceberItem.membroNome != null && listaAReceberItem.membroNome != '' ? ' | ${listaAReceberItem.membroNome}' : ''}',
                                                                                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                                                             font: GoogleFonts.inter(
                                                                                               fontWeight: FontWeight.w300,
@@ -1023,6 +1212,30 @@ class _PrevisaoWidgetState extends State<PrevisaoWidget>
                                                                                           ),
                                                                                       overflow: TextOverflow.visible,
                                                                                     ),
+                                                                                  ),
+                                                                                  Text(
+                                                                                    'Status: ${listaAReceberItem.statusCobranca}',
+                                                                                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                                                          font: GoogleFonts.inter(
+                                                                                            fontWeight: FontWeight.bold,
+                                                                                            fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                                          ),
+                                                                                          color: () {
+                                                                                            if (listaAReceberItem.statusCobranca == 'VENCIDO') {
+                                                                                              return FlutterFlowTheme.of(context).error;
+                                                                                            } else if (listaAReceberItem.statusCobranca == 'HOJE') {
+                                                                                              return FlutterFlowTheme.of(context).primary;
+                                                                                            } else if (listaAReceberItem.statusCobranca == 'A VENCER') {
+                                                                                              return FlutterFlowTheme.of(context).success;
+                                                                                            } else {
+                                                                                              return FlutterFlowTheme.of(context).secondaryText;
+                                                                                            }
+                                                                                          }(),
+                                                                                          fontSize: 12.0,
+                                                                                          letterSpacing: 0.0,
+                                                                                          fontWeight: FontWeight.bold,
+                                                                                          fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                                                                                        ),
                                                                                   ),
                                                                                 ],
                                                                               ),
@@ -1059,18 +1272,152 @@ class _PrevisaoWidgetState extends State<PrevisaoWidget>
                                                                               ),
                                                                             ],
                                                                           ),
-                                                                          Padding(
-                                                                            padding: EdgeInsetsDirectional.fromSTEB(
-                                                                                8.0,
-                                                                                0.0,
-                                                                                8.0,
-                                                                                0.0),
-                                                                            child:
-                                                                                Icon(
-                                                                              Icons.arrow_forward_ios,
-                                                                              color: FlutterFlowTheme.of(context).secondaryText,
-                                                                              size: 16.0,
-                                                                            ),
+                                                                          Column(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.max,
+                                                                            mainAxisAlignment:
+                                                                                (FFMainAxisAlignment.spaceAround).flutterValue,
+                                                                            children: [
+                                                                              Padding(
+                                                                                padding: EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
+                                                                                child: InkWell(
+                                                                                  splashColor: Colors.transparent,
+                                                                                  focusColor: Colors.transparent,
+                                                                                  hoverColor: Colors.transparent,
+                                                                                  highlightColor: Colors.transparent,
+                                                                                  onTap: () async {
+                                                                                    if (FFAppState().currentFunction == 'Leitor') {
+                                                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                                                        SnackBar(
+                                                                                          content: Text(
+                                                                                            'Atualmente você não tem permissão!',
+                                                                                            style: TextStyle(
+                                                                                              color: FlutterFlowTheme.of(context).primaryText,
+                                                                                              fontWeight: FontWeight.w600,
+                                                                                            ),
+                                                                                            textAlign: TextAlign.center,
+                                                                                          ),
+                                                                                          duration: Duration(milliseconds: 4000),
+                                                                                          backgroundColor: FlutterFlowTheme.of(context).error,
+                                                                                        ),
+                                                                                      );
+                                                                                    } else {
+                                                                                      context.pushNamed(
+                                                                                        DetalhePrevisaoWidget.routeName,
+                                                                                        queryParameters: {
+                                                                                          'pIdAgendamento': serializeParam(
+                                                                                            listaAReceberItem.transacaoId,
+                                                                                            ParamType.String,
+                                                                                          ),
+                                                                                          'pViewAgendamento': serializeParam(
+                                                                                            listaAReceberItem,
+                                                                                            ParamType.SupabaseRow,
+                                                                                          ),
+                                                                                        }.withoutNulls,
+                                                                                      );
+                                                                                    }
+                                                                                  },
+                                                                                  child: Icon(
+                                                                                    Icons.edit,
+                                                                                    color: FlutterFlowTheme.of(context).secondaryText,
+                                                                                    size: 24.0,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                              Builder(
+                                                                                builder: (context) => InkWell(
+                                                                                  splashColor: Colors.transparent,
+                                                                                  focusColor: Colors.transparent,
+                                                                                  hoverColor: Colors.transparent,
+                                                                                  highlightColor: Colors.transparent,
+                                                                                  onTap: () async {
+                                                                                    var _shouldSetState = false;
+                                                                                    _model.apiCobrancaSendAreceber = await DispararCobrancaWhatsAppCall.call(
+                                                                                      cnpjEmpresa: FFAppState().currentOrganizationDoc,
+                                                                                      nomeCliente: listaAReceberItem.membroNome,
+                                                                                      valorCobranca: formatNumber(
+                                                                                        listaAReceberItem.valor,
+                                                                                        formatType: FormatType.custom,
+                                                                                        format: '\'R\$\' #,##0.00;\'- R\$\' #,##0.00',
+                                                                                        locale: 'pt_BR',
+                                                                                      ),
+                                                                                      dataVencimento: listaAReceberItem.dataVencimento?.toString(),
+                                                                                      telefoneCliente: FFAppState().currentOrganizationFone,
+                                                                                    );
+
+                                                                                    _shouldSetState = true;
+                                                                                    if ((_model.apiCobrancaSendAreceber?.succeeded ?? true)) {
+                                                                                      await showDialog(
+                                                                                        context: context,
+                                                                                        builder: (dialogContext) {
+                                                                                          return Dialog(
+                                                                                            elevation: 0,
+                                                                                            insetPadding: EdgeInsets.zero,
+                                                                                            backgroundColor: Colors.transparent,
+                                                                                            alignment: AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
+                                                                                            child: GestureDetector(
+                                                                                              onTap: () {
+                                                                                                FocusScope.of(dialogContext).unfocus();
+                                                                                                FocusManager.instance.primaryFocus?.unfocus();
+                                                                                              },
+                                                                                              child: BsTopNotificacoesWidget(
+                                                                                                pTipo: 'AVISO',
+                                                                                                pMensagem: 'Cobrança enviada com sucesso!',
+                                                                                              ),
+                                                                                            ),
+                                                                                          );
+                                                                                        },
+                                                                                      );
+
+                                                                                      if (_shouldSetState) safeSetState(() {});
+                                                                                      return;
+                                                                                    } else {
+                                                                                      await showDialog(
+                                                                                        context: context,
+                                                                                        builder: (dialogContext) {
+                                                                                          return Dialog(
+                                                                                            elevation: 0,
+                                                                                            insetPadding: EdgeInsets.zero,
+                                                                                            backgroundColor: Colors.transparent,
+                                                                                            alignment: AlignmentDirectional(0.0, 0.0).resolve(Directionality.of(context)),
+                                                                                            child: GestureDetector(
+                                                                                              onTap: () {
+                                                                                                FocusScope.of(dialogContext).unfocus();
+                                                                                                FocusManager.instance.primaryFocus?.unfocus();
+                                                                                              },
+                                                                                              child: BsTopNotificacoesWidget(
+                                                                                                pTipo: 'ERRO',
+                                                                                                pMensagem: 'Erro ao enviar. Verifique se o WhatsApp está conectado.',
+                                                                                              ),
+                                                                                            ),
+                                                                                          );
+                                                                                        },
+                                                                                      );
+
+                                                                                      if (_shouldSetState) safeSetState(() {});
+                                                                                      return;
+                                                                                    }
+
+                                                                                    if (_shouldSetState) safeSetState(() {});
+                                                                                  },
+                                                                                  child: Icon(
+                                                                                    Icons.send,
+                                                                                    color: () {
+                                                                                      if (listaAReceberItem.statusCobranca == 'VENCIDO') {
+                                                                                        return FlutterFlowTheme.of(context).error;
+                                                                                      } else if (listaAReceberItem.statusCobranca == 'HOJE') {
+                                                                                        return FlutterFlowTheme.of(context).primary;
+                                                                                      } else if (listaAReceberItem.statusCobranca == 'A VENCER') {
+                                                                                        return FlutterFlowTheme.of(context).success;
+                                                                                      } else {
+                                                                                        return FlutterFlowTheme.of(context).secondaryText;
+                                                                                      }
+                                                                                    }(),
+                                                                                    size: 24.0,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
                                                                           ),
                                                                         ],
                                                                       ),

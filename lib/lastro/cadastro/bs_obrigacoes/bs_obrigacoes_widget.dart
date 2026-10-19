@@ -53,13 +53,12 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
         _model.vValorEstimado = widget.pItemDadosObrigacoes?.valorEstimado;
         _model.vCategoriaId = widget.pItemDadosObrigacoes?.categoriaId;
         _model.vCentroResultadoId = widget.pItemDadosObrigacoes?.centroCustoId;
-        _model.vContaId = widget.pItemDadosObrigacoes?.contaBancariaId;
         _model.vPeriodicidade = widget.pItemDadosObrigacoes?.periodicidade;
         _model.vDiaVencimento = widget.pItemDadosObrigacoes?.diaVencimento;
         _model.vMesVencimento = widget.pItemDadosObrigacoes?.mesVencimento;
-        _model.vDiaAntecedencia =
-            widget.pItemDadosObrigacoes!.diasAntecedencia;
+        _model.vJanelaMeses = widget.pItemDadosObrigacoes!.janelaMeses;
         _model.vAtivo = widget.pItemDadosObrigacoes!.ativo;
+        _model.vMembroId = widget.pItemDadosObrigacoes?.membroId;
         safeSetState(() {});
         safeSetState(() {
           _model.inputDescricaoTextController?.text =
@@ -77,10 +76,9 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
               widget.pItemDadosObrigacoes!.centroCustoId;
         });
         safeSetState(() {
-          _model.ddContaOrigemValueController?.value =
-              widget.pItemDadosObrigacoes!.contaBancariaId;
-          _model.ddContaOrigemValue =
-              widget.pItemDadosObrigacoes!.contaBancariaId;
+          _model.ddMembroValueController?.value =
+              widget.pItemDadosObrigacoes!.membroId;
+          _model.ddMembroValue = widget.pItemDadosObrigacoes!.membroId;
         });
         safeSetState(() {
           _model.choTipoValueController?.value = [
@@ -98,10 +96,9 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
           _model.ddMesValue = widget.pItemDadosObrigacoes!.mesVencimento;
         });
         safeSetState(() {
-          _model.ddAntecedenciaValueController?.value =
-              widget.pItemDadosObrigacoes!.diasAntecedencia;
-          _model.ddAntecedenciaValue =
-              widget.pItemDadosObrigacoes!.diasAntecedencia;
+          _model.ddJanelaMesesValueController?.value =
+              widget.pItemDadosObrigacoes!.janelaMeses;
+          _model.ddJanelaMesesValue = widget.pItemDadosObrigacoes!.janelaMeses;
         });
         safeSetState(() {
           _model.swtStatusValue = widget.pItemDadosObrigacoes!.ativo;
@@ -109,11 +106,15 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
         return;
       } else {
         _model.vDiaVencimento = 1;
-        _model.vDiaAntecedencia = 20;
+        _model.vJanelaMeses = 12;
         safeSetState(() {});
         safeSetState(() {
           _model.ddDiaValueController?.value = 1;
           _model.ddDiaValue = 1;
+        });
+        safeSetState(() {
+          _model.ddJanelaMesesValueController?.value = 12;
+          _model.ddJanelaMesesValue = 12;
         });
         return;
       }
@@ -204,8 +205,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                             child: Text(
                               widget.pIdObrigacao == null ||
                                       widget.pIdObrigacao == ''
-                                  ? 'Nova Obrigação'
-                                  : 'Editar Obrigação',
+                                  ? 'Nova Recorrência'
+                                  : 'Editar Recorrência',
                               style: FlutterFlowTheme.of(context)
                                   .headlineMedium
                                   .override(
@@ -254,7 +255,7 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                             padding: EdgeInsetsDirectional.fromSTEB(
                                 4.0, 0.0, 0.0, 6.0),
                             child: Text(
-                              'Descrição da Obrigação',
+                              'Descrição da Recorrência',
                               style: FlutterFlowTheme.of(context)
                                   .labelMedium
                                   .override(
@@ -526,9 +527,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                     ),
                                     options: List<String>.from(FFAppState()
                                         .cachePlanoContas
-                                        .where((e) =>
-                                            (e.permiteLancamento == true) &&
-                                            (e.naturezaFluxo == 'SAIDA'))
+                                        .where(
+                                            (e) => e.permiteLancamento == true)
                                         .toList()
                                         .map((e) => e.id)
                                         .toList()),
@@ -536,8 +536,7 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                         .formatarDropdownContas(FFAppState()
                                             .cachePlanoContas
                                             .where((e) =>
-                                                (e.permiteLancamento == true) &&
-                                                (e.naturezaFluxo == 'SAIDA'))
+                                                e.permiteLancamento == true)
                                             .toList()),
                                     onChanged: (val) async {
                                       safeSetState(
@@ -601,7 +600,7 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                             padding: EdgeInsetsDirectional.fromSTEB(
                                 4.0, 0.0, 0.0, 6.0),
                             child: Text(
-                              'Centro de Custo',
+                              'Centro de Resultado',
                               style: FlutterFlowTheme.of(context)
                                   .labelMedium
                                   .override(
@@ -691,7 +690,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                   .bodyMedium
                                                   .fontStyle,
                                         ),
-                                    hintText: 'Selecione o centro de custo...',
+                                    hintText:
+                                        'Selecione o centro de resultado...',
                                     icon: Icon(
                                       Icons.keyboard_arrow_down_rounded,
                                       color: FlutterFlowTheme.of(context)
@@ -719,7 +719,7 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                             padding: EdgeInsetsDirectional.fromSTEB(
                                 4.0, 0.0, 0.0, 6.0),
                             child: Text(
-                              'Conta Corrente',
+                              'Pessoa',
                               style: FlutterFlowTheme.of(context)
                                   .labelMedium
                                   .override(
@@ -743,47 +743,61 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                   ),
                             ),
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: FlutterFlowDropDown<String>(
-                                  controller:
-                                      _model.ddContaOrigemValueController ??=
-                                          FormFieldController<String>(
-                                    _model.ddContaOrigemValue ??=
-                                        _model.vContaId,
-                                  ),
-                                  options: List<String>.from(FFAppState()
-                                      .cacheContasBancarias
-                                      .where((e) => e.ativo == true)
-                                      .toList()
-                                      .map((e) => e.id)
-                                      .toList()),
-                                  optionLabels: FFAppState()
-                                      .cacheContasBancarias
-                                      .where((e) => e.ativo == true)
-                                      .toList()
-                                      .map((e) => e.nome)
-                                      .toList(),
-                                  onChanged: (val) async {
-                                    safeSetState(
-                                        () => _model.ddContaOrigemValue = val);
-                                    _model.vContaId =
-                                        _model.ddContaOrigemValue != null &&
-                                                _model.ddContaOrigemValue != ''
-                                            ? null
-                                            : _model.ddContaOrigemValue;
-                                    safeSetState(() {});
-                                  },
-                                  width: 200.0,
-                                  height: 35.0,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 0.0, 0.0, 6.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: FlutterFlowDropDown<String>(
+                                    controller:
+                                        _model.ddMembroValueController ??=
+                                            FormFieldController<String>(
+                                      _model.ddMembroValue ??= _model.vMembroId,
+                                    ),
+                                    options: List<String>.from(FFAppState()
+                                        .cacheMembros
+                                        .where((e) => e.ativo == true)
+                                        .toList()
+                                        .map((e) => e.id)
+                                        .toList()),
+                                    optionLabels: FFAppState()
+                                        .cacheMembros
+                                        .where((e) => e.ativo == true)
+                                        .toList()
+                                        .map((e) => e.nomeCompleto)
+                                        .toList(),
+                                    onChanged: (val) async {
+                                      safeSetState(
+                                          () => _model.ddMembroValue = val);
+                                      _model.vMembroId =
+                                          _model.ddMembroValue == null ||
+                                                  _model.ddMembroValue == ''
+                                              ? null
+                                              : _model.ddMembroValue;
+                                      safeSetState(() {});
+                                    },
+                                    width: 200.0,
+                                    height: 35.0,
+                                    textStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontStyle,
+                                          ),
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
+                                          letterSpacing: 0.0,
                                           fontWeight:
                                               FlutterFlowTheme.of(context)
                                                   .bodyMedium
@@ -793,39 +807,29 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                   .bodyMedium
                                                   .fontStyle,
                                         ),
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                  hintText:
-                                      'Deixe em branco se a conta só for decidida no dia do pagamento...',
-                                  icon: Icon(
-                                    Icons.keyboard_arrow_down_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    size: 24.0,
+                                    hintText: 'Selecione uma pessoa...',
+                                    icon: Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      size: 24.0,
+                                    ),
+                                    fillColor: FlutterFlowTheme.of(context)
+                                        .primaryBackground,
+                                    elevation: 2.0,
+                                    borderColor: Colors.transparent,
+                                    borderWidth: 0.0,
+                                    borderRadius: 8.0,
+                                    margin: EdgeInsetsDirectional.fromSTEB(
+                                        12.0, 0.0, 12.0, 0.0),
+                                    hidesUnderline: true,
+                                    isOverButton: false,
+                                    isSearchable: false,
+                                    isMultiSelect: false,
                                   ),
-                                  fillColor: FlutterFlowTheme.of(context)
-                                      .primaryBackground,
-                                  elevation: 2.0,
-                                  borderColor: Colors.transparent,
-                                  borderWidth: 0.0,
-                                  borderRadius: 8.0,
-                                  margin: EdgeInsetsDirectional.fromSTEB(
-                                      12.0, 0.0, 12.0, 0.0),
-                                  hidesUnderline: true,
-                                  isOverButton: false,
-                                  isSearchable: false,
-                                  isMultiSelect: false,
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -836,7 +840,7 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                   padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
                   child: Container(
                     width: double.infinity,
-                    height: 130.0,
+                    height: 120.0,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondaryBackground,
                       borderRadius: BorderRadius.circular(16.0),
@@ -1297,7 +1301,7 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                     padding: EdgeInsetsDirectional.fromSTEB(
                                         4.0, 0.0, 0.0, 6.0),
                                     child: Text(
-                                      'Gerar pendência quantos dias antes?',
+                                      'Projetar quantos meses?',
                                       style: FlutterFlowTheme.of(context)
                                           .labelMedium
                                           .override(
@@ -1327,82 +1331,18 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                   ),
                                   FlutterFlowDropDown<int>(
                                     controller:
-                                        _model.ddAntecedenciaValueController ??=
+                                        _model.ddJanelaMesesValueController ??=
                                             FormFieldController<int>(
-                                      _model.ddAntecedenciaValue ??=
-                                          _model.vDiaAntecedencia,
+                                      _model.ddJanelaMesesValue ??=
+                                          _model.vJanelaMeses,
                                     ),
-                                    options: List<int>.from([
-                                      1,
-                                      2,
-                                      3,
-                                      4,
-                                      5,
-                                      6,
-                                      7,
-                                      8,
-                                      9,
-                                      10,
-                                      11,
-                                      12,
-                                      13,
-                                      14,
-                                      15,
-                                      16,
-                                      17,
-                                      18,
-                                      19,
-                                      20,
-                                      21,
-                                      22,
-                                      23,
-                                      24,
-                                      25,
-                                      26,
-                                      27,
-                                      28,
-                                      29,
-                                      30,
-                                      31
-                                    ]),
-                                    optionLabels: [
-                                      '1',
-                                      '2',
-                                      '3',
-                                      '4',
-                                      '5',
-                                      '6',
-                                      '7',
-                                      '8',
-                                      '9',
-                                      '10',
-                                      '11',
-                                      '12',
-                                      '13',
-                                      '14',
-                                      '15',
-                                      '16',
-                                      '17',
-                                      '18',
-                                      '19',
-                                      '20',
-                                      '21',
-                                      '22',
-                                      '23',
-                                      '24',
-                                      '25',
-                                      '26',
-                                      '27',
-                                      '28',
-                                      '29',
-                                      '30',
-                                      '31'
-                                    ],
+                                    options: List<int>.from([3, 6, 12, 18, 24]),
+                                    optionLabels: ['3', '6', '12', '18', '24'],
                                     onChanged: (val) async {
                                       safeSetState(() =>
-                                          _model.ddAntecedenciaValue = val);
-                                      _model.vDiaAntecedencia =
-                                          _model.ddAntecedenciaValue!;
+                                          _model.ddJanelaMesesValue = val);
+                                      _model.vJanelaMeses =
+                                          _model.ddJanelaMesesValue!;
                                       safeSetState(() {});
                                     },
                                     width: 200.0,
@@ -1432,7 +1372,7 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                   .bodyMedium
                                                   .fontStyle,
                                         ),
-                                    hintText: 'Selecione o Dia...',
+                                    hintText: 'Selecione janela de meses...',
                                     icon: Icon(
                                       Icons.keyboard_arrow_down_rounded,
                                       color: FlutterFlowTheme.of(context)
@@ -1594,19 +1534,18 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                   _model.vCategoriaId,
                                               'centro_custo_id':
                                                   _model.vCentroResultadoId,
-                                              'conta_bancaria_id':
-                                                  _model.vContaId,
                                               'periodicidade':
                                                   _model.vPeriodicidade,
                                               'dia_vencimento':
                                                   _model.vDiaVencimento,
                                               'mes_vencimento':
                                                   _model.vMesVencimento,
-                                              'dias_antecedencia':
-                                                  _model.vDiaAntecedencia,
+                                              'janela_meses':
+                                                  _model.vJanelaMeses,
                                               'ativo': _model.vAtivo,
                                               'valor_estimado':
                                                   _model.vValorEstimado,
+                                              'membro_id': _model.vMembroId,
                                             });
                                             _shouldSetState = true;
                                             _model.retStatusInsert = await actions
@@ -1641,153 +1580,58 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                               safeSetState(() {});
                                             return;
                                           } else {
-                                            var confirmDialogResponse =
-                                                await showDialog<bool>(
-                                                      context: context,
-                                                      builder:
-                                                          (alertDialogContext) {
-                                                        return AlertDialog(
-                                                          title:
-                                                              Text('Atenção!'),
-                                                          content: Text(
-                                                              'Deseja reiniciar os lançamentos?'),
-                                                          actions: [
-                                                            TextButton(
-                                                              onPressed: () =>
-                                                                  Navigator.pop(
-                                                                      alertDialogContext,
-                                                                      false),
-                                                              child:
-                                                                  Text('Não'),
-                                                            ),
-                                                            TextButton(
-                                                              onPressed: () =>
-                                                                  Navigator.pop(
-                                                                      alertDialogContext,
-                                                                      true),
-                                                              child:
-                                                                  Text('Sim'),
-                                                            ),
-                                                          ],
-                                                        );
-                                                      },
-                                                    ) ??
-                                                    false;
-                                            if (confirmDialogResponse) {
-                                              await ObrigacoesRecorrentesTable()
-                                                  .update(
-                                                data: {
-                                                  'descricao':
-                                                      valueOrDefault<String>(
-                                                    _model.vDescricao,
-                                                    'Sem descrição',
+                                            await ObrigacoesRecorrentesTable()
+                                                .update(
+                                              data: {
+                                                'descricao':
+                                                    valueOrDefault<String>(
+                                                  _model.vDescricao,
+                                                  'Sem descrição',
+                                                ),
+                                                'categoria_id':
+                                                    _model.vCategoriaId,
+                                                'centro_custo_id':
+                                                    _model.vCentroResultadoId ==
+                                                                null ||
+                                                            _model.vCentroResultadoId ==
+                                                                ''
+                                                        ? null
+                                                        : _model
+                                                            .vCentroResultadoId,
+                                                'periodicidade':
+                                                    _model.vPeriodicidade,
+                                                'dia_vencimento':
+                                                    _model.vDiaVencimento,
+                                                'mes_vencimento': (_model
+                                                                .vMesVencimento! >=
+                                                            1) &&
+                                                        (_model.vMesVencimento! <=
+                                                            12)
+                                                    ? _model.vMesVencimento
+                                                    : null,
+                                                'janela_meses':
+                                                    _model.vJanelaMeses,
+                                                'ativo': _model.vAtivo,
+                                                'valor_estimado':
+                                                    _model.vValorEstimado,
+                                                'membro_id': _model.vMembroId !=
+                                                            null &&
+                                                        _model.vMembroId != ''
+                                                    ? _model.vMembroId
+                                                    : null,
+                                              },
+                                              matchingRows: (rows) => rows
+                                                  .eqOrNull(
+                                                    'organization_id',
+                                                    FFAppState()
+                                                        .currentOrganizationId,
+                                                  )
+                                                  .eqOrNull(
+                                                    'id',
+                                                    widget.pIdObrigacao,
                                                   ),
-                                                  'categoria_id':
-                                                      _model.vCategoriaId,
-                                                  'centro_custo_id':
-                                                      _model.vCentroResultadoId ==
-                                                                  null ||
-                                                              _model.vCentroResultadoId ==
-                                                                  ''
-                                                          ? null
-                                                          : _model
-                                                              .vCentroResultadoId,
-                                                  'conta_bancaria_id':
-                                                      _model.vContaId == null ||
-                                                              _model.vContaId ==
-                                                                  ''
-                                                          ? null
-                                                          : _model.vContaId,
-                                                  'periodicidade':
-                                                      _model.vPeriodicidade,
-                                                  'dia_vencimento':
-                                                      _model.vDiaVencimento,
-                                                  'mes_vencimento':
-                                                      (_model.vMesVencimento! >=
-                                                                  1) &&
-                                                              (_model.vMesVencimento! <=
-                                                                  12)
-                                                          ? _model
-                                                              .vMesVencimento
-                                                          : null,
-                                                  'dias_antecedencia':
-                                                      _model.vDiaAntecedencia,
-                                                  'ativo': _model.vAtivo,
-                                                  'valor_estimado':
-                                                      _model.vValorEstimado,
-                                                  'ultima_competencia_gerada':
-                                                      supaSerialize<DateTime>(
-                                                          null),
-                                                },
-                                                matchingRows: (rows) => rows
-                                                    .eqOrNull(
-                                                      'organization_id',
-                                                      FFAppState()
-                                                          .currentOrganizationId,
-                                                    )
-                                                    .eqOrNull(
-                                                      'id',
-                                                      widget.pIdObrigacao,
-                                                    ),
-                                              );
-                                              _shouldSetState = true;
-                                            } else {
-                                              await ObrigacoesRecorrentesTable()
-                                                  .update(
-                                                data: {
-                                                  'descricao':
-                                                      valueOrDefault<String>(
-                                                    _model.vDescricao,
-                                                    'Sem descrição',
-                                                  ),
-                                                  'categoria_id':
-                                                      _model.vCategoriaId,
-                                                  'centro_custo_id':
-                                                      _model.vCentroResultadoId ==
-                                                                  null ||
-                                                              _model.vCentroResultadoId ==
-                                                                  ''
-                                                          ? null
-                                                          : _model
-                                                              .vCentroResultadoId,
-                                                  'conta_bancaria_id':
-                                                      _model.vContaId == null ||
-                                                              _model.vContaId ==
-                                                                  ''
-                                                          ? null
-                                                          : _model.vContaId,
-                                                  'periodicidade':
-                                                      _model.vPeriodicidade,
-                                                  'dia_vencimento':
-                                                      _model.vDiaVencimento,
-                                                  'mes_vencimento':
-                                                      (_model.vMesVencimento! >=
-                                                                  1) &&
-                                                              (_model.vMesVencimento! <=
-                                                                  12)
-                                                          ? _model
-                                                              .vMesVencimento
-                                                          : null,
-                                                  'dias_antecedencia':
-                                                      _model.vDiaAntecedencia,
-                                                  'ativo': _model.vAtivo,
-                                                  'valor_estimado':
-                                                      _model.vValorEstimado,
-                                                },
-                                                matchingRows: (rows) => rows
-                                                    .eqOrNull(
-                                                      'organization_id',
-                                                      FFAppState()
-                                                          .currentOrganizationId,
-                                                    )
-                                                    .eqOrNull(
-                                                      'id',
-                                                      widget.pIdObrigacao,
-                                                    ),
-                                              );
-                                              _shouldSetState = true;
-                                            }
-
+                                            );
+                                            _shouldSetState = true;
                                             _model.retStatusUpdate = await actions
                                                 .acionarGeradorRecorrencias();
                                             _shouldSetState = true;

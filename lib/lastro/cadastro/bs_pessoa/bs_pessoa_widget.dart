@@ -674,6 +674,13 @@ class _BsPessoaWidgetState extends State<BsPessoaWidget> {
                                   },
                                 );
 
+                                await actions.syncMasterCache(
+                                  FFAppState().currentOrganizationId,
+                                  false,
+                                  false,
+                                  false,
+                                  true,
+                                );
                                 Navigator.pop(context);
                                 if (_shouldSetState) safeSetState(() {});
                                 return;

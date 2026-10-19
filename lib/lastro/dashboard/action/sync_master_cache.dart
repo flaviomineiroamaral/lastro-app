@@ -48,7 +48,11 @@ Future syncMasterCache(
 
   try {
     // DISPARO PARALELO: O motor do Dart executa tudo simultaneamente
-    final resultados = await Future.wait(tarefas);
+    //final resultados = await Future.wait(tarefas);
+    final resultados = await Future.wait(tarefas.map((t) => t.catchError((e) {
+          print('🔴 [MASTER CACHE] Falha em uma RPC: $e');
+          return <dynamic>[];
+        })));
 
 // Atualização cirúrgica do App State para o Plano de Contas
     if (syncPlano && ordem.containsKey('plano')) {
@@ -115,7 +119,8 @@ Future syncMasterCache(
       final data = resultados[ordem['membros']!] as List;
       FFAppState().cacheMembros = data
           .map((d) => DTCacheMembrosLightStruct(
-                id: d['id'],
+                id: d['id']?.toString() ?? '',
+                email: d['email']?.toString() ?? '',
                 nomeCompleto: d['nome_completo']?.toString() ?? '',
                 cpf: d['cpf'] != null
                     ? d['cpf'].toString().replaceAll(RegExp(r'\D'), '')

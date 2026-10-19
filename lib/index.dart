@@ -37,3 +37,5 @@ export '/obsoletos/onboarding_page_old/onboarding_page_old_widget.dart'
     show OnboardingPageOldWidget;
 export '/lastro/autenticacao/bloqueio_financeiro/bloqueio_financeiro_widget.dart'
     show BloqueioFinanceiroWidget;
+export '/lastro/cadastro/ativar_whatsapp/ativar_whatsapp_widget.dart'
+    show AtivarWhatsappWidget;

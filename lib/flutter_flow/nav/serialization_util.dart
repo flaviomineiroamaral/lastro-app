@@ -301,6 +301,8 @@ dynamic deserializeParam<T>(
             return VwContasParaNotificarRow(data);
           case VwExtratoIndividualRow:
             return VwExtratoIndividualRow(data);
+          case VwLembretesWhatsappRow:
+            return VwLembretesWhatsappRow(data);
           case VwSaldoTotalOrgRow:
             return VwSaldoTotalOrgRow(data);
           case VwTransacoesCompetenciaRow:

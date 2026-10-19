@@ -15,17 +15,17 @@ class BsObrigacoesModel extends FlutterFlowModel<BsObrigacoesWidget> {
 
   String? vCentroResultadoId;
 
-  String? vContaId;
-
   String? vPeriodicidade = 'MENSAL';
 
   int? vDiaVencimento;
 
   int? vMesVencimento;
 
-  int vDiaAntecedencia = 20;
+  int vJanelaMeses = 12;
 
   bool vAtivo = true;
+
+  String? vMembroId;
 
   ///  State fields for stateful widgets in this component.
 
@@ -40,9 +40,9 @@ class BsObrigacoesModel extends FlutterFlowModel<BsObrigacoesWidget> {
   // State field(s) for ddCentroDeCusto widget.
   String? ddCentroDeCustoValue;
   FormFieldController<String>? ddCentroDeCustoValueController;
-  // State field(s) for ddContaOrigem widget.
-  String? ddContaOrigemValue;
-  FormFieldController<String>? ddContaOrigemValueController;
+  // State field(s) for ddMembro widget.
+  String? ddMembroValue;
+  FormFieldController<String>? ddMembroValueController;
   // State field(s) for choTipo widget.
   FormFieldController<List<String>>? choTipoValueController;
   String? get choTipoValue => choTipoValueController?.value?.firstOrNull;
@@ -54,9 +54,9 @@ class BsObrigacoesModel extends FlutterFlowModel<BsObrigacoesWidget> {
   // State field(s) for ddMes widget.
   int? ddMesValue;
   FormFieldController<int>? ddMesValueController;
-  // State field(s) for ddAntecedencia widget.
-  int? ddAntecedenciaValue;
-  FormFieldController<int>? ddAntecedenciaValueController;
+  // State field(s) for ddJanelaMeses widget.
+  int? ddJanelaMesesValue;
+  FormFieldController<int>? ddJanelaMesesValueController;
   // State field(s) for swtStatus widget.
   bool? swtStatusValue;
   // Stores action output result for [Backend Call - Insert Row] action in btnSalvar widget.
@@ -64,9 +64,7 @@ class BsObrigacoesModel extends FlutterFlowModel<BsObrigacoesWidget> {
   // Stores action output result for [Custom Action - acionarGeradorRecorrencias] action in btnSalvar widget.
   bool? retStatusInsert;
   // Stores action output result for [Backend Call - Update Row(s)] action in btnSalvar widget.
-  List<ObrigacoesRecorrentesRow>? retUpdateObrigacoes1;
-  // Stores action output result for [Backend Call - Update Row(s)] action in btnSalvar widget.
-  List<ObrigacoesRecorrentesRow>? retUpdateObrigacoes2;
+  List<ObrigacoesRecorrentesRow>? retUpdateObrigacoes;
   // Stores action output result for [Custom Action - acionarGeradorRecorrencias] action in btnSalvar widget.
   bool? retStatusUpdate;
   // Stores action output result for [Backend Call - Delete Row(s)] action in btnExcluir widget.

@@ -47,6 +47,9 @@ class ViewMembrosEquipeRow extends SupabaseDataRow {
   String? get email => getField<String>('email');
   set email(String? value) => setField<String>('email', value);
 
+  String? get whatsapp => getField<String>('whatsapp');
+  set whatsapp(String? value) => setField<String>('whatsapp', value);
+
   String? get funcao => getField<String>('funcao');
   set funcao(String? value) => setField<String>('funcao', value);
 

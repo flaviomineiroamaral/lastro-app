@@ -29,5 +29,6 @@ export 'tables/view_saldos_contas.dart';
 export 'tables/vw_agendamentos.dart';
 export 'tables/vw_contas_para_notificar.dart';
 export 'tables/vw_extrato_individual.dart';
+export 'tables/vw_lembretes_whatsapp.dart';
 export 'tables/vw_saldo_total_org.dart';
 export 'tables/vw_transacoes_competencia.dart';

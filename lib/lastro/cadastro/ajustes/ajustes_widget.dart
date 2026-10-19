@@ -239,6 +239,166 @@ class _AjustesWidgetState extends State<AjustesWidget> {
                                               );
                                             } else {
                                               context.pushNamed(
+                                                  GerenciarPessoaWidget
+                                                      .routeName);
+                                            }
+                                          },
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            child: ListTile(
+                                              leading: Icon(
+                                                Icons.person,
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .secondaryText,
+                                              ),
+                                              title: Text(
+                                                'Pessoa',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .titleLarge
+                                                        .override(
+                                                          font: GoogleFonts
+                                                              .interTight(
+                                                            fontWeight:
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .titleLarge
+                                                                    .fontWeight,
+                                                            fontStyle:
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .titleLarge
+                                                                    .fontStyle,
+                                                          ),
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .secondaryText,
+                                                          letterSpacing: 0.0,
+                                                          fontWeight:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .titleLarge
+                                                                  .fontWeight,
+                                                          fontStyle:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .titleLarge
+                                                                  .fontStyle,
+                                                        ),
+                                              ),
+                                              trailing: Icon(
+                                                Icons.arrow_forward_ios_rounded,
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .secondaryText,
+                                                size: 24.0,
+                                              ),
+                                              tileColor:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryBackground,
+                                              dense: false,
+                                              contentPadding:
+                                                  EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                          12.0, 0.0, 12.0, 0.0),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Builder(
+                                      builder: (context) => Padding(
+                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                            4.0, 0.0, 4.0, 8.0),
+                                        child: InkWell(
+                                          splashColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onTap: () async {
+                                            if (FFAppState().currentPlanName ==
+                                                'Gratuito') {
+                                              await showDialog(
+                                                context: context,
+                                                builder: (dialogContext) {
+                                                  return Dialog(
+                                                    elevation: 0,
+                                                    insetPadding:
+                                                        EdgeInsets.zero,
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    alignment:
+                                                        AlignmentDirectional(
+                                                                -1.0, 0.0)
+                                                            .resolve(
+                                                                Directionality.of(
+                                                                    context)),
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        FocusScope.of(
+                                                                dialogContext)
+                                                            .unfocus();
+                                                        FocusManager.instance
+                                                            .primaryFocus
+                                                            ?.unfocus();
+                                                      },
+                                                      child:
+                                                          BsTopNotificacoesWidget(
+                                                        pTipo: 'AVISO',
+                                                        pMensagem:
+                                                            'Faça upgrade do seu plano!',
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            } else if ((FFAppState()
+                                                        .currentFunction ==
+                                                    'Leitor') ||
+                                                (FFAppState()
+                                                            .currentFunction ==
+                                                        '')) {
+                                              await showDialog(
+                                                context: context,
+                                                builder: (dialogContext) {
+                                                  return Dialog(
+                                                    elevation: 0,
+                                                    insetPadding:
+                                                        EdgeInsets.zero,
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    alignment:
+                                                        AlignmentDirectional(
+                                                                -1.0, 0.0)
+                                                            .resolve(
+                                                                Directionality.of(
+                                                                    context)),
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        FocusScope.of(
+                                                                dialogContext)
+                                                            .unfocus();
+                                                        FocusManager.instance
+                                                            .primaryFocus
+                                                            ?.unfocus();
+                                                      },
+                                                      child:
+                                                          BsTopNotificacoesWidget(
+                                                        pTipo: 'AVISO',
+                                                        pMensagem:
+                                                            'Atualmente você não tem permissão!',
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            } else {
+                                              context.pushNamed(
                                                   GerenciarContaWidget
                                                       .routeName);
                                             }
@@ -733,7 +893,7 @@ class _AjustesWidgetState extends State<AjustesWidget> {
                                                         .secondaryText,
                                               ),
                                               title: Text(
-                                                'Obrigações Recorrentes',
+                                                'Lançamentos Recorrentes',
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .titleLarge
@@ -1104,8 +1264,8 @@ class _AjustesWidgetState extends State<AjustesWidget> {
                                                 },
                                               );
                                             } else if ((FFAppState()
-                                                        .currentFunction ==
-                                                    'Leitor') ||
+                                                        .currentFunction !=
+                                                    'Dono') ||
                                                 (FFAppState()
                                                             .currentFunction ==
                                                         '')) {
@@ -1137,7 +1297,7 @@ class _AjustesWidgetState extends State<AjustesWidget> {
                                                           BsTopNotificacoesWidget(
                                                         pTipo: 'AVISO',
                                                         pMensagem:
-                                                            'Atualmente você não tem permissão!',
+                                                            'Apenas o dono da conta pode efetuar este procedimento!',
                                                       ),
                                                     ),
                                                   );
@@ -1145,7 +1305,7 @@ class _AjustesWidgetState extends State<AjustesWidget> {
                                               );
                                             } else {
                                               context.pushNamed(
-                                                  GerenciarPessoaWidget
+                                                  AtivarWhatsappWidget
                                                       .routeName);
                                             }
                                           },
@@ -1153,13 +1313,13 @@ class _AjustesWidgetState extends State<AjustesWidget> {
                                             color: Colors.transparent,
                                             child: ListTile(
                                               leading: Icon(
-                                                Icons.person,
+                                                Icons.phonelink_setup_sharp,
                                                 color:
                                                     FlutterFlowTheme.of(context)
                                                         .secondaryText,
                                               ),
                                               title: Text(
-                                                'Pessoa',
+                                                'Conectar Whatsapp',
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .titleLarge
@@ -1227,7 +1387,7 @@ class _AjustesWidgetState extends State<AjustesWidget> {
                                               EdgeInsetsDirectional.fromSTEB(
                                                   0.0, 10.0, 5.0, 0.0),
                                           child: Text(
-                                            'Versão 2.01.000',
+                                            'Versão 3.00.000',
                                             textAlign: TextAlign.end,
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium

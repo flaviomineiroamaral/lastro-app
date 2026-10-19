@@ -99,4 +99,11 @@ class TransacoesRow extends SupabaseDataRow {
       getField<String>('transferencia_interna_id');
   set transferenciaInternaId(String? value) =>
       setField<String>('transferencia_interna_id', value);
+
+  String? get tipoRecorrencia => getField<String>('tipo_recorrencia');
+  set tipoRecorrencia(String? value) =>
+      setField<String>('tipo_recorrencia', value);
+
+  String? get recorrenciaId => getField<String>('recorrencia_id');
+  set recorrenciaId(String? value) => setField<String>('recorrencia_id', value);
 }

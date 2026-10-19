@@ -1109,6 +1109,13 @@ class _BsContaBancariaWidgetState extends State<BsContaBancariaWidget> {
                                   },
                                 );
 
+                                await actions.syncMasterCache(
+                                  FFAppState().currentOrganizationId,
+                                  false,
+                                  true,
+                                  false,
+                                  false,
+                                );
                                 Navigator.pop(context);
                                 if (_shouldSetState) safeSetState(() {});
                                 return;
