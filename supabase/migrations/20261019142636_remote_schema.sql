@@ -14,28 +14,24 @@ DROP TRIGGER IF EXISTS "on_auth_user_created_homolog" ON "auth"."users";
 
 DROP VIEW IF EXISTS "public"."view_membros_equipe";
 
-DROP VIEW IF EXISTS "public"."vw_transacoes_staging";
+-- [PRESERVADO] DROP VIEW IF EXISTS "public"."vw_transacoes_staging";
 
 ALTER TABLE IF EXISTS "public"."contratos_b2b"
   DROP CONSTRAINT IF EXISTS "contratos_b2b_status_check";
 
-ALTER TABLE IF EXISTS "public"."regras_categorizacao"
-  DROP CONSTRAINT IF EXISTS "regras_categorizacao_centro_custo_id_fkey";
+-- [PRESERVADO] ALTER TABLE IF EXISTS "public"."regras_categorizacao"   DROP CONSTRAINT IF EXISTS "regras_categorizacao_centro_custo_id_fkey";
 
-ALTER TABLE IF EXISTS "public"."regras_categorizacao"
-  DROP CONSTRAINT IF EXISTS "regras_categorizacao_plano_contas_id_fkey";
+-- [PRESERVADO] ALTER TABLE IF EXISTS "public"."regras_categorizacao"   DROP CONSTRAINT IF EXISTS "regras_categorizacao_plano_contas_id_fkey";
 
-ALTER TABLE IF EXISTS "public"."transacoes_staging"
-  DROP CONSTRAINT IF EXISTS "transacoes_staging_suggested_centro_custo_id_fkey";
+-- [PRESERVADO] ALTER TABLE IF EXISTS "public"."transacoes_staging"   DROP CONSTRAINT IF EXISTS "transacoes_staging_suggested_centro_custo_id_fkey";
 
-ALTER TABLE IF EXISTS "public"."transacoes_staging"
-  DROP CONSTRAINT IF EXISTS "transacoes_staging_suggested_plano_contas_id_fkey";
+-- [PRESERVADO] ALTER TABLE IF EXISTS "public"."transacoes_staging"   DROP CONSTRAINT IF EXISTS "transacoes_staging_suggested_plano_contas_id_fkey";
 
-DROP FUNCTION IF EXISTS "public"."fn_aprovar_item_staging"(uuid);
+-- [PRESERVADO] DROP FUNCTION IF EXISTS "public"."fn_aprovar_item_staging"(uuid);
 
-DROP FUNCTION IF EXISTS "public"."fn_aprovar_lote_staging"(uuid, uuid, integer);
+-- [PRESERVADO] DROP FUNCTION IF EXISTS "public"."fn_aprovar_lote_staging"(uuid, uuid, integer);
 
-DROP FUNCTION IF EXISTS "public"."fn_descartar_item_staging"(uuid);
+-- [PRESERVADO] DROP FUNCTION IF EXISTS "public"."fn_descartar_item_staging"(uuid);
 
 DROP FUNCTION IF EXISTS "public"."fn_vincular_usuario_ao_serial"(uuid, uuid);
 
@@ -48,19 +44,17 @@ DROP FUNCTION IF EXISTS "public"."upsert_lead_comercial"(text, text, text, text,
 ALTER TABLE IF EXISTS "public"."organizations"
   ALTER COLUMN "plano" DROP DEFAULT;
 
-ALTER TABLE IF EXISTS "public"."leads_comercial"
-  DROP COLUMN IF EXISTS "cnpj";
+-- [PRESERVADO] ALTER TABLE IF EXISTS "public"."leads_comercial"   DROP COLUMN IF EXISTS "cnpj";
 
-ALTER TABLE IF EXISTS "public"."membros"
-  DROP COLUMN IF EXISTS "teste";
+-- [PRESERVADO] ALTER TABLE IF EXISTS "public"."membros"   DROP COLUMN IF EXISTS "teste";
 
-DROP TABLE IF EXISTS "public"."regras_categorizacao";
+-- [PRESERVADO] DROP TABLE IF EXISTS "public"."regras_categorizacao";
 
-DROP TABLE IF EXISTS "public"."transacoes_staging";
+-- [PRESERVADO] DROP TABLE IF EXISTS "public"."transacoes_staging";
 
-DROP FUNCTION IF EXISTS "public"."fn_aprender_com_conciliacao"();
+-- [PRESERVADO] DROP FUNCTION IF EXISTS "public"."fn_aprender_com_conciliacao"();
 
-DROP FUNCTION IF EXISTS "public"."fn_inferir_categorizacao_staging"();
+-- [PRESERVADO] DROP FUNCTION IF EXISTS "public"."fn_inferir_categorizacao_staging"();
 
 CREATE EXTENSION "hypopg" SCHEMA "extensions";
 
