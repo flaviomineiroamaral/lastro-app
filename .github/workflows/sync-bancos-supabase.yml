@@ -28,8 +28,13 @@ jobs:
           supabase migration repair --status reverted 20260805004920 --db-url "${{ secrets.STAGING_DB_URL }}" || true
           supabase migration repair --status reverted 20260918180702 --db-url "${{ secrets.STAGING_DB_URL }}" || true
           supabase migration repair --status reverted 20261014115214 --db-url "${{ secrets.STAGING_DB_URL }}" || true
-          supabase migration repair --status applied 20261014120000 --db-url "${{ secrets.STAGING_DB_URL }}" || true
-          supabase migration repair --status applied 20261016220000 --db-url "${{ secrets.STAGING_DB_URL }}" || true
+          
+          echo "Garantindo que todas as migrações locais estão registradas como aplicadas no banco..."
+          for file in supabase/migrations/*.sql; do
+            version=$(basename "$file" | cut -d'_' -f1)
+            echo "Verificando migracao: $version"
+            supabase migration repair --status applied "$version" --db-url "${{ secrets.STAGING_DB_URL }}" || true
+          done
 
       - name: Extrair Arquivo de Migração (Sem pesar sua máquina)
         run: |
