@@ -107,3 +107,6 @@ WHERE
 ORDER BY
   t.data_vencimento,
   t.id;
+
+-- Habilitar security_invoker para respeitar RLS e sanar o aviso no Security Advisor
+ALTER VIEW public.vw_agendamentos SET (security_invoker = true);
