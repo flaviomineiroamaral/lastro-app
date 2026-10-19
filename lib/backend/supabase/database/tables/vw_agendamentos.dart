@@ -63,6 +63,15 @@ class VwAgendamentosRow extends SupabaseDataRow {
   String? get membroId => getField<String>('membro_id');
   set membroId(String? value) => setField<String>('membro_id', value);
 
+  String? get membroNome => getField<String>('membro_nome');
+  set membroNome(String? value) => setField<String>('membro_nome', value);
+
+  String? get membroTelefone => getField<String>('membro_telefone');
+  set membroTelefone(String? value) => setField<String>('membro_telefone', value);
+
+  String? get membroEmail => getField<String>('membro_email');
+  set membroEmail(String? value) => setField<String>('membro_email', value);
+
   String? get observacoes => getField<String>('observacoes');
   set observacoes(String? value) => setField<String>('observacoes', value);
 
