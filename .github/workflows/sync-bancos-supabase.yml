@@ -22,19 +22,15 @@ jobs:
 
       - name: Corrigir Historico Fantasma do Banco
         run: |
-          echo "Limpando historico de arquivos deletados..."
-          supabase migration repair --status reverted 20260721121500 --db-url "${{ secrets.STAGING_DB_URL }}" || true
-          supabase migration repair --status reverted 20260803000000 --db-url "${{ secrets.STAGING_DB_URL }}" || true
-          supabase migration repair --status reverted 20260803000001 --db-url "${{ secrets.STAGING_DB_URL }}" || true
-          supabase migration repair --status reverted 20260804113843 --db-url "${{ secrets.STAGING_DB_URL }}" || true
-          supabase migration repair --status reverted 20260805004920 --db-url "${{ secrets.STAGING_DB_URL }}" || true
-          supabase migration repair --status reverted 20260918180702 --db-url "${{ secrets.STAGING_DB_URL }}" || true
-          supabase migration repair --status reverted 20261014115214 --db-url "${{ secrets.STAGING_DB_URL }}" || true
+          echo "Limpando historico de arquivos deletados ou fantasmas..."
+          for version in 20260721121500 20260803000000 20260803000001 20260804113843 20260805004920 20260918180702 20261014115214 20261019141040; do
+            supabase migration repair --status reverted "$version" --db-url "${{ secrets.STAGING_DB_URL }}" || true
+          done
           
           echo "Garantindo que todas as migrações locais estão registradas como aplicadas no banco..."
           for file in supabase/migrations/*.sql; do
             version=$(basename "$file" | cut -d'_' -f1)
-            echo "Verificando migracao: $version"
+            echo "Verificando migracao local: $version"
             supabase migration repair --status applied "$version" --db-url "${{ secrets.STAGING_DB_URL }}" || true
           done
 
