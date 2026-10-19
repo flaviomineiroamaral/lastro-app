@@ -43,6 +43,17 @@ class FFAppState extends ChangeNotifier {
       _currentPlanName =
           prefs.getString('ff_currentPlanName') ?? _currentPlanName;
     });
+    _safeInit(() {
+      _currentOrganizationFone =
+          prefs.getString('ff_currentOrganizationFone') ??
+              _currentOrganizationFone;
+    });
+    _safeInit(() {
+      _limitecrsplano = prefs.getInt('ff_limitecrsplano') ?? _limitecrsplano;
+    });
+    _safeInit(() {
+      _limitecrsatual = prefs.getInt('ff_limitecrsatual') ?? _limitecrsatual;
+    });
   }
 
   void update(VoidCallback callback) {
@@ -121,6 +132,39 @@ class FFAppState extends ChangeNotifier {
   set currentPlanName(String value) {
     _currentPlanName = value;
     prefs.setString('ff_currentPlanName', value);
+  }
+
+  String _currentOrganizationDoc = '';
+  String get currentOrganizationDoc => _currentOrganizationDoc;
+  set currentOrganizationDoc(String value) {
+    _currentOrganizationDoc = value;
+  }
+
+  String _currentOrganizationFone = '';
+  String get currentOrganizationFone => _currentOrganizationFone;
+  set currentOrganizationFone(String value) {
+    _currentOrganizationFone = value;
+    prefs.setString('ff_currentOrganizationFone', value);
+  }
+
+  int _limitecrsplano = 0;
+  int get limitecrsplano => _limitecrsplano;
+  set limitecrsplano(int value) {
+    _limitecrsplano = value;
+    prefs.setInt('ff_limitecrsplano', value);
+  }
+
+  int _limitecrsatual = 0;
+  int get limitecrsatual => _limitecrsatual;
+  set limitecrsatual(int value) {
+    _limitecrsatual = value;
+    prefs.setInt('ff_limitecrsatual', value);
+  }
+
+  bool _isbloqueadofinanceiro = false;
+  bool get isbloqueadofinanceiro => _isbloqueadofinanceiro;
+  set isbloqueadofinanceiro(bool value) {
+    _isbloqueadofinanceiro = value;
   }
 
   DateTime? _dataInicioGlob;
@@ -257,36 +301,6 @@ class FFAppState extends ChangeNotifier {
 
   void insertAtIndexInCacheMembros(int index, DTCacheMembrosLightStruct value) {
     cacheMembros.insert(index, value);
-  }
-
-  bool _isbloqueadofinanceiro = false;
-  bool get isbloqueadofinanceiro => _isbloqueadofinanceiro;
-  set isbloqueadofinanceiro(bool value) {
-    _isbloqueadofinanceiro = value;
-  }
-
-  int _limitecrsplano = 0;
-  int get limitecrsplano => _limitecrsplano;
-  set limitecrsplano(int value) {
-    _limitecrsplano = value;
-  }
-
-  int _limitecrsatual = 0;
-  int get limitecrsatual => _limitecrsatual;
-  set limitecrsatual(int value) {
-    _limitecrsatual = value;
-  }
-
-  String _currentOrganizationDoc = '';
-  String get currentOrganizationDoc => _currentOrganizationDoc;
-  set currentOrganizationDoc(String value) {
-    _currentOrganizationDoc = value;
-  }
-
-  String _currentOrganizationFone = '';
-  String get currentOrganizationFone => _currentOrganizationFone;
-  set currentOrganizationFone(String value) {
-    _currentOrganizationFone = value;
   }
 }
 

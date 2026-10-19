@@ -19,8 +19,6 @@ class PrevisaoModel extends FlutterFlowModel<PrevisaoWidget> {
       tabBarController != null ? tabBarController!.previousIndex : 0;
 
   // Stores action output result for [Backend Call - API (DispararCobrancaWhatsApp)] action in Icon widget.
-  ApiCallResponse? apiCobrancaSendApagar;
-  // Stores action output result for [Backend Call - API (DispararCobrancaWhatsApp)] action in Icon widget.
   ApiCallResponse? apiCobrancaSendAreceber;
 
   @override

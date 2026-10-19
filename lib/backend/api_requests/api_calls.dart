@@ -132,18 +132,24 @@ class CriarInstanciaPareamentoCall {
 
 class DispararCobrancaWhatsAppCall {
   static Future<ApiCallResponse> call({
-    String? cnpjEmpresa = '',
+    String? docIdentificacao = '',
     String? nomeCliente = '',
     String? valorCobranca = '',
     String? dataVencimento = '',
     String? telefoneCliente = '',
+    String? nomeOrganizacao = '',
+    String? statusCobranca = '',
+    String? textoCobranca = '',
   }) async {
     final ffApiRequestBody = '''
 {
-  "cnpj_empresa": ${cnpjEmpresa == null ? 'null' : '"${escapeStringForJson(cnpjEmpresa)}"'},
+  "doc_identificacao": ${docIdentificacao == null ? 'null' : '"${escapeStringForJson(docIdentificacao)}"'},
+  "nome_organizacao": ${nomeOrganizacao == null ? 'null' : '"${escapeStringForJson(nomeOrganizacao)}"'},
   "telefone_cliente": ${telefoneCliente == null ? 'null' : '"${escapeStringForJson(telefoneCliente)}"'},
   "nome_cliente": ${nomeCliente == null ? 'null' : '"${escapeStringForJson(nomeCliente)}"'},
   "valor": ${valorCobranca == null ? 'null' : '"${escapeStringForJson(valorCobranca)}"'},
+  "status_cobranca": ${statusCobranca == null ? 'null' : '"${escapeStringForJson(statusCobranca)}"'},
+  "texto_cobranca": ${textoCobranca == null ? 'null' : '"${escapeStringForJson(textoCobranca)}"'},
   "data_vencimento": ${dataVencimento == null ? 'null' : '"${escapeStringForJson(dataVencimento)}"'}
 }''';
     return ApiManager.instance.makeApiCall(

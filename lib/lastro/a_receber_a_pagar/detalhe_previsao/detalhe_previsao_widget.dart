@@ -294,7 +294,12 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
                               alignment: WrapAlignment.start,
                               controller: _model.choTipoValueController ??=
                                   FormFieldController<List<String>>(
-                                [widget.pAbaPadrao!],
+                                [
+                                  widget.pAbaPadrao != null &&
+                                          widget.pAbaPadrao != ''
+                                      ? widget.pAbaPadrao!
+                                      : _model.vTipoOperacao
+                                ],
                               ),
                               wrapped: false,
                             ),
