@@ -1,6 +1,11 @@
 SET local check_function_bodies = off;
 
-REVOKE ALL ON SCHEMA "public" FROM "pg_database_owner";
+GRANT ALL ON SCHEMA "public" TO "postgres";
+GRANT ALL ON SCHEMA "public" TO "pg_database_owner";
+GRANT USAGE, CREATE ON SCHEMA "public" TO PUBLIC;
+
+
+-- [REMOVIDO] REVOKE ALL ON SCHEMA "public" FROM "pg_database_owner";
 
 DROP EVENT TRIGGER IF EXISTS "ensure_rls";
 
@@ -3939,7 +3944,16 @@ CREATE POLICY "Permitir leitura publica de parametros" ON "public"."parametros_s
   TO PUBLIC
   USING (true);
 
-ALTER PUBLICATION "supabase_realtime" ADD TABLE "public"."org_pulse";
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' 
+      AND schemaname = 'public' 
+      AND tablename = 'org_pulse'
+  ) THEN
+    ALTER PUBLICATION "supabase_realtime" ADD TABLE "public"."org_pulse";
+  END IF;
+END $$;
 
 COMMENT ON EXTENSION "hypopg" IS 'Hypothetical indexes for PostgreSQL';
 
@@ -3965,11 +3979,11 @@ GRANT EXECUTE ON FUNCTION "public"."upsert_lead_comercial"(text, text, text, tex
 
 GRANT EXECUTE ON FUNCTION "public"."upsert_lead_comercial"(text, text, text, text, text, text) TO "service_role";
 
-REVOKE ALL ON SCHEMA "public" FROM PUBLIC;
+-- [REMOVIDO] REVOKE ALL ON SCHEMA "public" FROM PUBLIC;
 
 GRANT CREATE, USAGE ON SCHEMA "public" TO PUBLIC;
 
-REVOKE ALL ON SCHEMA "public" FROM "postgres";
+-- [REMOVIDO] REVOKE ALL ON SCHEMA "public" FROM "postgres";
 
 GRANT CREATE, USAGE ON SCHEMA "public" TO "postgres";
 
