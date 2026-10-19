@@ -56,13 +56,13 @@ ALTER TABLE IF EXISTS "public"."organizations"
 
 -- [PRESERVADO] DROP FUNCTION IF EXISTS "public"."fn_inferir_categorizacao_staging"();
 
-CREATE EXTENSION "hypopg" SCHEMA "extensions";
+CREATE EXTENSION IF NOT EXISTS "hypopg" SCHEMA "extensions";
 
-CREATE EXTENSION "index_advisor" SCHEMA "extensions";
+CREATE EXTENSION IF NOT EXISTS "index_advisor" SCHEMA "extensions";
 
-CREATE EXTENSION "pg_cron";
+CREATE EXTENSION IF NOT EXISTS "pg_cron";
 
-CREATE EXTENSION "pg_net" SCHEMA "public";
+CREATE EXTENSION IF NOT EXISTS "pg_net" SCHEMA "public";
 
 ALTER TABLE IF EXISTS "monitor"."audit_log"
   ENABLE ROW LEVEL SECURITY;
@@ -3989,6 +3989,7 @@ GRANT DELETE, INSERT, MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON
 
 GRANT DELETE, INSERT, MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON TABLE "public"."vw_lembretes_whatsapp" TO "service_role";
 
+DO $$ BEGIN PERFORM cron.unschedule(jobid) FROM cron.job WHERE jobname = 'lastro-gerador-recorrencias-diario'; EXCEPTION WHEN OTHERS THEN NULL; END $$;
 SELECT cron.schedule_in_database('lastro-gerador-recorrencias-diario', '0 3 * * *', 'SELECT public.fn_gerar_transacoes_recorrentes();', 'postgres', NULL, true);
 
 ALTER TABLE IF EXISTS "public"."leads_comercial"
