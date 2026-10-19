@@ -131,4 +131,16 @@ class VwAgendamentosRow extends SupabaseDataRow {
   String? get tipoRecorrencia => getField<String>('tipo_recorrencia');
   set tipoRecorrencia(String? value) =>
       setField<String>('tipo_recorrencia', value);
+
+  bool? get temTelefone => getField<bool>('tem_telefone');
+  set temTelefone(bool? value) => setField<bool>('tem_telefone', value);
+
+  bool? get podeCobrar => getField<bool>('pode_cobrar');
+  set podeCobrar(bool? value) => setField<bool>('pode_cobrar', value);
+
+  String? get statusCobranca => getField<String>('status_cobranca');
+  set statusCobranca(String? value) => setField<String>('status_cobranca', value);
+
+  String? get textoCobranca => getField<String>('texto_cobranca');
+  set textoCobranca(String? value) => setField<String>('texto_cobranca', value);
 }
