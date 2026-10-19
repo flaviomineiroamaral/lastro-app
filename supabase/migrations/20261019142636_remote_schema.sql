@@ -2,65 +2,65 @@ SET local check_function_bodies = off;
 
 REVOKE ALL ON SCHEMA "public" FROM "pg_database_owner";
 
-DROP EVENT TRIGGER "ensure_rls";
+DROP EVENT TRIGGER IF EXISTS "ensure_rls";
 
-DROP POLICY "Atualização B2C: Utilizadores atualizam apenas a própria ass" ON "public"."assinaturas_b2c";
+DROP POLICY IF EXISTS "Atualização B2C: Utilizadores atualizam apenas a própria ass" ON "public"."assinaturas_b2c";
 
-DROP POLICY "Leitura B2C: Utilizadores veem apenas a própria assinatura" ON "public"."assinaturas_b2c";
+DROP POLICY IF EXISTS "Leitura B2C: Utilizadores veem apenas a própria assinatura" ON "public"."assinaturas_b2c";
 
-DROP POLICY "Leitura de Vinculo Pessoal" ON "public"."organization_members";
+DROP POLICY IF EXISTS "Leitura de Vinculo Pessoal" ON "public"."organization_members";
 
-DROP TRIGGER "on_auth_user_created_homolog" ON "auth"."users";
+DROP TRIGGER IF EXISTS "on_auth_user_created_homolog" ON "auth"."users";
 
-DROP VIEW "public"."view_membros_equipe";
+DROP VIEW IF EXISTS "public"."view_membros_equipe";
 
-DROP VIEW "public"."vw_transacoes_staging";
+DROP VIEW IF EXISTS "public"."vw_transacoes_staging";
 
-ALTER TABLE "public"."contratos_b2b"
-  DROP CONSTRAINT "contratos_b2b_status_check";
+ALTER TABLE IF EXISTS "public"."contratos_b2b"
+  DROP CONSTRAINT IF EXISTS "contratos_b2b_status_check";
 
-ALTER TABLE "public"."regras_categorizacao"
-  DROP CONSTRAINT "regras_categorizacao_centro_custo_id_fkey";
+ALTER TABLE IF EXISTS "public"."regras_categorizacao"
+  DROP CONSTRAINT IF EXISTS "regras_categorizacao_centro_custo_id_fkey";
 
-ALTER TABLE "public"."regras_categorizacao"
-  DROP CONSTRAINT "regras_categorizacao_plano_contas_id_fkey";
+ALTER TABLE IF EXISTS "public"."regras_categorizacao"
+  DROP CONSTRAINT IF EXISTS "regras_categorizacao_plano_contas_id_fkey";
 
-ALTER TABLE "public"."transacoes_staging"
-  DROP CONSTRAINT "transacoes_staging_suggested_centro_custo_id_fkey";
+ALTER TABLE IF EXISTS "public"."transacoes_staging"
+  DROP CONSTRAINT IF EXISTS "transacoes_staging_suggested_centro_custo_id_fkey";
 
-ALTER TABLE "public"."transacoes_staging"
-  DROP CONSTRAINT "transacoes_staging_suggested_plano_contas_id_fkey";
+ALTER TABLE IF EXISTS "public"."transacoes_staging"
+  DROP CONSTRAINT IF EXISTS "transacoes_staging_suggested_plano_contas_id_fkey";
 
-DROP FUNCTION "public"."fn_aprovar_item_staging"(uuid);
+DROP FUNCTION IF EXISTS "public"."fn_aprovar_item_staging"(uuid);
 
-DROP FUNCTION "public"."fn_aprovar_lote_staging"(uuid, uuid, integer);
+DROP FUNCTION IF EXISTS "public"."fn_aprovar_lote_staging"(uuid, uuid, integer);
 
-DROP FUNCTION "public"."fn_descartar_item_staging"(uuid);
+DROP FUNCTION IF EXISTS "public"."fn_descartar_item_staging"(uuid);
 
-DROP FUNCTION "public"."fn_vincular_usuario_ao_serial"(uuid, uuid);
+DROP FUNCTION IF EXISTS "public"."fn_vincular_usuario_ao_serial"(uuid, uuid);
 
-DROP FUNCTION "public"."handle_new_user_homolog"();
+DROP FUNCTION IF EXISTS "public"."handle_new_user_homolog"();
 
-DROP FUNCTION "public"."obter_cache_membros_light"(uuid);
+DROP FUNCTION IF EXISTS "public"."obter_cache_membros_light"(uuid);
 
-DROP FUNCTION "public"."upsert_lead_comercial"(text, text, text, text, text, text);
+DROP FUNCTION IF EXISTS "public"."upsert_lead_comercial"(text, text, text, text, text, text);
 
-ALTER TABLE "public"."organizations"
+ALTER TABLE IF EXISTS "public"."organizations"
   ALTER COLUMN "plano" DROP DEFAULT;
 
-ALTER TABLE "public"."leads_comercial"
-  DROP COLUMN "cnpj";
+ALTER TABLE IF EXISTS "public"."leads_comercial"
+  DROP COLUMN IF EXISTS "cnpj";
 
-ALTER TABLE "public"."membros"
-  DROP COLUMN "teste";
+ALTER TABLE IF EXISTS "public"."membros"
+  DROP COLUMN IF EXISTS "teste";
 
-DROP TABLE "public"."regras_categorizacao";
+DROP TABLE IF EXISTS "public"."regras_categorizacao";
 
-DROP TABLE "public"."transacoes_staging";
+DROP TABLE IF EXISTS "public"."transacoes_staging";
 
-DROP FUNCTION "public"."fn_aprender_com_conciliacao"();
+DROP FUNCTION IF EXISTS "public"."fn_aprender_com_conciliacao"();
 
-DROP FUNCTION "public"."fn_inferir_categorizacao_staging"();
+DROP FUNCTION IF EXISTS "public"."fn_inferir_categorizacao_staging"();
 
 CREATE EXTENSION "hypopg" SCHEMA "extensions";
 
@@ -70,7 +70,7 @@ CREATE EXTENSION "pg_cron";
 
 CREATE EXTENSION "pg_net" SCHEMA "public";
 
-ALTER TABLE "monitor"."audit_log"
+ALTER TABLE IF EXISTS "monitor"."audit_log"
   ENABLE ROW LEVEL SECURITY;
 
 CREATE OR REPLACE FUNCTION monitor.log_table_dml()
@@ -3745,15 +3745,18 @@ BEGIN
 END;
 $function$;
 
-ALTER TABLE "public"."contratos_b2b"
+ALTER TABLE IF EXISTS "public"."contratos_b2b"
+  DROP CONSTRAINT IF EXISTS "contratos_b2b_status_contrato_check",
   ADD CONSTRAINT "contratos_b2b_status_contrato_check"
     CHECK
     ((status_contrato = ANY (ARRAY['lead_recebido'::text, 'pendente_geracao'::text, 'aguardando_permissao_wa'::text, 'link_enviado'::text, 'assinado'::text,
     'aceite_manual_pendente'::text, 'cancelado'::text])));
 
-ALTER TABLE "public"."leads_comercial"
+ALTER TABLE IF EXISTS "public"."leads_comercial"
+  DROP CONSTRAINT IF EXISTS "leads_comercial_documento_key",
   ADD CONSTRAINT "leads_comercial_documento_key" UNIQUE (documento_identificacao);
 
+DROP VIEW IF EXISTS "public"."view_membros_equipe";
 CREATE VIEW "public"."view_membros_equipe" WITH (security_invoker=true) AS  SELECT om.id AS vinculo_id,
     om.organization_id,
     o.nome AS nome_organizacao,
@@ -3844,6 +3847,7 @@ CREATE VIEW "public"."view_membros_equipe" WITH (security_invoker=true) AS  SELE
          LIMIT 1) ac ON (true))
      LEFT JOIN public.planos_comerciais pc ON ((pc.id = COALESCE(o.plano_id, ab.plano_id, ac.plano_id))));
 
+DROP VIEW IF EXISTS "public"."vw_lembretes_whatsapp";
 CREATE VIEW "public"."vw_lembretes_whatsapp" AS  WITH owner_phone AS (
          SELECT om.organization_id,
             max(p.whatsapp) AS telefone_dono
@@ -3887,16 +3891,19 @@ CREATE VIEW "public"."vw_lembretes_whatsapp" AS  WITH owner_phone AS (
      LEFT JOIN owner_phone op ON ((t.organization_id = op.organization_id)))
   WHERE ((t.status = 'PENDENTE'::text) AND (t.transferencia_interna_id IS NULL) AND (((t.tipo_operacao = 'CREDITO'::text) AND (m.telefone IS NOT NULL) AND (TRIM(BOTH FROM m.telefone) <> ''::text) AND ((t.data_vencimento - CURRENT_DATE) = ANY (ARRAY[0, 3]))) OR ((t.tipo_operacao = 'DEBITO'::text) AND (op.telefone_dono IS NOT NULL) AND (TRIM(BOTH FROM op.telefone_dono) <> ''::text) AND ((t.data_vencimento - CURRENT_DATE) = 0))));
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
 
+DROP TRIGGER IF EXISTS trg_audit_dml_assinaturas_b2b ON public.assinaturas_b2b;
 CREATE TRIGGER trg_audit_dml_assinaturas_b2b
   AFTER INSERT OR DELETE OR UPDATE ON public.assinaturas_b2b
   FOR EACH STATEMENT
   EXECUTE FUNCTION monitor.log_table_dml();
 
+DROP POLICY IF EXISTS "Membros podem ler assinaturas B2B" ON "public"."assinaturas_b2b";
 CREATE POLICY "Membros podem ler assinaturas B2B" ON "public"."assinaturas_b2b"
   FOR SELECT
   TO PUBLIC
@@ -3906,16 +3913,19 @@ CREATE POLICY "Membros podem ler assinaturas B2B" ON "public"."assinaturas_b2b"
            FROM public.organization_members
           WHERE (organization_members.profile_id = auth.uid()))))));
 
+DROP POLICY IF EXISTS "Utilizador pode ler a própria assinatura B2C" ON "public"."assinaturas_b2c";
 CREATE POLICY "Utilizador pode ler a própria assinatura B2C" ON "public"."assinaturas_b2c"
   FOR SELECT
   TO PUBLIC
   USING ((auth.uid() = user_id));
 
+DROP POLICY IF EXISTS "Permitir leitura publica de cupons" ON "public"."codigos_parceria";
 CREATE POLICY "Permitir leitura publica de cupons" ON "public"."codigos_parceria"
   FOR SELECT
   TO PUBLIC
   USING (true);
 
+DROP POLICY IF EXISTS "Membros podem ler contratos da sua organização" ON "public"."contratos_b2b";
 CREATE POLICY "Membros podem ler contratos da sua organização" ON "public"."contratos_b2b"
   FOR SELECT
   TO PUBLIC
@@ -3923,11 +3933,13 @@ CREATE POLICY "Membros podem ler contratos da sua organização" ON "public"."co
    FROM public.organization_members
   WHERE (organization_members.profile_id = auth.uid()))));
 
+DROP POLICY IF EXISTS "Membros veem membros da mesma org" ON "public"."organization_members";
 CREATE POLICY "Membros veem membros da mesma org" ON "public"."organization_members"
   FOR SELECT
   TO PUBLIC
   USING (public.check_user_in_org(organization_id));
 
+DROP POLICY IF EXISTS "Permitir leitura publica de parametros" ON "public"."parametros_sistema";
 CREATE POLICY "Permitir leitura publica de parametros" ON "public"."parametros_sistema"
   FOR SELECT
   TO PUBLIC
@@ -3985,6 +3997,6 @@ GRANT DELETE, INSERT, MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE ON
 
 SELECT cron.schedule_in_database('lastro-gerador-recorrencias-diario', '0 3 * * *', 'SELECT public.fn_gerar_transacoes_recorrentes();', 'postgres', NULL, true);
 
-ALTER TABLE "public"."leads_comercial"
+ALTER TABLE IF EXISTS "public"."leads_comercial"
   ALTER COLUMN "id" SET DEFAULT public.uuid_generate_v7();
 
