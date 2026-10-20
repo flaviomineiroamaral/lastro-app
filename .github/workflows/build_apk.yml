@@ -57,22 +57,25 @@ jobs:
           cache: true
 
       - name: Configurar Assinatura Oficial (Google Play Keystore)
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
         run: |
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
-          cat <<EOF > android/key.properties
-          storePassword=$ANDROID_STORE_PASSWORD
-          keyPassword=$ANDROID_KEY_PASSWORD
-          keyAlias=$ANDROID_KEY_ALIAS
-          storeFile=upload-keystore.jks
-          EOF
-          sed -i 's/signingConfig signingConfigs.debug/signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug/g' android/app/build.gradle
-          echo "✅ Chave de assinatura oficial configurada!"
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+            cat <<EOF > android/key.properties
+            storePassword=$ANDROID_STORE_PASSWORD
+            keyPassword=$ANDROID_KEY_PASSWORD
+            keyAlias=$ANDROID_KEY_ALIAS
+            storeFile=upload-keystore.jks
+            EOF
+            sed -i 's/signingConfig signingConfigs.debug/signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug/g' android/app/build.gradle
+            echo "✅ Chave de assinatura oficial configurada!"
+          else
+            echo "ℹ️ Secrets de assinatura não encontrados. Usando configuração padrão."
+          fi
 
       - name: Instalar Dependencias
         run: flutter pub get
