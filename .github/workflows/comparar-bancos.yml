@@ -1,0 +1,116 @@
+name: "🔍 Comparar Bancos: Homologação vs Produção"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  comparar:
+    name: Comparando Schemas Reais
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Extrair Schemas dos Dois Bancos
+        run: |
+          echo "📥 Extraindo schema real de Homologação (STAGING)..."
+          supabase db dump --db-url "${{ secrets.STAGING_DB_URL }}" -f homolog.sql
+
+          echo "📥 Extraindo schema real de Produção (PROD)..."
+          supabase db dump --db-url "${{ secrets.PROD_DB_URL }}" -f prod.sql
+
+      - name: Gerar Diff e Relatório de Diferenças
+        run: |
+          # Gera diff linha por linha limpo
+          diff -u homolog.sql prod.sql > diff_completo.patch || true
+
+          python3 - << 'EOF'
+          import re
+          import os
+
+          def extrair_itens(caminho):
+              with open(caminho, 'r', encoding='utf-8', errors='ignore') as f:
+                  conteudo = f.read()
+
+              # Tabelas
+              tabelas = set(re.findall(r'CREATE TABLE (?:IF NOT EXISTS )?([^\s\(]+)', conteudo, re.IGNORECASE))
+              # Views
+              views = set(re.findall(r'CREATE (?:OR REPLACE )?VIEW ([^\s\(]+)', conteudo, re.IGNORECASE))
+              # Funções / RPCs
+              funcoes_brutas = re.findall(r'CREATE (?:OR REPLACE )?FUNCTION\s+([a-zA-Z0-9_\."]+)\s*\(([^\)]*)\)', conteudo, re.IGNORECASE)
+              funcoes = set(f"{nome.strip()}({args.strip()})" for nome, args in funcoes_brutas)
+              # Triggers
+              triggers_brutos = re.findall(r'CREATE TRIGGER\s+([a-zA-Z0-9_"]+)\s+[^;]+ON\s+([a-zA-Z0-9_\."]+)', conteudo, re.IGNORECASE)
+              triggers = set(f"{tg} ON {tbl}" for tg, tbl in triggers_brutos)
+
+              return {
+                  'tabelas': tabelas,
+                  'views': views,
+                  'funcoes': funcoes,
+                  'triggers': triggers
+              }
+
+          h = extrair_itens('homolog.sql')
+          p = extrair_itens('prod.sql')
+
+          relatorio = []
+          relatorio.append("# 📊 Relatório de Auditoria: Banco Homologação vs Banco Produção\n")
+          relatorio.append("> Comparação direta extraída via dump em tempo real dos dois bancos de dados do Supabase.\n")
+
+          total_diffs = 0
+
+          for secao in ['tabelas', 'views', 'funcoes', 'triggers']:
+              apenas_homolog = h[secao] - p[secao]
+              apenas_prod = p[secao] - h[secao]
+              em_comum = h[secao] & p[secao]
+
+              relatorio.append(f"## 🔹 {secao.upper()}")
+              relatorio.append(f"- **Em ambos os bancos:** {len(em_comum)}")
+              
+              if apenas_homolog:
+                  total_diffs += len(apenas_homolog)
+                  relatorio.append(f"- ❌ **Presente em HOMOLOGAÇÃO, mas AUSENTE em PRODUÇÃO ({len(apenas_homolog)}):**")
+                  for item in sorted(apenas_homolog):
+                      relatorio.append(f"  - `{item}`")
+              else:
+                  relatorio.append("- ✅ **Homologação e Produção 100% alinhados nesta categoria.**")
+
+              if apenas_prod:
+                  relatorio.append(f"- ⚠️ **Presente em PRODUÇÃO, mas NÃO em Homologação ({len(apenas_prod)}):**")
+                  for item in sorted(apenas_prod):
+                      relatorio.append(f"  - `{item}`")
+
+              relatorio.append("")
+
+          relatorio.append("## 📌 Conclusão da Auditoria")
+          if total_diffs == 0:
+              relatorio.append("✅ **OS BANCOS ESTÃO IDÊNTICOS! Todos os objetos de homologação existem em produção.**")
+          else:
+              relatorio.append(f"⚠️ **FORAM DETECTADAS {total_diffs} DIFERENÇAS QUE ESTÃO EM HOMOLOGAÇÃO MAS NÃO CHEGARAM NA PRODUÇÃO.**")
+
+          texto = "\n".join(relatorio)
+          with open("relatorio_auditoria.md", "w", encoding="utf-8") as f:
+              f.write(texto)
+
+          if "GITHUB_STEP_SUMMARY" in os.environ:
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
+                  f.write(texto)
+
+          print(texto)
+          EOF
+
+      - name: Upload dos Artefatos de Comparação
+        uses: actions/upload-artifact@v4
+        with:
+          name: comparacao_homologacao_vs_producao
+          path: |
+            relatorio_auditoria.md
+            diff_completo.patch
+            homolog.sql
+            prod.sql
