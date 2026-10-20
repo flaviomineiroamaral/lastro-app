@@ -99,11 +99,11 @@ class _DetalhePrevisaoWidgetState extends State<DetalhePrevisaoWidget> {
         _model.ddCategoriaValue = _model.vIdCategoria!;
         _model.ddContaOrigemValueController?.value =
             (_model.vIdContaOrigem != null && _model.vIdContaOrigem != ''
-                ? _model.vIdCategoria!
+                ? _model.vIdContaOrigem!
                 : '');
         _model.ddContaOrigemValue =
             (_model.vIdContaOrigem != null && _model.vIdContaOrigem != ''
-                ? _model.vIdCategoria!
+                ? _model.vIdContaOrigem!
                 : '');
         _model.ddCentroDeCustoValueController?.value = _model.vIdCentroCusto!;
         _model.ddCentroDeCustoValue = _model.vIdCentroCusto!;

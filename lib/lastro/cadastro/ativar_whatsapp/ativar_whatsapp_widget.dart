@@ -37,7 +37,7 @@ class _AtivarWhatsappWidgetState extends State<AtivarWhatsappWidget> {
     _model.tfTelefoneTextController ??= TextEditingController();
     _model.tfTelefoneFocusNode ??= FocusNode();
 
-    _model.tfTelefoneMask = MaskTextInputFormatter(mask: '(##) # ####-####\n');
+    _model.tfTelefoneMask = MaskTextInputFormatter(mask: '(##) # ####-####');
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 

@@ -49,45 +49,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      var confirmDialogResponse = await showDialog<bool>(
-            context: context,
-            builder: (alertDialogContext) {
-              return AlertDialog(
-                content: Text(FFAppState().currentOrganizationId),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(alertDialogContext, false),
-                    child: Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(alertDialogContext, true),
-                    child: Text('Confirm'),
-                  ),
-                ],
-              );
-            },
-          ) ??
-          false;
       if (FFAppState().currentOrganizationId != '') {
-        confirmDialogResponse = await showDialog<bool>(
-              context: context,
-              builder: (alertDialogContext) {
-                return AlertDialog(
-                  content: Text(FFAppState().currentOrganizationId),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(alertDialogContext, false),
-                      child: Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(alertDialogContext, true),
-                      child: Text('Confirm'),
-                    ),
-                  ],
-                );
-              },
-            ) ??
-            false;
         _model.minhaOrganizacao = await ViewMembrosEquipeTable().queryRows(
           queryFn: (q) => q
               .eqOrNull(
@@ -99,26 +61,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                 currentUserUid,
               ),
         );
-        confirmDialogResponse = await showDialog<bool>(
-              context: context,
-              builder: (alertDialogContext) {
-                return AlertDialog(
-                  content: Text(
-                      _model.minhaOrganizacao!.firstOrNull!.organizationId!),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(alertDialogContext, false),
-                      child: Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(alertDialogContext, true),
-                      child: Text('Confirm'),
-                    ),
-                  ],
-                );
-              },
-            ) ??
-            false;
         if (_model.minhaOrganizacao?.firstOrNull?.isBloqueadoFinanceiro ==
             true) {
           context.goNamed(BloqueioFinanceiroWidget.routeName);
@@ -383,7 +325,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                                       highlightColor:
                                                           Colors.transparent,
                                                       onTap: () async {
-                                                        context.pushNamed(
+                                                        context.goNamed(
                                                             SelecaoOrganizacaoWidget
                                                                 .routeName);
                                                       },

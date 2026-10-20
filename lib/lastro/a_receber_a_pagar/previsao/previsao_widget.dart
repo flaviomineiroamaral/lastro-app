@@ -1096,7 +1096,7 @@ class _PrevisaoWidgetState extends State<PrevisaoWidget>
                                                                                             locale: 'pt_BR',
                                                                                           ),
                                                                                           dataVencimento: listaAReceberItem.dataVencimento?.toString(),
-                                                                                          telefoneCliente: FFAppState().currentOrganizationFone,
+                                                                                          telefoneCliente: listaAReceberItem.membroTelefone,
                                                                                           nomeOrganizacao: FFAppState().currentOrganizationName,
                                                                                           statusCobranca: listaAReceberItem.statusCobranca,
                                                                                           textoCobranca: listaAReceberItem.textoCobranca,
