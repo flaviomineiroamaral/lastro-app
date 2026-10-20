@@ -543,6 +543,28 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                           () => _model.ddCategoriaValue = val);
                                       _model.vCategoriaId =
                                           _model.ddCategoriaValue;
+                                      _model.vTipoOperacao = (FFAppState()
+                                                      .cachePlanoContas
+                                                      .where((e) =>
+                                                          e.id ==
+                                                          _model
+                                                              .ddCategoriaValue)
+                                                      .toList()
+                                                      .firstOrNull
+                                                      ?.naturezaFluxo ==
+                                                  'ENTRADA') ||
+                                              (FFAppState()
+                                                      .cachePlanoContas
+                                                      .where((e) =>
+                                                          e.id ==
+                                                          _model
+                                                              .ddCategoriaValue)
+                                                      .toList()
+                                                      .firstOrNull
+                                                      ?.tipo ==
+                                                  'RECEITA')
+                                          ? 'CREDITO'
+                                          : 'DEBITO';
                                       safeSetState(() {});
                                     },
                                     width: 200.0,
@@ -865,6 +887,11 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                       _model.vPeriodicidade =
                                           _model.choTipoValue;
                                       safeSetState(() {});
+                                      safeSetState(() {
+                                        _model.ddJanelaMesesValueController
+                                            ?.value = 1;
+                                        _model.ddJanelaMesesValue = 1;
+                                      });
                                     },
                               selectedChipStyle: ChipStyle(
                                 backgroundColor:
@@ -1388,6 +1415,7 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                     margin: EdgeInsetsDirectional.fromSTEB(
                                         12.0, 0.0, 12.0, 0.0),
                                     hidesUnderline: true,
+                                    disabled: _model.choTipoValue == 'ANUAL',
                                     isOverButton: false,
                                     isSearchable: false,
                                     isMultiSelect: false,
@@ -1546,6 +1574,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                               'valor_estimado':
                                                   _model.vValorEstimado,
                                               'membro_id': _model.vMembroId,
+                                              'tipo_operacao':
+                                                  _model.vTipoOperacao,
                                             });
                                             _shouldSetState = true;
                                             _model.retStatusInsert = await actions
@@ -1619,6 +1649,8 @@ class _BsObrigacoesWidgetState extends State<BsObrigacoesWidget> {
                                                         _model.vMembroId != ''
                                                     ? _model.vMembroId
                                                     : null,
+                                                'tipo_operacao':
+                                                    _model.vTipoOperacao,
                                               },
                                               matchingRows: (rows) => rows
                                                   .eqOrNull(

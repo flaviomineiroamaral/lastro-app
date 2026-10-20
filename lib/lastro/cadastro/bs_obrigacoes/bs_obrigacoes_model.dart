@@ -27,6 +27,8 @@ class BsObrigacoesModel extends FlutterFlowModel<BsObrigacoesWidget> {
 
   String? vMembroId;
 
+  String vTipoOperacao = 'DEBITO';
+
   ///  State fields for stateful widgets in this component.
 
   // State field(s) for inputDescricao widget.
