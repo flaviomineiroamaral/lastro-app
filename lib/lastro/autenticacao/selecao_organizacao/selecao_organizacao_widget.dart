@@ -75,7 +75,19 @@ class _SelecaoOrganizacaoWidgetState extends State<SelecaoOrganizacaoWidget> {
                     size: 30.0,
                   ),
                   onPressed: () async {
-                    context.pop();
+                    if (FFAppState().currentOrganizationId != '') {
+                      context.pop();
+                      return;
+                    } else {
+                      GoRouter.of(context).prepareAuthEvent();
+                      await authManager.signOut();
+                      GoRouter.of(context).clearRedirectLocation();
+
+                      context.pushNamedAuth(
+                          AuthPageWidget.routeName, context.mounted);
+
+                      return;
+                    }
                   },
                 ),
                 title: Text(
@@ -206,8 +218,6 @@ class _SelecaoOrganizacaoWidgetState extends State<SelecaoOrganizacaoWidget> {
                                                           .minhaOrganizacao!
                                                           .firstOrNull!
                                                           .nomeOrganizacao!;
-                                                  FFAppState()
-                                                      .tempImportacaoOFX = [];
                                                   FFAppState().currentUser =
                                                       _model
                                                           .minhaOrganizacao!
@@ -239,16 +249,20 @@ class _SelecaoOrganizacaoWidgetState extends State<SelecaoOrganizacaoWidget> {
                                                           .limiteCrsAtual!;
                                                   FFAppState()
                                                           .currentOrganizationDoc =
-                                                      _model
-                                                          .minhaOrganizacao!
-                                                          .firstOrNull!
-                                                          .documentoCnpj!;
+                                                      valueOrDefault<String>(
+                                                    _model
+                                                        .minhaOrganizacao
+                                                        ?.firstOrNull
+                                                        ?.documentoCnpj,
+                                                    '\"\"',
+                                                  );
                                                   FFAppState()
                                                           .currentOrganizationFone =
-                                                      _model
-                                                          .minhaOrganizacao!
-                                                          .firstOrNull!
-                                                          .whatsapp!;
+                                                      valueOrDefault<String>(
+                                                    _model.minhaOrganizacao
+                                                        ?.firstOrNull?.whatsapp,
+                                                    '\"\"',
+                                                  );
                                                   safeSetState(() {});
                                                   FFAppState()
                                                       .dataFimGlob = FFAppState()
@@ -276,7 +290,7 @@ class _SelecaoOrganizacaoWidgetState extends State<SelecaoOrganizacaoWidget> {
                                                     true,
                                                   );
 
-                                                  context.pushNamed(
+                                                  context.goNamed(
                                                       DashboardWidget
                                                           .routeName);
 

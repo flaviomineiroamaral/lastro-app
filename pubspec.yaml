@@ -36,6 +36,7 @@ dependencies:
   collection: 1.19.1
   cross_file: 0.3.5+1
   csslib: 1.0.2
+  csv: 6.0.0
   dropdown_button2: 
     git:
       url: https://github.com/FlutterFlow/dropdown_button2.git
@@ -49,6 +50,7 @@ dependencies:
   flutter_cache_manager: 3.4.1
   flutter_native_splash: 2.4.1
   flutter_plugin_android_lifecycle: 2.0.28
+  flutter_secure_storage: 10.0.0-beta.4
   font_awesome_flutter: 11.0.0
   from_css_color: 2.0.0
   functions_client: 2.4.2
@@ -106,6 +108,7 @@ dependencies:
   syncfusion_flutter_charts:
   syncfusion_flutter_core:
   syncfusion_flutter_pdf: ^24.1.41
+  synchronized: 3.4.0
   timeago: 3.7.1
   universal_io: 2.2.2
   url_launcher: 6.3.1

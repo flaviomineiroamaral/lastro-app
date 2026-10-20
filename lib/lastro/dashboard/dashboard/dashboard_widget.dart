@@ -49,54 +49,119 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      _model.minhaOrganizacao = await ViewMembrosEquipeTable().queryRows(
-        queryFn: (q) => q
-            .eqOrNull(
-              'organization_id',
-              FFAppState().currentOrganizationId,
-            )
-            .eqOrNull(
-              'profile_id',
-              currentUserUid,
-            ),
-      );
-      if (_model.minhaOrganizacao?.firstOrNull?.isBloqueadoFinanceiro == true) {
-        context.goNamed(BloqueioFinanceiroWidget.routeName);
+      var confirmDialogResponse = await showDialog<bool>(
+            context: context,
+            builder: (alertDialogContext) {
+              return AlertDialog(
+                content: Text(FFAppState().currentOrganizationId),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(alertDialogContext, false),
+                    child: Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(alertDialogContext, true),
+                    child: Text('Confirm'),
+                  ),
+                ],
+              );
+            },
+          ) ??
+          false;
+      if (FFAppState().currentOrganizationId != '') {
+        confirmDialogResponse = await showDialog<bool>(
+              context: context,
+              builder: (alertDialogContext) {
+                return AlertDialog(
+                  content: Text(FFAppState().currentOrganizationId),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(alertDialogContext, false),
+                      child: Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(alertDialogContext, true),
+                      child: Text('Confirm'),
+                    ),
+                  ],
+                );
+              },
+            ) ??
+            false;
+        _model.minhaOrganizacao = await ViewMembrosEquipeTable().queryRows(
+          queryFn: (q) => q
+              .eqOrNull(
+                'organization_id',
+                FFAppState().currentOrganizationId,
+              )
+              .eqOrNull(
+                'profile_id',
+                currentUserUid,
+              ),
+        );
+        confirmDialogResponse = await showDialog<bool>(
+              context: context,
+              builder: (alertDialogContext) {
+                return AlertDialog(
+                  content: Text(
+                      _model.minhaOrganizacao!.firstOrNull!.organizationId!),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(alertDialogContext, false),
+                      child: Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(alertDialogContext, true),
+                      child: Text('Confirm'),
+                    ),
+                  ],
+                );
+              },
+            ) ??
+            false;
+        if (_model.minhaOrganizacao?.firstOrNull?.isBloqueadoFinanceiro ==
+            true) {
+          context.goNamed(BloqueioFinanceiroWidget.routeName);
+
+          return;
+        } else {
+          await Future.wait([
+            Future(() async {
+              await actions.syncMasterCache(
+                FFAppState().currentOrganizationId,
+                true,
+                true,
+                true,
+                true,
+              );
+              FFAppState().dataFimGlob = FFAppState().dataFimGlob == null
+                  ? functions.getUltimoDiaDoMesAtual()
+                  : FFAppState().dataFimGlob;
+              FFAppState().dataInicioGlob = FFAppState().dataInicioGlob == null
+                  ? functions.getPrimeiroDiaDoMesAtual()
+                  : FFAppState().dataInicioGlob;
+              safeSetState(() {});
+              _model.dataInicio = _model.dataInicio == null
+                  ? FFAppState().dataInicioGlob
+                  : _model.dataInicio;
+              _model.dataFim = _model.dataFim == null
+                  ? FFAppState().dataFimGlob
+                  : _model.dataFim;
+              safeSetState(() {});
+              await _model.abAtualizaDashboard(context);
+              safeSetState(() {});
+              return;
+            }),
+            Future(() async {
+              await actions.acionarGeradorRecorrencias();
+              return;
+            }),
+          ]);
+        }
+      } else {
+        context.pushNamed(SelecaoOrganizacaoWidget.routeName);
 
         return;
-      } else {
-        await Future.wait([
-          Future(() async {
-            await actions.syncMasterCache(
-              FFAppState().currentOrganizationId,
-              true,
-              true,
-              true,
-              true,
-            );
-            FFAppState().dataFimGlob = FFAppState().dataFimGlob == null
-                ? functions.getUltimoDiaDoMesAtual()
-                : FFAppState().dataFimGlob;
-            FFAppState().dataInicioGlob = FFAppState().dataInicioGlob == null
-                ? functions.getPrimeiroDiaDoMesAtual()
-                : FFAppState().dataInicioGlob;
-            safeSetState(() {});
-            _model.dataInicio = _model.dataInicio == null
-                ? FFAppState().dataInicioGlob
-                : _model.dataInicio;
-            _model.dataFim = _model.dataFim == null
-                ? FFAppState().dataFimGlob
-                : _model.dataFim;
-            safeSetState(() {});
-            await _model.abAtualizaDashboard(context);
-            safeSetState(() {});
-            return;
-          }),
-          Future(() async {
-            await actions.acionarGeradorRecorrencias();
-            return;
-          }),
-        ]);
       }
     });
 

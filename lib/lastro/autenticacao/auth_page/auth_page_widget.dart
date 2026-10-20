@@ -651,6 +651,63 @@ class _AuthPageWidgetState extends State<AuthPageWidget>
                                             child: FFButtonWidget(
                                               onPressed: () async {
                                                 var _shouldSetState = false;
+                                                FFAppState()
+                                                    .deleteCurrentOrganizationId();
+                                                FFAppState()
+                                                    .currentOrganizationId = '';
+
+                                                FFAppState()
+                                                    .deleteCurrentOrganizationType();
+                                                FFAppState()
+                                                    .currentOrganizationType = '';
+
+                                                FFAppState()
+                                                    .deleteCurrentOrganizationName();
+                                                FFAppState()
+                                                    .currentOrganizationName = '';
+
+                                                FFAppState()
+                                                    .deleteCurrentUser();
+                                                FFAppState().currentUser = '';
+
+                                                FFAppState()
+                                                    .deleteCurrentFunction();
+                                                FFAppState().currentFunction =
+                                                    '';
+
+                                                FFAppState()
+                                                    .deleteCurrentPlanName();
+                                                FFAppState().currentPlanName =
+                                                    '';
+
+                                                FFAppState()
+                                                    .currentOrganizationDoc = '';
+                                                FFAppState()
+                                                    .deleteCurrentOrganizationFone();
+                                                FFAppState()
+                                                    .currentOrganizationFone = '';
+
+                                                FFAppState()
+                                                    .deleteLimitecrsplano();
+                                                FFAppState().limitecrsplano = 0;
+
+                                                FFAppState()
+                                                    .deleteLimitecrsatual();
+                                                FFAppState().limitecrsatual = 0;
+
+                                                FFAppState()
+                                                        .isbloqueadofinanceiro =
+                                                    false;
+                                                FFAppState().tempImportacaoOFX =
+                                                    [];
+                                                FFAppState().cachePlanoContas =
+                                                    [];
+                                                FFAppState()
+                                                    .cacheContasBancarias = [];
+                                                FFAppState()
+                                                    .cacheCentrosDeResultado = [];
+                                                FFAppState().cacheMembros = [];
+                                                safeSetState(() {});
                                                 GoRouter.of(context)
                                                     .prepareAuthEvent();
 

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart'
     show ChangeNotifier, Color, Colors, VoidCallback;
 import '/backend/schema/structs/index.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:csv/csv.dart';
+import 'package:synchronized/synchronized.dart';
+import 'flutter_flow/flutter_flow_util.dart';
 
 class FFAppState extends ChangeNotifier {
   static FFAppState _instance = FFAppState._internal();
@@ -17,42 +20,46 @@ class FFAppState extends ChangeNotifier {
   }
 
   Future initializePersistedState() async {
-    prefs = await SharedPreferences.getInstance();
-    _safeInit(() {
+    secureStorage = FlutterSecureStorage();
+    await _safeInitAsync(() async {
       _currentOrganizationId =
-          prefs.getString('ff_currentOrganizationId') ?? _currentOrganizationId;
+          await secureStorage.getString('ff_currentOrganizationId') ??
+              _currentOrganizationId;
     });
-    _safeInit(() {
+    await _safeInitAsync(() async {
       _currentOrganizationType =
-          prefs.getString('ff_currentOrganizationType') ??
+          await secureStorage.getString('ff_currentOrganizationType') ??
               _currentOrganizationType;
     });
-    _safeInit(() {
+    await _safeInitAsync(() async {
       _currentOrganizationName =
-          prefs.getString('ff_currentOrganizationName') ??
+          await secureStorage.getString('ff_currentOrganizationName') ??
               _currentOrganizationName;
     });
-    _safeInit(() {
-      _currentUser = prefs.getString('ff_currentUser') ?? _currentUser;
+    await _safeInitAsync(() async {
+      _currentUser =
+          await secureStorage.getString('ff_currentUser') ?? _currentUser;
     });
-    _safeInit(() {
-      _currentFunction =
-          prefs.getString('ff_currentFunction') ?? _currentFunction;
+    await _safeInitAsync(() async {
+      _currentFunction = await secureStorage.getString('ff_currentFunction') ??
+          _currentFunction;
     });
-    _safeInit(() {
-      _currentPlanName =
-          prefs.getString('ff_currentPlanName') ?? _currentPlanName;
+    await _safeInitAsync(() async {
+      _currentPlanName = await secureStorage.getString('ff_currentPlanName') ??
+          _currentPlanName;
     });
-    _safeInit(() {
+    await _safeInitAsync(() async {
       _currentOrganizationFone =
-          prefs.getString('ff_currentOrganizationFone') ??
+          await secureStorage.getString('ff_currentOrganizationFone') ??
               _currentOrganizationFone;
     });
-    _safeInit(() {
-      _limitecrsplano = prefs.getInt('ff_limitecrsplano') ?? _limitecrsplano;
+    await _safeInitAsync(() async {
+      _limitecrsplano =
+          await secureStorage.getInt('ff_limitecrsplano') ?? _limitecrsplano;
     });
-    _safeInit(() {
-      _limitecrsatual = prefs.getInt('ff_limitecrsatual') ?? _limitecrsatual;
+    await _safeInitAsync(() async {
+      _limitecrsatual =
+          await secureStorage.getInt('ff_limitecrsatual') ?? _limitecrsatual;
     });
   }
 
@@ -61,7 +68,7 @@ class FFAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  late SharedPreferences prefs;
+  late FlutterSecureStorage secureStorage;
 
   List<OfxTransactionStruct> _tempImportacaoOFX = [];
   List<OfxTransactionStruct> get tempImportacaoOFX => _tempImportacaoOFX;
@@ -96,42 +103,66 @@ class FFAppState extends ChangeNotifier {
   String get currentOrganizationId => _currentOrganizationId;
   set currentOrganizationId(String value) {
     _currentOrganizationId = value;
-    prefs.setString('ff_currentOrganizationId', value);
+    secureStorage.setString('ff_currentOrganizationId', value);
+  }
+
+  void deleteCurrentOrganizationId() {
+    secureStorage.delete(key: 'ff_currentOrganizationId');
   }
 
   String _currentOrganizationType = '';
   String get currentOrganizationType => _currentOrganizationType;
   set currentOrganizationType(String value) {
     _currentOrganizationType = value;
-    prefs.setString('ff_currentOrganizationType', value);
+    secureStorage.setString('ff_currentOrganizationType', value);
+  }
+
+  void deleteCurrentOrganizationType() {
+    secureStorage.delete(key: 'ff_currentOrganizationType');
   }
 
   String _currentOrganizationName = '';
   String get currentOrganizationName => _currentOrganizationName;
   set currentOrganizationName(String value) {
     _currentOrganizationName = value;
-    prefs.setString('ff_currentOrganizationName', value);
+    secureStorage.setString('ff_currentOrganizationName', value);
+  }
+
+  void deleteCurrentOrganizationName() {
+    secureStorage.delete(key: 'ff_currentOrganizationName');
   }
 
   String _currentUser = '';
   String get currentUser => _currentUser;
   set currentUser(String value) {
     _currentUser = value;
-    prefs.setString('ff_currentUser', value);
+    secureStorage.setString('ff_currentUser', value);
+  }
+
+  void deleteCurrentUser() {
+    secureStorage.delete(key: 'ff_currentUser');
   }
 
   String _currentFunction = '';
   String get currentFunction => _currentFunction;
   set currentFunction(String value) {
     _currentFunction = value;
-    prefs.setString('ff_currentFunction', value);
+    secureStorage.setString('ff_currentFunction', value);
+  }
+
+  void deleteCurrentFunction() {
+    secureStorage.delete(key: 'ff_currentFunction');
   }
 
   String _currentPlanName = '';
   String get currentPlanName => _currentPlanName;
   set currentPlanName(String value) {
     _currentPlanName = value;
-    prefs.setString('ff_currentPlanName', value);
+    secureStorage.setString('ff_currentPlanName', value);
+  }
+
+  void deleteCurrentPlanName() {
+    secureStorage.delete(key: 'ff_currentPlanName');
   }
 
   String _currentOrganizationDoc = '';
@@ -144,21 +175,33 @@ class FFAppState extends ChangeNotifier {
   String get currentOrganizationFone => _currentOrganizationFone;
   set currentOrganizationFone(String value) {
     _currentOrganizationFone = value;
-    prefs.setString('ff_currentOrganizationFone', value);
+    secureStorage.setString('ff_currentOrganizationFone', value);
+  }
+
+  void deleteCurrentOrganizationFone() {
+    secureStorage.delete(key: 'ff_currentOrganizationFone');
   }
 
   int _limitecrsplano = 0;
   int get limitecrsplano => _limitecrsplano;
   set limitecrsplano(int value) {
     _limitecrsplano = value;
-    prefs.setInt('ff_limitecrsplano', value);
+    secureStorage.setInt('ff_limitecrsplano', value);
+  }
+
+  void deleteLimitecrsplano() {
+    secureStorage.delete(key: 'ff_limitecrsplano');
   }
 
   int _limitecrsatual = 0;
   int get limitecrsatual => _limitecrsatual;
   set limitecrsatual(int value) {
     _limitecrsatual = value;
-    prefs.setInt('ff_limitecrsatual', value);
+    secureStorage.setInt('ff_limitecrsatual', value);
+  }
+
+  void deleteLimitecrsatual() {
+    secureStorage.delete(key: 'ff_limitecrsatual');
   }
 
   bool _isbloqueadofinanceiro = false;
@@ -314,4 +357,56 @@ Future _safeInitAsync(Function() initializeField) async {
   try {
     await initializeField();
   } catch (_) {}
+}
+
+extension FlutterSecureStorageExtensions on FlutterSecureStorage {
+  static final _lock = Lock();
+
+  Future<void> writeSync({required String key, String? value}) async =>
+      await _lock.synchronized(() async {
+        await write(key: key, value: value);
+      });
+
+  void remove(String key) => delete(key: key);
+
+  Future<String?> getString(String key) async => await read(key: key);
+  Future<void> setString(String key, String value) async =>
+      await writeSync(key: key, value: value);
+
+  Future<bool?> getBool(String key) async {
+    final value = await read(key: key);
+    return value == null ? null : value == 'true';
+  }
+
+  Future<void> setBool(String key, bool value) async =>
+      await writeSync(key: key, value: value.toString());
+
+  Future<int?> getInt(String key) async =>
+      int.tryParse(await read(key: key) ?? '');
+  Future<void> setInt(String key, int value) async =>
+      await writeSync(key: key, value: value.toString());
+
+  Future<double?> getDouble(String key) async =>
+      double.tryParse(await read(key: key) ?? '');
+  Future<void> setDouble(String key, double value) async =>
+      await writeSync(key: key, value: value.toString());
+
+  Future<List<String>?> getStringList(String key) async =>
+      await read(key: key).then((result) {
+        if (result == null || result.isEmpty) {
+          return null;
+        }
+        // Lists are stored as JSON. Older versions stored CSV, which never
+        // starts with `["` because CSV quotes any field containing a quote.
+        if (result == '[]' || result.startsWith('["')) {
+          return (jsonDecode(result) as List).map((e) => e.toString()).toList();
+        }
+        return const CsvToListConverter(shouldParseNumbers: false)
+            .convert(result)
+            .first
+            .map((e) => e.toString())
+            .toList();
+      });
+  Future<void> setStringList(String key, List<String> value) async =>
+      await writeSync(key: key, value: jsonEncode(value));
 }
