@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 
 class FFDevEnvironmentValues {
-  static const String currentEnvironment = 'Homologacao';
+  static const String currentEnvironment = 'Producao';
   static const String environmentValuesPath =
       'assets/environment_values/environment.json';
 

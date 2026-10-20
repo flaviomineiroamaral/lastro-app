@@ -40,8 +40,9 @@ if (Test-Path $appBuildGradle) {
     if ($content -notmatch 'applicationIdSuffix ".dev"') {
         $content = $content -replace 'buildTypes\s*\{', "buildTypes {`n        debug {`n            applicationIdSuffix `".dev`"`n        }"
     }
+    $content = $content -replace 'signingConfig signingConfigs\.debug', 'signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug'
     Set-Content $appBuildGradle $content
-    Write-Host "[OK] ProGuard otimizado e sufixo .dev para ambiente de desenvolvimento configurados" -ForegroundColor Green
+    Write-Host "[OK] ProGuard otimizado, assinatura Release e sufixo .dev configurados" -ForegroundColor Green
 }
 
 # 5. Share Intent Filters e launchMode em AndroidManifest.xml (Receber PDFs/OFX de apps bancários)

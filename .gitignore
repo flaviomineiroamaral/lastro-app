@@ -35,3 +35,9 @@ ios/Flutter/ephemeral/
 temp_app/
 scratch_*.dart
 
+# Android Signing Keys (Never commit to Git)
+*.jks
+*.keystore
+key.properties
+keystore_backup/
+
